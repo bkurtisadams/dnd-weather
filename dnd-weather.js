@@ -931,7 +931,7 @@ highWindsTable: [
 });
  */
 document.addEventListener('keydown', function(event) {
-    if (event.shiftKey && event.key.toLowerCase() === 'g') {
+    if (event.ctrlKey && event.shiftKey && event.key.toLowerCase() === 'g') {
         console.log("Shift+G was pressed");
         generateWeather();  // Call the generateWeather function
     }
@@ -973,6 +973,47 @@ function getAllUserIDs() {
     console.log("User IDs:", userIds);
     return userIds;
 }
+
+// Wait until the DOM is fully loaded
+Hooks.on("ready", () => {
+    console.log("Foundry is ready, adding journal button.");
+  
+    // Function to add the button to journal entries
+    const addJournalButton = (app, html, data) => {
+      console.log("Journal sheet rendered:", app, html, data);
+  
+      // Create the button element
+      const button = document.createElement("button");
+      button.textContent = "Activate Weather Module";
+      button.classList.add("weather-module-button");
+  
+      // Add an event listener to the button
+      button.addEventListener("click", activateWeatherModule);
+  
+      // Append the button to the journal entry
+      html.find(".window-header .window-title").after(button);
+    };
+  
+    // Call the function to add the button when the journal is rendered
+    Hooks.on("renderJournalSheet", addJournalButton);
+  });
+  
+  // Function to activate the weather module
+  const activateWeatherModule = () => {
+    console.log("Weather module activated!");
+    // Add your module activation code here
+    generateWeather();
+  };
+  
+  // Function to initialize the weather module
+ // const generateWeather = () => {
+    // Your weather module initialization code goes here
+    //console.log("Initializing weather module...");
+    // Example: display a message or update the weather
+    //ui.notifications.info("Weather module activated and initialized!");
+  //};
+  
+  
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // HOOKS INIT
 Hooks.once('init', () => {

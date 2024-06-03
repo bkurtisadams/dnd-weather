@@ -1,0 +1,9 @@
+{
+  "name": "dnd-weather",
+  "title": "dnd-weather",
+  "version": "1.0.6",
+  "description": "Generates weather for the World of Greyhawk setting",
+  "author": "BK Adams",
+  "compatibleCoreVersion": "11.0",
+  "scripts": ["dnd-weather.js"]
+}
