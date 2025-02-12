@@ -1,0 +1,108 @@
+{{-- Settings panel template --}} 
+<form class="dnd-weather-settings">
+  <h2 class="settings-header">{{localize "DND-WEATHER.Settings.Title"}}</h2>
+  
+  {{!-- General Settings Section --}}
+  <div class="form-group">
+    <h3 class="settings-section">{{localize "DND-WEATHER.Settings.General.Title"}}</h3>
+    
+    <div class="form-row">
+      <label>
+        <input type="checkbox" name="enabled" {{checked settings.general.enabled}}>
+        {{localize "DND-WEATHER.Settings.General.Enable"}}
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>
+        <input type="checkbox" name="autoUpdate" {{checked settings.general.autoUpdate}}>
+        {{localize "DND-WEATHER.Settings.General.AutoUpdate"}}
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>
+        {{localize "DND-WEATHER.Settings.General.UpdateInterval"}}
+        <input type="number" name="updateInterval" value="{{settings.general.updateInterval}}" min="1" max="72">
+      </label>
+      <span class="notes">{{localize "DND-WEATHER.Settings.General.UpdateIntervalHint"}}</span>
+    </div>
+
+    <div class="form-row">
+      <label>
+        <input type="checkbox" name="displayInChat" {{checked settings.general.displayInChat}}>
+        {{localize "DND-WEATHER.Settings.General.DisplayInChat"}}
+      </label>
+    </div>
+  </div>
+
+  {{!-- Location Settings Section --}}
+  <div class="form-group">
+    <h3 class="settings-section">{{localize "DND-WEATHER.Settings.Location.Title"}}</h3>
+
+    <div class="form-row">
+      <label>
+        {{localize "DND-WEATHER.Settings.Location.Terrain"}}
+        <select name="terrain">
+          {{#each terrainTypes}}
+            <option value="{{this}}" {{selected this ../settings.location.terrain}}>
+              {{localize (concat "DND-WEATHER.Terrain." this)}}
+            </option>
+          {{/each}}
+        </select>
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>
+        {{localize "DND-WEATHER.Settings.Location.Latitude"}}
+        <input type="number" name="latitude" value="{{settings.location.latitude}}" min="0" max="90">
+      </label>
+      <span class="notes">{{localize "DND-WEATHER.Settings.Location.LatitudeHint"}}</span>
+    </div>
+
+    <div class="form-row">
+      <label>
+        {{localize "DND-WEATHER.Settings.Location.Elevation"}}
+        <input type="number" name="elevation" value="{{settings.location.elevation}}" min="0" step="100">
+      </label>
+      <span class="notes">{{localize "DND-WEATHER.Settings.Location.ElevationHint"}}</span>
+    </div>
+
+    <div class="form-row">
+      <label>
+        <input type="checkbox" name="isCoastal" {{checked settings.location.isCoastal}}>
+        {{localize "DND-WEATHER.Settings.Location.Coastal"}}
+      </label>
+    </div>
+  </div>
+
+  {{!-- Calendar Integration Section --}}
+  <div class="form-group">
+    <h3 class="settings-section">{{localize "DND-WEATHER.Settings.Calendar.Title"}}</h3>
+
+    <div class="form-row">
+      <label>
+        <input type="checkbox" name="useSimpleCalendar" {{checked settings.calendar.useSimpleCalendar}}>
+        {{localize "DND-WEATHER.Settings.Calendar.UseSimpleCalendar"}}
+      </label>
+    </div>
+
+    <div class="form-row">
+      <label>
+        <input type="checkbox" name="syncWithGameTime" {{checked settings.calendar.syncWithGameTime}}>
+        {{localize "DND-WEATHER.Settings.Calendar.SyncWithGameTime"}}
+      </label>
+    </div>
+  </div>
+
+  {{!-- Submit Buttons --}}
+  <div class="form-group">
+    <button type="submit" name="submit">
+      <i class="fas fa-save"></i> {{localize "DND-WEATHER.Settings.SaveSettings"}}
+    </button>
+    <button type="button" name="reset" class="reset-defaults">
+      <i class="fas fa-undo"></i> {{localize "DND-WEATHER.Settings.ResetDefaults"}}
+    </button>
+  </div>
+</form>

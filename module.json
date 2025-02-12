@@ -1,9 +1,43 @@
 {
-  "name": "dnd-weather",
-  "title": "dnd-weather",
-  "version": "1.0.6",
-  "description": "Generates weather for the World of Greyhawk setting",
-  "author": "BK Adams",
-  "compatibleCoreVersion": "11.0",
-  "scripts": ["dnd-weather.js"]
+    "id": "dnd-weather",
+    "title": "D&D Weather System",
+    "description": "Weather generation system for the World of Greyhawk setting with accurate moon phases",
+    "version": "1.0.6",
+    "library": false,
+    "manifestPlusVersion": "1.2.0",
+    "compatibility": {
+      "minimum": "11",
+      "verified": "12",
+      "maximum": "12"
+    },
+    "authors": [
+      {
+        "name": "BK Adams"
+      }
+    ],
+    "esmodules": [
+      "src/ui/components/WeatherDialog.js",
+      "src/weather-system.js"
+      
+    ],
+    "languages": [
+      {
+        "lang": "en",
+        "name": "English",
+        "path": "lang/en.json"
+      }
+    ],
+    "relationships": {
+      "optional": [
+        {
+          "id": "simple-calendar",
+          "type": "module",
+          "manifest": "https://github.com/vigoren/foundryvtt-simple-calendar/releases/latest/download/module.json",
+          "compatibility": {
+            "verified": "2.3.0"
+          }
+        }
+      ]
+    },
+    "socket": false
 }

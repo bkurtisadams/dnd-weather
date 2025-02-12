@@ -1,0 +1,7 @@
+{
+  "name": "dnd-weather",
+  "version": "1.0.6",
+  "description": "Weather generation system for the World of Greyhawk",
+  "author": "BK Adams",
+  "license": "MIT"
+}

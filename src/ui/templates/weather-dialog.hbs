@@ -1,0 +1,152 @@
+{{!-- Weather dialog template --}} 
+<form class="dnd-weather-dialog">
+  <header class="dialog-header">
+    <h2>{{localize "DND-WEATHER.Dialog.Title"}}</h2>
+    {{#if lastUpdate}}
+      <div class="last-update">
+        {{localize "DND-WEATHER.Dialog.LastUpdate"}}: {{lastUpdate}}
+      </div>
+    {{/if}}
+  </header>
+  
+  <div class="dialog-content">
+    {{!-- Loading State --}}
+    {{#if loading}}
+      <div class="weather-loading">
+        <i class="fas fa-spinner fa-spin"></i> {{localize "DND-WEATHER.Dialog.Loading"}}
+      </div>
+    {{/if}}
+
+    {{!-- Error Display --}}
+    {{#if error}}
+      <div class="weather-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{error}}</span>
+        <button type="button" class="retry-button" title="{{localize "DND-WEATHER.Dialog.Error.Retry"}}">
+          <i class="fas fa-redo"></i> {{localize "DND-WEATHER.Dialog.Retry"}}
+        </button>
+      </div>
+    {{/if}}
+
+    {{!-- Current Weather Display --}}
+    <div class="weather-current {{#if loading}}loading{{/if}}">
+      {{!-- Temperature Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-thermometer-half"></i>
+        </div>
+        <div class="weather-data">
+          <h3>{{localize "DND-WEATHER.Dialog.Temperature"}}</h3>
+          <p class="temperature">{{weather.temperature}}°F</p>
+          {{#if weather.windChill}}
+            <p class="wind-chill">
+              {{localize "DND-WEATHER.Dialog.FeelsLike"}} {{weather.windChill}}°F
+            </p>
+          {{/if}}
+          {{#if weather.temperatureEffects}}
+            <p class="effects">
+              {{localize (concat "DND-WEATHER.weather.temperature.effects." weather.temperatureEffects)}}
+            </p>
+          {{/if}}
+        </div>
+      </div>
+
+      {{!-- Wind Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-wind"></i>
+        </div>
+        <div class="weather-data">
+          <h3>{{localize "DND-WEATHER.Dialog.Wind"}}</h3>
+          <p>{{weather.windSpeed}} mph {{localize (concat "DND-WEATHER.weather.wind.direction." weather.windDirection)}}</p>
+          {{#if weather.windEffects}}
+            <p class="effects">
+              {{localize (concat "DND-WEATHER.weather.wind." weather.windEffects)}}
+            </p>
+          {{/if}}
+        </div>
+      </div>
+
+      {{!-- Precipitation Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-cloud-rain"></i>
+        </div>
+        <div class="weather-data">
+          <h3>{{localize "DND-WEATHER.Dialog.Precipitation"}}</h3>
+          <p>{{localize (concat "DND-WEATHER.weather.precipitation." weather.precipitation)}}</p>
+          {{#if weather.precipitationEffects}}
+            <p class="effects">{{weather.precipitationEffects}}</p>
+          {{/if}}
+        </div>
+      </div>
+
+      {{!-- Moon Phase Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-moon"></i>
+        </div>
+        <div class="weather-data">
+          <h3>{{localize "DND-WEATHER.Dialog.Moon"}}</h3>
+          <p>{{localize (concat "DND-WEATHER.weather.moonPhase." weather.moonPhase)}}</p>
+        </div>
+      </div>
+
+      {{!-- Special Events Section --}}
+      {{#if weather.specialEvents}}
+        <div class="weather-row special-events">
+          <div class="weather-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="weather-data">
+            <h3>{{localize "DND-WEATHER.Dialog.SpecialEvents"}}</h3>
+            <ul>
+              {{#each weather.specialEvents}}
+                <li>
+                  {{localize (concat "DND-WEATHER.specialEvents." this)}}
+                  {{#if (lookup ../specialEvents.effects this)}}
+                    <p class="effects">
+                      {{localize (concat "DND-WEATHER.specialEvents.effects." this)}}
+                    </p>
+                  {{/if}}
+                </li>
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+      {{/if}}
+    </div>
+
+    {{!-- Weather Controls --}}
+    <div class="weather-controls">
+      <button type="button" 
+              class="generate-weather" 
+              {{#if loading}}disabled{{/if}}
+              title="{{localize "DND-WEATHER.Dialog.Tooltips.Generate"}}">
+        <i class="fas fa-dice"></i> {{localize "DND-WEATHER.Dialog.GenerateNew"}}
+      </button>
+      
+      {{#if isGM}}
+        <button type="button" 
+                class="update-weather" 
+                {{#if loading}}disabled{{/if}}
+                title="{{localize "DND-WEATHER.Dialog.Tooltips.Update"}}">
+          <i class="fas fa-sync"></i> {{localize "DND-WEATHER.Dialog.Update"}}
+        </button>
+        <button type="button" 
+                class="settings" 
+                {{#if loading}}disabled{{/if}}
+                title="{{localize "DND-WEATHER.Dialog.Tooltips.Settings"}}">
+          <i class="fas fa-cog"></i> {{localize "DND-WEATHER.Dialog.Settings"}}
+        </button>
+      {{/if}}
+
+      <button type="button" 
+              class="refresh-weather" 
+              {{#if loading}}disabled{{/if}}
+              title="{{localize "DND-WEATHER.Dialog.Tooltips.Refresh"}}">
+        <i class="fas fa-redo"></i> {{localize "DND-WEATHER.Dialog.Refresh"}}
+      </button>
+    </div>
+  </div>
+</form>

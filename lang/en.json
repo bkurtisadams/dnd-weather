@@ -1,0 +1,137 @@
+{
+    "DND-WEATHER": {
+        "settings": {
+            "latitude": {
+                "name": "Default Latitude",
+                "hint": "The default latitude for weather calculations (e.g., 40 for temperate regions)"
+            },
+            "elevation": {
+                "name": "Default Elevation",
+                "hint": "The default elevation in feet above sea level"
+            },
+            "terrain": {
+                "name": "Default Terrain",
+                "hint": "The default terrain type for weather calculations"
+            }
+        },
+        "ui": {
+            "generate": "Generate Weather",
+            "days": "Number of Days",
+            "report": "Weather Report"
+        },
+        "Dialog": {
+            "Title": "Weather System",
+            "Loading": "Loading weather data...",
+            "Retry": "Retry",
+            "LastUpdate": "Last updated",
+            "Refresh": "Refresh",
+            "GenerateNew": "Generate New Weather",
+            "Update": "Update Weather",
+            "Settings": "Settings",
+            "Temperature": "Temperature",
+            "FeelsLike": "Feels like",
+            "Wind": "Wind Conditions",
+            "Precipitation": "Precipitation",
+            "Moon": "Moon Phase",
+            "SpecialEvents": "Special Events",
+            "Error": {
+                "Failed": "Failed to generate weather",
+                "Retry": "Click to try again",
+                "NoData": "No weather data available",
+                "NoSystem": "Weather system not initialized"
+            },
+            "Notifications": {
+                "Generated": "Generated new weather",
+                "Updated": "Weather updated"
+            },
+            "Tooltips": {
+                "Generate": "Generate new weather conditions",
+                "Update": "Update current weather",
+                "Settings": "Open weather system settings",
+                "Refresh": "Refresh the display"
+            }
+        },
+        "weather": {
+            "conditions": {
+                "clear": "Clear",
+                "partlyCloudy": "Partly Cloudy",
+                "cloudy": "Cloudy"
+            },
+            "precipitation": {
+                "none": "None",
+                "rain": "Rain",
+                "snow": "Snow",
+                "sleet": "Sleet"
+            },
+            "wind": {
+                "calm": "Calm",
+                "light": "Light",
+                "moderate": "Moderate",
+                "strong": "Strong",
+                "severe": "Severe",
+                "windstorm": "Windstorm",
+                "direction": {
+                    "N": "North",
+                    "NE": "Northeast",
+                    "E": "East",
+                    "SE": "Southeast",
+                    "S": "South",
+                    "SW": "Southwest",
+                    "W": "West",
+                    "NW": "Northwest"
+                }
+            },
+            "temperature": {
+                "high": "High",
+                "low": "Low",
+                "windChill": "Wind Chill",
+                "effects": {
+                    "extreme-cold": "Extreme cold! Risk of hypothermia",
+                    "cold": "Cold conditions",
+                    "mild": "Mild conditions",
+                    "hot": "Hot conditions",
+                    "extreme-heat": "Extreme heat! Risk of heatstroke"
+                }
+            },
+            "moonPhase": {
+                "new": "New Moon",
+                "waxingCrescent": "Waxing Crescent",
+                "firstQuarter": "First Quarter",
+                "waxingGibbous": "Waxing Gibbous",
+                "full": "Full Moon",
+                "waningGibbous": "Waning Gibbous",
+                "lastQuarter": "Last Quarter",
+                "waningCrescent": "Waning Crescent"
+            }
+        },
+        "terrain": {
+            "plains": "Plains",
+            "forest": "Forest",
+            "hills": "Hills",
+            "mountains": "Mountains",
+            "desert": "Desert",
+            "coast": "Coast",
+            "ocean": "Ocean"
+        },
+        "specialEvents": {
+            "sandstorm": "Sandstorm",
+            "windstorm": "Windstorm",
+            "earthquake": "Earthquake",
+            "avalanche": "Avalanche",
+            "volcano": "Volcano",
+            "tsunami": "Tsunami",
+            "quicksand": "Quicksand",
+            "flashFlood": "Flash Flood",
+            "rainForest": "Rain Forest Downpour",
+            "sunShower": "Sun Shower",
+            "tornado": "Tornado",
+            "oasis": "Oasis",
+            "effects": {
+                "sandstorm": "Visibility severely reduced, movement impaired",
+                "windstorm": "Strong winds affect ranged attacks and flight",
+                "flashFlood": "Risk of being swept away, terrain becomes difficult",
+                "tornado": "Extreme danger! Seek shelter immediately"
+            }
+        }
+    }
+}
