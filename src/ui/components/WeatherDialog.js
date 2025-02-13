@@ -6,11 +6,8 @@ export class WeatherDialog extends Application {
         super(options);
         console.log("WeatherDialog constructor called");
         
-        // Initialize the weather system reference
-        this.weatherSystem = game.modules.get('dnd-weather')?.weatherSystem;
-        
-        // Initialize state
-        this._state = {
+        // Properly initialize state as an object
+        this.state = {
             loading: false,
             error: null,
             lastUpdate: null
@@ -23,116 +20,128 @@ export class WeatherDialog extends Application {
             template: "modules/dnd-weather/src/ui/templates/weather-dialog.hbs",
             width: 500,
             height: 'auto',
-            title: game.i18n.localize("DND-WEATHER.Dialog.Title"),
+            title: "Weather System",
             resizable: true,
             classes: ["dnd-weather", "weather-dialog"]
         });
     }
 
-    async getData() {
+    getData() {
+        console.log("WeatherDialog getData called");
         try {
-            // Get current weather data
-            const weather = this.weatherSystem?.getCurrentWeather() || {};
+            // Access the weather system through the global namespace
+            const weatherSystem = globalThis.dndWeather?.weatherSystem;
+            if (!weatherSystem) {
+                console.error("DND-Weather | Weather system not found in getData");
+                return {
+                    weather: {
+                        temperature: '??',
+                        wind: 'Unknown',
+                        windDirection: 'Unknown',
+                        precipitation: 'Unknown',
+                        moonPhase: 'Unknown'
+                    },
+                    isGM: game.user.isGM,
+                    loading: this.state.loading,
+                    error: "Weather system not initialized"
+                };
+            }
+
+            const currentWeather = weatherSystem.getCurrentWeather();
+            console.log("DND-Weather | Current weather data:", currentWeather);
             
-            // Return template data
             return {
-                weather,
+                weather: {
+                    temperature: currentWeather.temperature || 65,
+                    windChill: currentWeather.windChill,
+                    wind: currentWeather.wind?.speed || 'Light',
+                    windDirection: currentWeather.wind?.direction || 'North',
+                    precipitation: currentWeather.precipitation?.type || 'None',
+                    moonPhase: currentWeather.moonPhase || 'Full Moon',
+                    conditions: currentWeather.conditions || 'Clear'
+                },
                 isGM: game.user.isGM,
-                loading: this._state.loading,
-                error: this._state.error,
-                lastUpdate: this._state.lastUpdate
+                loading: this.state.loading,
+                error: this.state.error
             };
         } catch (error) {
-            console.error("Failed to get weather data:", error);
+            console.error("DND-Weather | Error in getData:", error);
             return {
-                weather: {},
+                weather: {
+                    temperature: '??',
+                    wind: 'Error',
+                    windDirection: 'Error',
+                    precipitation: 'Error',
+                    moonPhase: 'Error'
+                },
                 isGM: game.user.isGM,
                 loading: false,
-                error: error.message,
-                lastUpdate: this._state.lastUpdate
+                error: error.message
             };
         }
     }
 
     activateListeners(html) {
         super.activateListeners(html);
+        console.log("DND-Weather | Activating listeners");
+        
+        html.find('.generate-weather').click(this._onGenerateWeather.bind(this));
+        html.find('.update-weather').click(this._onUpdateWeather.bind(this));
+        html.find('.settings').click(this._onOpenSettings.bind(this));
+        html.find('.refresh-weather').click(() => this.render(true));
+    }
 
-        // Button listeners with error handling
-        html.find('.generate-weather').click(async (event) => {
-            event.preventDefault();
-            await this._handleAction(this._onGenerateWeather.bind(this));
-        });
-
-        html.find('.update-weather').click(async (event) => {
-            event.preventDefault();
-            await this._handleAction(this._onUpdateWeather.bind(this));
-        });
-
-        html.find('.settings').click(async (event) => {
-            event.preventDefault();
-            await this._handleAction(this._onOpenSettings.bind(this));
-        });
-
-        html.find('.refresh-weather').click(async (event) => {
-            event.preventDefault();
-            await this._handleAction(async () => {
-                await this.render(true);
-            });
-        });
-
-        // Add retry button listener
-        html.find('.retry-button').click(async (event) => {
-            event.preventDefault();
-            this._state.error = null;
-            await this.render(true);
+    async _onGenerateWeather(event) {
+        event.preventDefault();
+        console.log("DND-Weather | Generate weather clicked");
+        await this._handleAction(async () => {
+            const weatherSystem = globalThis.dndWeather?.weatherSystem;
+            if (!weatherSystem) throw new Error("Weather system not initialized");
+            await weatherSystem.generateWeather();
+            this.render(true);
         });
     }
 
-    async _handleAction(action) {
-        if (this._state.loading) return;
+    async _onUpdateWeather(event) {
+        event.preventDefault();
+        console.log("DND-Weather | Update weather clicked");
+        await this._handleAction(async () => {
+            const weatherSystem = globalThis.dndWeather?.weatherSystem;
+            if (!weatherSystem) throw new Error("Weather system not initialized");
+            await weatherSystem.updateWeather();
+            this.render(true);
+        });
+    }
 
-        this._state.loading = true;
-        this._state.error = null;
+    _onOpenSettings(event) {
+        event.preventDefault();
+        console.log("DND-Weather | Settings clicked");
+        game.settings.sheet.render(true);
+    }
+
+    async _handleAction(action) {
+        if (this.state.loading) return;
+
+        this.state.loading = true;
+        this.state.error = null;
         await this.render(false);
 
         try {
             await action();
-            this._state.lastUpdate = new Date().toLocaleTimeString();
+            this.state.lastUpdate = new Date().toLocaleTimeString();
         } catch (error) {
-            console.error("Action failed:", error);
-            this._state.error = game.i18n.localize("DND-WEATHER.Dialog.Error.Failed");
-            ui.notifications.error(this._state.error);
+            console.error("DND-Weather | Action failed:", error);
+            this.state.error = error.message;
+            ui.notifications.error(this.state.error);
         } finally {
-            this._state.loading = false;
+            this.state.loading = false;
             await this.render(true);
         }
     }
 
-    async _onGenerateWeather() {
-        if (!this.weatherSystem) {
-            throw new Error(game.i18n.localize("DND-WEATHER.Dialog.Error.NoSystem"));
-        }
-
-        await this.weatherSystem.generateWeather();
-        ui.notifications.info(game.i18n.localize("DND-WEATHER.Dialog.Notifications.Generated"));
-    }
-
-    async _onUpdateWeather() {
-        if (!this.weatherSystem) {
-            throw new Error(game.i18n.localize("DND-WEATHER.Dialog.Error.NoSystem"));
-        }
-
-        await this.weatherSystem.updateWeather();
-        ui.notifications.info(game.i18n.localize("DND-WEATHER.Dialog.Notifications.Updated"));
-    }
-
-    _onOpenSettings() {
-        game.settings.sheet.render(true);
-    }
-
     async close(options={}) {
-        // Clean up state
-        this._state = {
+        // Reset state when closing
+        this.state = {
             loading: false,
             error: null,
             lastUpdate: null

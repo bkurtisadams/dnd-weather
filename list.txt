@@ -4,11 +4,11 @@
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather
 
 02/12/2025  09:07 AM    <DIR>          .
-02/12/2025  11:13 AM    <DIR>          ..
+02/12/2025  08:31 PM    <DIR>          ..
 02/10/2025  12:39 AM                44 .gitignore
 02/10/2025  06:56 PM         2,062,811 GreyhawkWeather.pdf
 02/10/2025  12:41 AM    <DIR>          lang
-02/12/2025  02:45 PM                 0 list.txt
+02/13/2025  04:23 AM                 0 list.txt
 02/12/2025  02:28 PM             1,040 module.json
 02/10/2025  12:39 AM               173 package.json
 02/12/2025  07:36 AM    <DIR>          src
@@ -19,20 +19,20 @@
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git
 
 02/12/2025  09:07 AM    <DIR>          ..
-06/03/2024  12:45 PM               330 COMMIT_EDITMSG
+02/12/2025  03:34 PM             2,106 COMMIT_EDITMSG
 06/03/2024  12:45 PM               428 config
 05/28/2024  05:26 PM                73 description
-06/03/2024  12:46 PM               103 FETCH_HEAD
+02/12/2025  03:35 PM               103 FETCH_HEAD
 05/28/2024  05:26 PM                21 HEAD
 06/05/2024  09:16 AM    <DIR>          hooks
-06/03/2024  12:45 PM               225 index
+02/12/2025  03:34 PM             4,275 index
 06/05/2024  09:16 AM    <DIR>          info
 06/05/2024  09:16 AM    <DIR>          logs
-06/05/2024  09:16 AM    <DIR>          objects
-06/03/2024  12:45 PM                41 ORIG_HEAD
+02/12/2025  03:35 PM    <DIR>          objects
+02/12/2025  03:35 PM                41 ORIG_HEAD
 06/03/2024  12:45 PM                46 packed-refs
 06/05/2024  09:16 AM    <DIR>          refs
-               8 File(s)          1,267 bytes
+               8 File(s)          7,093 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\hooks
 
@@ -61,9 +61,9 @@
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\logs
 
 06/05/2024  09:16 AM    <DIR>          .
-06/03/2024  12:45 PM               384 HEAD
+02/12/2025  03:34 PM               583 HEAD
 06/05/2024  09:16 AM    <DIR>          refs
-               1 File(s)            384 bytes
+               1 File(s)            583 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\logs\refs
 
@@ -77,8 +77,8 @@
 
 06/05/2024  09:16 AM    <DIR>          .
 06/05/2024  09:16 AM    <DIR>          ..
-06/03/2024  12:45 PM               384 main
-               1 File(s)            384 bytes
+02/12/2025  03:34 PM               583 main
+               1 File(s)            583 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\logs\refs\remotes
 
@@ -92,8 +92,8 @@
 
 06/05/2024  09:16 AM    <DIR>          .
 06/05/2024  09:16 AM    <DIR>          ..
-06/03/2024  12:45 PM               169 main
-               1 File(s)            169 bytes
+02/12/2025  03:35 PM               325 main
+               1 File(s)            325 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\logs\refs\remotes\upstream
 
@@ -105,53 +105,422 @@
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects
 
-06/05/2024  09:16 AM    <DIR>          .
-06/05/2024  09:16 AM    <DIR>          7a
+02/12/2025  03:35 PM    <DIR>          .
+02/12/2025  03:34 PM    <DIR>          00
+02/12/2025  03:34 PM    <DIR>          08
+02/12/2025  03:34 PM    <DIR>          1f
+02/12/2025  03:34 PM    <DIR>          29
+02/12/2025  03:34 PM    <DIR>          2f
+02/12/2025  03:34 PM    <DIR>          36
+02/12/2025  03:34 PM    <DIR>          3a
+02/12/2025  03:34 PM    <DIR>          3b
+02/12/2025  03:34 PM    <DIR>          42
+02/12/2025  03:34 PM    <DIR>          45
+02/12/2025  03:34 PM    <DIR>          46
+02/12/2025  03:34 PM    <DIR>          4d
+02/12/2025  03:34 PM    <DIR>          56
+02/12/2025  03:34 PM    <DIR>          5c
+02/12/2025  03:34 PM    <DIR>          5d
+02/12/2025  03:34 PM    <DIR>          60
+02/12/2025  03:34 PM    <DIR>          64
+02/12/2025  03:34 PM    <DIR>          65
+02/12/2025  03:34 PM    <DIR>          69
+02/12/2025  03:34 PM    <DIR>          73
+02/12/2025  03:34 PM    <DIR>          75
+02/12/2025  03:34 PM    <DIR>          76
+02/12/2025  03:34 PM    <DIR>          78
+02/12/2025  03:34 PM    <DIR>          7a
+02/12/2025  03:34 PM    <DIR>          82
+02/12/2025  03:34 PM    <DIR>          8d
+02/12/2025  03:34 PM    <DIR>          92
+02/12/2025  03:34 PM    <DIR>          94
+02/12/2025  03:34 PM    <DIR>          99
+02/12/2025  03:34 PM    <DIR>          9e
+02/12/2025  03:34 PM    <DIR>          a7
 06/05/2024  09:16 AM    <DIR>          a8
-06/05/2024  09:16 AM    <DIR>          e3
+02/12/2025  03:34 PM    <DIR>          ac
+02/12/2025  03:34 PM    <DIR>          b5
+02/12/2025  03:34 PM    <DIR>          b7
+02/12/2025  03:34 PM    <DIR>          bc
+02/12/2025  03:34 PM    <DIR>          c1
+02/12/2025  03:34 PM    <DIR>          c6
+02/12/2025  03:34 PM    <DIR>          cf
+02/12/2025  03:34 PM    <DIR>          d9
+02/12/2025  03:34 PM    <DIR>          de
+02/12/2025  03:34 PM    <DIR>          df
+02/12/2025  03:34 PM    <DIR>          e3
+02/12/2025  03:34 PM    <DIR>          ea
+02/12/2025  03:34 PM    <DIR>          ed
+02/12/2025  03:34 PM    <DIR>          f9
+02/12/2025  03:34 PM    <DIR>          fa
+02/12/2025  03:34 PM    <DIR>          fc
 06/05/2024  09:16 AM    <DIR>          ff
 05/28/2024  05:26 PM    <DIR>          info
 06/05/2024  09:16 AM    <DIR>          pack
                0 File(s)              0 bytes
 
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\00
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               997 6750a1a838a2c719590156f873970141478249
+               1 File(s)            997 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\08
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,366 c0ccb5049278471c75c4fe6e6f588754aaca82
+               1 File(s)          2,366 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\1f
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,496 f14427cae0ff2546f0fe4c9d51cfc426856ea0
+               1 File(s)          2,496 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\29
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,304 b9b43d05a94ed14ab372169191bb21668a6f89
+               1 File(s)          2,304 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\2f
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM                85 6f121d49d31c4c63f43bba6bc960f958a18520
+02/12/2025  03:34 PM             1,392 a4e8cfda88d017a85a94046544c9dd9519696d
+               2 File(s)          1,477 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\36
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             3,032 009132204ccb4a28a37b1f3e40c5971463d0c9
+               1 File(s)          3,032 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\3a
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM                37 67b43bfcf1406c64b3e51649156de4b9499d83
+               1 File(s)             37 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\3b
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,291 20bfc829323a69cfc9abe6a5fc00f1a2de6b55
+               1 File(s)          2,291 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\42
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               874 acde8f5d3cbf1ca56d7d30b8c50af52a0a1d84
+               1 File(s)            874 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\45
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,234 9a5e1da576ae189c0485a14972f9a0d17580ea
+               1 File(s)          1,234 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\46
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               192 b8d2012fa931c912dd5488263174587035c203
+               1 File(s)            192 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\4d
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,498 296cb6b4dfb91f81c89cabe955053b20d90733
+               1 File(s)          1,498 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\56
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM                45 8bea1c7de668204e40d5142f56b78f2c7f88b5
+               1 File(s)             45 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\5c
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               283 e60cdf42cc62ff565f22f5f8b0a37c3c781886
+               1 File(s)            283 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\5d
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               134 fa3e6105e027e731fcdadfbe8ab1c3b9d03e8e
+               1 File(s)            134 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\60
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,918 ce1457304c44f6747c931c0da573bd7de916d4
+               1 File(s)          1,918 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\64
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM         1,599,208 e5af4408ef169fb158ff101343977645e30849
+               1 File(s)      1,599,208 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\65
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               159 acdef2db1ecb67229d9a5d4501cd3bf10cd797
+               1 File(s)            159 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\69
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,514 7aea82a8f78c365702581c42867b3aab39ee5a
+               1 File(s)          1,514 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\73
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               228 1065725362cdeac6cf72b2050b22bbc2e0b8b2
+               1 File(s)            228 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\75
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               896 a88b09baa64d88a214aafe1ebf20d697640f7b
+02/12/2025  03:34 PM             1,557 c2af80ebc33e09c3b7e4d6519b0986cc60b9a2
+               2 File(s)          2,453 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\76
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               185 e96d15830b880586bea304181522a6e5c6333a
+               1 File(s)            185 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\78
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               216 6d1294406575712f7fac103d15192db69ce197
+               1 File(s)            216 bytes
+
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\7a
 
-06/05/2024  09:16 AM    <DIR>          .
-06/05/2024  09:16 AM    <DIR>          ..
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,441 1877588fad58000ea3066298c8c1a3bc5ab305
 06/03/2024  12:45 PM                93 af88e32e3b250fa4fdbdf06f515b79eee47be6
-               1 File(s)             93 bytes
+               2 File(s)          2,534 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\82
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               620 2e354db30d1b18cea634c4c5cbe14b7fb637ae
+02/12/2025  03:34 PM             1,874 4b5d1edd54ca69e6f756dc683473839e5e2dec
+               2 File(s)          2,494 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\8d
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               453 5c9339096bc71bddb3a699831ad3dfad69c019
+               1 File(s)            453 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\92
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,925 0712e380ad236d68d61e94815aa794eb1ac731
+               1 File(s)          1,925 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\94
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               142 6f42d9e69d759ea366624c633ecdcc8fa84a44
+02/12/2025  03:34 PM             1,277 f69fe9d5ea8d1f942e2a9abab77e1d1fdf6881
+               2 File(s)          1,419 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\99
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,842 bc4571941d007b7bb67f0546968d9363a49bba
+               1 File(s)          1,842 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\9e
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               308 ccf7b449bda78610e75445a598840302c83b39
+               1 File(s)            308 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\a7
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,022 2e12ea55f2acea808f5e606864a410003b4903
+02/12/2025  03:34 PM                94 a1a45bb3ea41770db20449bcc2ce0307200a8c
+               2 File(s)          1,116 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\a8
 
 06/05/2024  09:16 AM    <DIR>          .
-06/05/2024  09:16 AM    <DIR>          ..
+02/12/2025  03:35 PM    <DIR>          ..
 06/03/2024  12:45 PM               186 9157008aaa308c57a9dd55d3c914b154ddffce
                1 File(s)            186 bytes
 
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\ac
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM                56 ad9b41797f8ce0b6139c2920e4b245d0bd3212
+               1 File(s)             56 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\b5
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,618 86a707ff76952adf515283875fb99b498a497d
+               1 File(s)          1,618 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\b7
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               312 5b7b52699a7bbe84e680c2c2a629044a9d033d
+               1 File(s)            312 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\bc
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             3,423 69509a9a59cd9b73def9279cc2805082903e0d
+               1 File(s)          3,423 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\c1
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               704 ceb85a7060589aaaffe2e8c488c5accb2378e4
+               1 File(s)            704 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\c6
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,603 a94be6f09b8d32b8361c1fa547c79dde3778d2
+               1 File(s)          2,603 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\cf
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM                86 15ab4919fcca5e4184cfe58013a4e2a17d9328
+               1 File(s)             86 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\d9
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               493 c833d6eb35020040c9f0f9b5d5a27f04a73ab1
+               1 File(s)            493 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\de
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,091 abda35baf32ecd18c411da9a5755f513ff8c11
+               1 File(s)          1,091 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\df
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,424 7dda8847f76afe382ebd1938f89f4fb94087e7
+               1 File(s)          2,424 bytes
+
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\e3
 
-06/05/2024  09:16 AM    <DIR>          .
-06/05/2024  09:16 AM    <DIR>          ..
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM               198 2a4e8c9ecae80c1b722c6c3094795f893bdaa7
 06/03/2024  12:45 PM            42,750 5db1fccbfd812ef3b713dd73376adec0d20a64
-               1 File(s)         42,750 bytes
+02/12/2025  03:34 PM             3,477 d45e8b85d53403e00b06cf9ac9e7fc3f642bd9
+               3 File(s)         46,425 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\ea
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,854 f8c344c19ea376ae2e3d2d93265a16b2e201c6
+               1 File(s)          2,854 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\ed
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,994 f39ce7f071bb47be9a1c7c407adb2246cf98f9
+               1 File(s)          1,994 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\f9
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,226 5eefb2399a5689a8ac4bbf6f02493f503ade54
+               1 File(s)          1,226 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\fa
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             2,031 6bcd837cbab0b8f45bb2ff1496bb8734c2935b
+               1 File(s)          2,031 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\fc
+
+02/12/2025  03:34 PM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          ..
+02/12/2025  03:34 PM             1,602 1283e0217831e83d6124e757307c9c6a6ea32f
+02/12/2025  03:34 PM             1,343 23ff726387060399730bb9c4da093d68252f5c
+               2 File(s)          2,945 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\ff
 
 06/05/2024  09:16 AM    <DIR>          .
-06/05/2024  09:16 AM    <DIR>          ..
+02/12/2025  03:35 PM    <DIR>          ..
 06/03/2024  12:45 PM               169 2691990929786c7f93806184b052994fb94fdd
                1 File(s)            169 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\info
 
 05/28/2024  05:26 PM    <DIR>          .
-06/05/2024  09:16 AM    <DIR>          ..
+02/12/2025  03:35 PM    <DIR>          ..
                0 File(s)              0 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\objects\pack
 
 06/05/2024  09:16 AM    <DIR>          .
-06/05/2024  09:16 AM    <DIR>          ..
+02/12/2025  03:35 PM    <DIR>          ..
 05/28/2024  05:26 PM             1,156 pack-bfcc6ba2ca7b2bd4d7937d95f6c8e35b7b634cc6.idx
 05/28/2024  05:26 PM            34,616 pack-bfcc6ba2ca7b2bd4d7937d95f6c8e35b7b634cc6.pack
                2 File(s)         35,772 bytes
@@ -159,31 +528,31 @@
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\refs
 
 06/05/2024  09:16 AM    <DIR>          .
-06/05/2024  09:16 AM    <DIR>          heads
+02/12/2025  03:34 PM    <DIR>          heads
 06/05/2024  09:16 AM    <DIR>          remotes
 05/28/2024  05:26 PM    <DIR>          tags
                0 File(s)              0 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\refs\heads
 
-06/05/2024  09:16 AM    <DIR>          .
+02/12/2025  03:34 PM    <DIR>          .
 06/05/2024  09:16 AM    <DIR>          ..
-06/03/2024  12:45 PM                41 main
+02/12/2025  03:34 PM                41 main
                1 File(s)             41 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\refs\remotes
 
 06/05/2024  09:16 AM    <DIR>          .
 06/05/2024  09:16 AM    <DIR>          ..
-06/05/2024  09:16 AM    <DIR>          origin
+02/12/2025  03:35 PM    <DIR>          origin
 06/05/2024  09:16 AM    <DIR>          upstream
                0 File(s)              0 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\refs\remotes\origin
 
-06/05/2024  09:16 AM    <DIR>          .
+02/12/2025  03:35 PM    <DIR>          .
 06/05/2024  09:16 AM    <DIR>          ..
-06/03/2024  12:45 PM                41 main
+02/12/2025  03:35 PM                41 main
                1 File(s)             41 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\.git\refs\remotes\upstream
@@ -204,9 +573,9 @@
 
 02/10/2025  12:41 AM    <DIR>          .
 02/12/2025  09:07 AM    <DIR>          ..
-02/12/2025  08:39 AM             2,732 en.json
+02/12/2025  03:27 PM             5,075 en.json
 02/10/2025  12:41 AM                22 README.md
-               2 File(s)          2,754 bytes
+               2 File(s)          5,097 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src
 
@@ -217,8 +586,8 @@
 02/10/2025  12:41 AM    <DIR>          subsystems
 02/10/2025  12:41 AM    <DIR>          ui
 02/12/2025  08:06 AM    <DIR>          utils
-02/12/2025  02:35 PM             7,708 weather-system.js
-               2 File(s)         11,236 bytes
+02/12/2025  03:09 PM             7,976 weather-system.js
+               2 File(s)         11,504 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\constants
 
@@ -259,19 +628,19 @@
 02/12/2025  01:28 PM    <DIR>          .
 02/10/2025  12:41 AM    <DIR>          ..
 02/10/2025  06:30 AM             8,547 SettingsPanel.js
-02/12/2025  02:43 PM             1,935 WeatherDialog.js
+02/12/2025  03:29 PM             4,543 WeatherDialog.js
 02/12/2025  01:12 PM            12,656 WeatherDialog.js.old
 02/10/2025  06:28 AM             7,565 WeatherReport.js
-               4 File(s)         30,703 bytes
+               4 File(s)         33,311 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\ui\templates
 
 02/10/2025  12:41 AM    <DIR>          .
 02/10/2025  12:41 AM    <DIR>          ..
 02/10/2025  06:39 AM             3,892 settings-panel.hbs
-02/10/2025  06:39 AM             3,204 weather-dialog.hbs
+02/12/2025  03:30 PM             5,588 weather-dialog.hbs
 02/10/2025  06:40 AM             4,518 weather-report.hbs
-               3 File(s)         11,614 bytes
+               3 File(s)         13,998 bytes
 
  Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\utils
 
@@ -304,5 +673,5 @@
                5 File(s)         38,856 bytes
 
      Total Files Listed:
-              79 File(s)      2,386,314 bytes
-              91 Dir(s)  288,142,589,952 bytes free
+             133 File(s)      4,064,971 bytes
+             226 Dir(s)  286,209,617,920 bytes free

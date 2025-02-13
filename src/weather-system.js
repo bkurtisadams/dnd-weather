@@ -120,6 +120,7 @@ export class GreyhawkWeatherSystem {
     }
 
     async generateWeather(days = 1) {
+        console.log("DND-Weather | Generating weather for", days, "days");
         const weatherData = [];
         const currentDate = await this.calendar.getCurrentDate();
 
@@ -134,33 +135,61 @@ export class GreyhawkWeatherSystem {
 
     async generateDailyWeather(date) {
         try {
-            const weather = await this.generateWeatherForDate(date);
+            console.log("DND-Weather | Generating daily weather for:", date);
+            
+            // Generate base temperature
             const baseTemp = await this.tempCalculator.calculateBaseTemperature(date);
+            console.log("DND-Weather | Base temperature:", baseTemp);
+            
+            // Calculate daily high and low
             const { highTemp, lowTemp } = await this.tempCalculator.calculateDailyTemperatures(baseTemp);
+            console.log("DND-Weather | High/Low temps:", highTemp, lowTemp);
+            
+            // Determine sky conditions
             const skyConditions = await this.determineSkyConds();
+            console.log("DND-Weather | Sky conditions:", skyConditions);
+            
+            // Check for precipitation
             const precipitation = await this.precipHandler.determinePrecipitation(date, highTemp, lowTemp);
+            console.log("DND-Weather | Precipitation:", precipitation);
+            
+            // Calculate wind
             const wind = await this.windSystem.calculateWindConditions(precipitation.hasPrecipitation);
+            console.log("DND-Weather | Wind conditions:", wind);
+            
+            // Check for special events
             const specialEvents = await this.determineSpecialEvents(precipitation, highTemp, lowTemp);
+            console.log("DND-Weather | Special events:", specialEvents);
+            
+            // Calculate wind chill if applicable
             const windChill = this.calculateWindChill(lowTemp, wind.speed);
+            console.log("DND-Weather | Wind chill:", windChill);
+            
+            // Get moon phase
             const moonPhase = await this.moonTracker.calculateMoonPhase(date);
+            console.log("DND-Weather | Moon phase:", moonPhase);
+
+            // Generate the final report
+            const report = this.reportGen.generateReport({
+                date,
+                highTemp,
+                lowTemp,
+                windChill,
+                skyConditions,
+                precipitation,
+                wind,
+                specialEvents,
+                moonPhase
+            });
+
+            console.log("DND-Weather | Generated weather report:", report);
+            return report;
+
         } catch (error) {
-            console.error("Failed to generate weather:", error);
-            // Notify user through UI
+            console.error("DND-Weather | Failed to generate weather:", error);
             ui.notifications.error("Failed to generate weather");
             return null;
         }
-
-        return this.reportGen.generateReport({
-            date,
-            highTemp,
-            lowTemp,
-            windChill,
-            skyConditions,
-            precipitation,
-            wind,
-            specialEvents,
-            moonPhase
-        });
     }
 
     async determineSkyConds() {
@@ -191,85 +220,87 @@ export class GreyhawkWeatherSystem {
         return this.tempCalculator.calculateWindChill(temp, windSpeed);
     }
 
-    // UI Integration Methods
     getCurrentWeather() {
         return this.reportGen.getCurrentReport();
     }
 
     async updateWeather() {
+        console.log("DND-Weather | Updating current weather");
         const weather = await this.generateDailyWeather(await this.calendar.getCurrentDate());
         return weather;
     }
 }
 
 // Initialize the module
-Hooks.once('init', () => {
+Hooks.once('init', async () => {
     console.log('DND-Weather | Initializing weather system');
     
     // Create global namespace for the module
-    globalThis.dndWeather = globalThis.dndWeather || {};
-    
-    // Initialize the weather system
-    const weatherSystem = new GreyhawkWeatherSystem();
-    
-    // Register everything in the global namespace
     globalThis.dndWeather = {
-        weatherSystem: weatherSystem,
+        weatherSystem: new GreyhawkWeatherSystem(),
         WeatherDialog: WeatherDialog
     };
     
-    // Also register in the module API
-    const moduleData = game.modules.get('dnd-weather');
-    moduleData.api = {
-        weatherSystem: weatherSystem,
+    // Register the module API
+    game.modules.get('dnd-weather').api = {
+        weatherSystem: globalThis.dndWeather.weatherSystem,
         WeatherDialog: WeatherDialog
     };
+
+    console.log('DND-Weather | Initialization complete');
 });
 
 // Add Scene Controls
 Hooks.on('getSceneControlButtons', (controls) => {
     console.log("DND-Weather | Adding weather controls");
     
-    const weatherControls = {
+    // Find the token controls group or create it
+    let tokenControls = controls.find(c => c.name === "token");
+    if (!tokenControls) {
+        console.log("DND-Weather | Creating token controls group");
+        tokenControls = {
+            name: "token",
+            title: "CONTROLS.Token",
+            layer: "tokens",
+            icon: "fas fa-user-alt",
+            tools: []
+        };
+        controls.push(tokenControls);
+    }
+
+    // Add the weather tool to token controls
+    tokenControls.tools.push({
         name: "weather",
-        title: "Generate Weather",
+        title: "DND-WEATHER.Controls.WeatherGenerator",
         icon: "fas fa-cloud",
-        visible: true,
-        button: true,
+        visible: game.user.isGM,
         onClick: () => {
             console.log("DND-Weather | Weather button clicked");
-            const dialog = new globalThis.dndWeather.WeatherDialog();
-            dialog.render(true);
-        }
-    };
+            new globalThis.dndWeather.WeatherDialog().render(true);
+        },
+        button: true
+    });
 
-    // Add to existing controls
-    const basicControls = controls.find(c => c.name === "basic");
-    if (basicControls) {
-        basicControls.tools.push(weatherControls);
-    } else {
-        controls.push({
-            name: "basic",
-            title: "Basic Controls",
-            tools: [weatherControls]
-        });
-    }
+    console.log("DND-Weather | Weather controls added successfully");
 });
 
-// Also add this to your initialization hook to make sure the weather system is available
-Hooks.once('init', () => {
+// Register settings when ready
+// Initialize the module
+Hooks.once('init', async () => {
     console.log('DND-Weather | Initializing weather system');
-    game.dndWeather = {
+    
+    // Create global namespace for the module
+    globalThis.dndWeather = {
         weatherSystem: new GreyhawkWeatherSystem(),
         WeatherDialog: WeatherDialog
     };
     
-    // Make it available through the module API as well
-    game.modules.get('dnd-weather').weatherSystem = game.dndWeather.weatherSystem;
-});
+    // Register the module API
+    const module = game.modules.get('dnd-weather');
+    module.api = globalThis.dndWeather;
+    
+    // Also set the weatherSystem directly
+    module.weatherSystem = globalThis.dndWeather.weatherSystem;
 
-// Register settings when ready
-Hooks.once('ready', () => {
-    console.log("DND-Weather | Weather module ready");
-});
-
+    console.log('DND-Weather | Weather system initialized:', globalThis.dndWeather.weatherSystem);
+});;
