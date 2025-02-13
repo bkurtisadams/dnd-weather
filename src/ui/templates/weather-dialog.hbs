@@ -17,14 +17,16 @@
     {{!-- Add before the weather display section, around line 12 --}}
     <div class="weather-controls mb-2">
         <div class="form-group">
-            <label>Month:
-                <select name="month" {{#if loading}}disabled{{/if}}>
-                    {{#each months}}
-                        <option value="{{this}}" {{#if (eq this ../selectedMonth)}}selected{{/if}}>{{this}}</option>
-                    {{/each}}
-                </select>
-            </label>
-        </div>
+          <label>Month:
+              <select name="month" {{#if loading}}disabled{{/if}}>
+                  {{#each months}}
+                      <option value="{{this}}" {{#if (eq ../selectedMonth this)}}selected{{/if}}>
+                          {{this}}
+                      </option>
+                  {{/each}}
+              </select>
+          </label>
+      </div>
         
         <div class="form-group">
             <label>Latitude:

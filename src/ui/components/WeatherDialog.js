@@ -2,6 +2,10 @@
 import { baselineData } from '../../constants/baseline-data.js';
 console.log("WeatherDialog.js loaded, baselineData:", baselineData);
 
+// Add near the top of the file, after imports
+Handlebars.registerHelper('eq', function(a, b) {
+    return a === b;
+});
 
 export class WeatherDialog extends Application {
     constructor(options = {}) {
@@ -21,12 +25,12 @@ export class WeatherDialog extends Application {
             selectedMonth: this.months[0] || 'Fireseek', // Default to first month or Fireseek
             latitude: game.settings.get('dnd-weather', 'latitude'),
             terrain: game.settings.get('dnd-weather', 'terrain'),
-            elevation: game.settings.get('dnd-weather', 'elevation')
+            elevation: game.settings.get('dnd-weather', 'elevation')            
         };
 
         // Add months array from baselineData.js
-        this.months = Object.keys(globalThis.dndWeather?.weatherSystem?.baselineData || {});
-        console.log("Available months:", this.months);
+        /* this.months = Object.keys(globalThis.dndWeather?.weatherSystem?.baselineData || {});
+        console.log("Available months:", this.months); */
 
         // Bind methods to preserve 'this' context
         this._onGenerateWeather = this._onGenerateWeather.bind(this);
@@ -57,7 +61,7 @@ export class WeatherDialog extends Application {
 
             // Add form data
             const formData = {
-                months: this.months,
+                months: this.months, // Use this.months directly
                 selectedMonth: this.state.selectedMonth,
                 latitude: this.state.latitude,
                 terrain: this.state.terrain,
@@ -72,6 +76,8 @@ export class WeatherDialog extends Application {
                     'ocean'
                 ]
             };
+
+            console.log("DND-Weather | Form data:", formData); // debug log
 
             // Get current weather data
             const currentWeather = this.state.currentWeather || weatherSystem.getCurrentWeather();
