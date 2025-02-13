@@ -12,6 +12,7 @@ import {
     calculateTimeOfDayAdjustment 
 } from './utils/temperature.js';
 import { WeatherCalculator } from './utils/weather-calculations.js';
+import { registerSettings } from './settings.js';
 
 // Create bare minimum files for now to get it loading
 const BaselineData = {};
@@ -20,6 +21,34 @@ const PrecipitationTable = {};
 const WindEffects = {};
 const SpecialWeatherEvents = {};
 const MOON_PHASES = {};
+
+// Initialize the module
+Hooks.once('init', async () => {
+    console.log('DND-Weather | Initializing weather system');
+    
+    // Register module settings first
+    registerSettings();
+    console.log('DND-Weather | Settings registered');
+    
+    // Create global namespace for the module
+    globalThis.dndWeather = {
+        weatherSystem: new GreyhawkWeatherSystem({
+            latitude: game.settings.get('dnd-weather', 'latitude'),
+            elevation: game.settings.get('dnd-weather', 'elevation'),
+            terrain: game.settings.get('dnd-weather', 'terrain')
+        }),
+        WeatherDialog: WeatherDialog
+    };
+    
+    // Register the module API
+    const module = game.modules.get('dnd-weather');
+    module.api = globalThis.dndWeather;
+    
+    // Also set the weatherSystem directly
+    module.weatherSystem = globalThis.dndWeather.weatherSystem;
+
+    console.log('DND-Weather | Weather system initialized:', globalThis.dndWeather.weatherSystem);
+});
 
 class TemperatureCalculator {
     constructor(settings) {
