@@ -104,17 +104,78 @@ class MoonPhaseTracker {
 }
 
 class ReportGenerator {
+    constructor() {
+        this.currentWeather = {
+            baseConditions: {
+                temperature: {
+                    high: 65,
+                    low: 45,
+                    adjusted: {
+                        high: 65,
+                        low: 45
+                    }
+                },
+                sky: 'Clear',
+                precipitation: 'None',
+                wind: {
+                    speed: 5,
+                    direction: 'North'
+                },
+                visibility: 'Normal'
+            },
+            effects: {
+                terrain: [],
+                temperature: [],
+                precipitation: [],
+                wind: [],
+                special: []
+            },
+            timestamp: new Date().toLocaleString()
+        };
+    }
+
     generateReport(data) {
-        return data;
+        console.log("DND-Weather | Generating report with data:", data);
+        
+        this.currentWeather = {
+            baseConditions: {
+                temperature: {
+                    high: data.highTemp || 65,
+                    low: data.lowTemp || 45,
+                    adjusted: {
+                        high: data.highTemp + (data.elevation ? Math.floor(data.elevation / 1000) * -3 : 0),
+                        low: data.lowTemp + (data.elevation ? Math.floor(data.elevation / 1000) * -3 : 0)
+                    },
+                    windChill: data.windChill
+                },
+                sky: data.skyConditions || 'Clear',
+                precipitation: data.precipitation?.type || 'None',
+                wind: {
+                    speed: data.wind?.speed || 5,
+                    direction: data.wind?.direction || 'North',
+                    effects: []
+                },
+                visibility: 'Normal'
+            },
+            effects: {
+                terrain: [],
+                temperature: [],
+                precipitation: [],
+                wind: [],
+                special: data.specialEvents || []
+            },
+            timestamp: new Date().toLocaleString(),
+            terrain: data.terrain || 'plains',
+            elevation: data.elevation || 0,
+            latitude: data.latitude || 45
+        };
+
+        console.log("DND-Weather | Updated current weather:", this.currentWeather);
+        return this.currentWeather;
     }
     
     getCurrentReport() {
-        return {
-            temperature: 65,
-            conditions: 'Clear',
-            wind: 'Light',
-            moonPhase: 'Full Moon'
-        };
+        return this.currentWeather;
     }
 }
 

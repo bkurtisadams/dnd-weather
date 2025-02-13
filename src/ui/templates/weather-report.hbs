@@ -1,129 +1,126 @@
-{{-- Weather report template --}} 
-<div class="dnd-weather-report">
-  <header class="report-header">
-    <h2>{{localize "DND-WEATHER.Report.Title"}}</h2>
-    <div class="timestamp">{{report.timestamp}}</div>
-  </header>
-
-  <div class="report-content">
-    {{!-- Location Information --}}
-    <section class="report-section location-info">
-      <h3>{{localize "DND-WEATHER.Report.Location"}}</h3>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.Terrain"}}</label>
-          <span>{{report.terrain}}</span>
-        </div>
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.Elevation"}}</label>
-          <span>{{report.elevation}} ft</span>
-        </div>
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.Latitude"}}</label>
-          <span>{{report.latitude}}°</span>
-        </div>
+{{!-- Weather dialog template --}} 
+<form class="dnd-weather-dialog">
+  <div class="dialog-content">
+    {{#if loading}}
+      <div class="weather-loading">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
       </div>
-    </section>
-
-    {{!-- Base Conditions --}}
-    <section class="report-section base-conditions">
-      <h3>{{localize "DND-WEATHER.Report.BaseConditions"}}</h3>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.Temperature"}}</label>
-          <span>{{report.temperature.base}}°F</span>
-        </div>
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.AdjustedTemp"}}</label>
-          <span>{{report.temperature.adjusted}}°F</span>
-        </div>
-        {{#if report.temperature.windChill}}
-          <div class="info-item">
-            <label>{{localize "DND-WEATHER.Report.WindChill"}}</label>
-            <span>{{report.temperature.windChill}}°F</span>
-          </div>
-        {{/if}}
-      </div>
-    </section>
-
-    {{!-- Wind Conditions --}}
-    <section class="report-section wind-conditions">
-      <h3>{{localize "DND-WEATHER.Report.WindConditions"}}</h3>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.WindSpeed"}}</label>
-          <span>{{report.wind.speed}} mph</span>
-        </div>
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.WindDirection"}}</label>
-          <span>{{report.wind.direction}}</span>
-        </div>
-      </div>
-      {{#if report.wind.effects}}
-        <div class="effects-list">
-          <h4>{{localize "DND-WEATHER.Report.WindEffects"}}</h4>
-          <ul>
-            {{#each report.wind.effects}}
-              <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
-    </section>
-
-    {{!-- Precipitation --}}
-    <section class="report-section precipitation">
-      <h3>{{localize "DND-WEATHER.Report.Precipitation"}}</h3>
-      <div class="info-grid">
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.PrecipType"}}</label>
-          <span>{{report.precipitation.type}}</span>
-        </div>
-        {{#if report.precipitation.amount}}
-          <div class="info-item">
-            <label>{{localize "DND-WEATHER.Report.PrecipAmount"}}</label>
-            <span>{{report.precipitation.amount}} inches</span>
-          </div>
-        {{/if}}
-        <div class="info-item">
-          <label>{{localize "DND-WEATHER.Report.Duration"}}</label>
-          <span>{{report.precipitation.duration}}</span>
-        </div>
-      </div>
-      {{#if report.precipitation.effects}}
-        <div class="effects-list">
-          <h4>{{localize "DND-WEATHER.Report.PrecipEffects"}}</h4>
-          <ul>
-            {{#each report.precipitation.effects}}
-              <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-      {{/if}}
-    </section>
-
-    {{!-- Special Events --}}
-    {{#if report.specialEvents}}
-      <section class="report-section special-events">
-        <h3>{{localize "DND-WEATHER.Report.SpecialEvents"}}</h3>
-        <div class="effects-list warning">
-          <ul>
-            {{#each report.specialEvents}}
-              <li>{{this}}</li>
-            {{/each}}
-          </ul>
-        </div>
-      </section>
     {{/if}}
 
-    {{!-- Travel Effects --}}
-    <section class="report-section travel-effects">
-      <h3>{{localize "DND-WEATHER.Report.TravelEffects"}}</h3>
-      <div class="effects-list">
-        <ul>
-          {{#each report.travelEffects}}
-            <li>{{this}}</li>
-          {{/each}}
-        </ul>
+    {{#if error}}
+      <div class="weather-error">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>{{error}}</span>
       </div>
-    </section>
+    {{/if}}
+
+    <div class="weather-current {{#if loading}}loading{{/if}}">
+      {{!-- Temperature Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-thermometer-half"></i>
+        </div>
+        <div class="weather-data">
+          <h3>Temperature</h3>
+          <p class="temperature">High: {{weather.temperature}}°F</p>
+          <p class="temperature">Low: {{weather.temperatureLow}}°F</p>
+          {{#if weather.windChill}}
+            <p class="wind-chill">
+              Feels like {{weather.windChill}}°F
+            </p>
+          {{/if}}
+          <p class="conditions">{{weather.conditions}}</p>
+        </div>
+      </div>
+
+      {{!-- Wind Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-wind"></i>
+        </div>
+        <div class="weather-data">
+          <h3>Wind Conditions</h3>
+          <p>{{weather.wind}} mph from the {{weather.windDirection}}</p>
+          {{#if effects.wind.length}}
+            <ul class="effects-list">
+              {{#each effects.wind}}
+                <li>{{this}}</li>
+              {{/each}}
+            </ul>
+          {{/if}}
+        </div>
+      </div>
+
+      {{!-- Precipitation Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-cloud-rain"></i>
+        </div>
+        <div class="weather-data">
+          <h3>Precipitation</h3>
+          <p>{{weather.precipitation}}</p>
+          {{#if effects.precipitation.length}}
+            <ul class="effects-list">
+              {{#each effects.precipitation}}
+                <li>{{this}}</li>
+              {{/each}}
+            </ul>
+          {{/if}}
+        </div>
+      </div>
+
+      {{!-- Moon Phase Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-moon"></i>
+        </div>
+        <div class="weather-data">
+          <h3>Moon Phase</h3>
+          <p>{{weather.moonPhase}}</p>
+        </div>
+      </div>
+
+      {{!-- Special Effects Section --}}
+      {{#if effects.special.length}}
+        <div class="weather-row">
+          <div class="weather-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <div class="weather-data">
+            <h3>Special Events</h3>
+            <ul class="effects-list">
+              {{#each effects.special}}
+                <li>{{this}}</li>
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+      {{/if}}
+    </div>
+
+    {{#if lastUpdate}}
+      <div class="last-update">
+        Last updated: {{lastUpdate}}
+      </div>
+    {{/if}}
+
+    <div class="weather-controls">
+      <button type="button" class="generate-weather" {{#if loading}}disabled{{/if}}>
+        <i class="fas fa-dice"></i> Generate New Weather
+      </button>
+      
+      {{#if isGM}}
+        <button type="button" class="update-weather" {{#if loading}}disabled{{/if}}>
+          <i class="fas fa-sync"></i> Update Weather
+        </button>
+        <button type="button" class="settings" {{#if loading}}disabled{{/if}}>
+          <i class="fas fa-cog"></i> Settings
+        </button>
+      {{/if}}
+
+      <button type="button" class="refresh-weather" {{#if loading}}disabled{{/if}}>
+        <i class="fas fa-redo"></i> Refresh
+      </button>
+    </div>
+  </div>
+</form>
