@@ -15,8 +15,10 @@ export class GreyhawkWeatherSystem {
             latitude: 40,
             elevation: 0,
             terrain: 'plains',
+            month: 'Fireseek', // Default to Fireseek for testing
             ...options
         };
+        console.log("DND-Weather | Initialized with settings:", this.settings);
         this.currentWeather = null;
     }
 
@@ -41,8 +43,13 @@ export class GreyhawkWeatherSystem {
     async generateDailyWeather(date) {
         try {
             // Get the current month's baseline data
-            const month = this._getGreyhawkMonth(date);
+            const month = this.settings.month || this._getGreyhawkMonth(date);
+            console.log("DND-Weather | Generating weather for month:", month);
             const monthData = baselineData[month];
+            if (!monthData) {
+                console.error("DND-Weather | Invalid month:", month);
+                throw new Error(`Invalid month: ${month}`);
+            }
             
             // Step 1: Calculate base temperature and adjustments
             const baseTemp = monthData.baseDailyTemp;

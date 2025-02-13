@@ -1,17 +1,32 @@
 // WeatherDialog.js
-console.log("WeatherDialog.js loaded");
+import { baselineData } from '../../constants/baseline-data.js';
+console.log("WeatherDialog.js loaded, baselineData:", baselineData);
+
 
 export class WeatherDialog extends Application {
     constructor(options = {}) {
         super(options);
         console.log("WeatherDialog constructor called");
+
+        // Initialize months from baselineData
+        this.months = Object.keys(baselineData);
+        console.log("Available months:", this.months);
         
         this.state = {
             loading: false,
             error: null,
             lastUpdate: null,
-            currentWeather: null
+            currentWeather: null,
+            // Add new state properties
+            selectedMonth: this.months[0] || 'Fireseek', // Default to first month or Fireseek
+            latitude: game.settings.get('dnd-weather', 'latitude'),
+            terrain: game.settings.get('dnd-weather', 'terrain'),
+            elevation: game.settings.get('dnd-weather', 'elevation')
         };
+
+        // Add months array from baselineData.js
+        this.months = Object.keys(globalThis.dndWeather?.weatherSystem?.baselineData || {});
+        console.log("Available months:", this.months);
 
         // Bind methods to preserve 'this' context
         this._onGenerateWeather = this._onGenerateWeather.bind(this);
@@ -40,12 +55,33 @@ export class WeatherDialog extends Application {
                 return this._getErrorData("Weather system not initialized");
             }
 
+            // Add form data
+            const formData = {
+                months: this.months,
+                selectedMonth: this.state.selectedMonth,
+                latitude: this.state.latitude,
+                terrain: this.state.terrain,
+                elevation: this.state.elevation,
+                terrainTypes: [
+                    'plains',
+                    'forest',
+                    'hills',
+                    'mountains',
+                    'desert',
+                    'coast',
+                    'ocean'
+                ]
+            };
+
             // Get current weather data
             const currentWeather = this.state.currentWeather || weatherSystem.getCurrentWeather();
             console.log("DND-Weather | Current weather data:", currentWeather);
 
             if (!currentWeather || !currentWeather.baseConditions) {
-                return this._getErrorData("No weather data available");
+                return {
+                    ...this._getErrorData("No weather data available"),
+                    ...formData
+                };
             }
 
             // Prepare the data for the template
@@ -66,7 +102,8 @@ export class WeatherDialog extends Application {
                 isGM: game.user.isGM,
                 loading: this.state.loading,
                 error: this.state.error,
-                lastUpdate: this.state.lastUpdate || currentWeather.timestamp
+                lastUpdate: this.state.lastUpdate || currentWeather.timestamp,
+                ...formData
             };
         } catch (error) {
             console.error("DND-Weather | Error in getData:", error);
@@ -92,15 +129,37 @@ export class WeatherDialog extends Application {
         };
     }
 
+    // Add to activateListeners method around line 85
     activateListeners(html) {
         super.activateListeners(html);
         console.log("DND-Weather | Activating listeners");
         
         // Remove any existing listeners first
-        html.find('.generate-weather').off('click').on('click', this._onGenerateWeather);
-        html.find('.update-weather').off('click').on('click', this._onUpdateWeather);
-        html.find('.settings').off('click').on('click', this._onOpenSettings);
+        html.find('.generate-weather').off('click').on('click', this._onGenerateWeather.bind(this));
+        html.find('.update-weather').off('click').on('click', this._onUpdateWeather.bind(this));
+        html.find('.settings').off('click').on('click', this._onOpenSettings.bind(this));
         html.find('.refresh-weather').off('click').on('click', () => this.render());
+
+        // Add input listeners
+        html.find('select[name="month"]').on('change', (event) => {
+            this.state.selectedMonth = event.target.value;
+            console.log("DND-Weather | Month changed to:", this.state.selectedMonth);
+        });
+
+        html.find('input[name="latitude"]').on('change', (event) => {
+            this.state.latitude = Number(event.target.value);
+            console.log("DND-Weather | Latitude changed to:", this.state.latitude);
+        });
+
+        html.find('select[name="terrain"]').on('change', (event) => {
+            this.state.terrain = event.target.value;
+            console.log("DND-Weather | Terrain changed to:", this.state.terrain);
+        });
+
+        html.find('input[name="elevation"]').on('change', (event) => {
+            this.state.elevation = Number(event.target.value);
+            console.log("DND-Weather | Elevation changed to:", this.state.elevation);
+        });
     }
 
     async _onGenerateWeather(event) {
@@ -118,6 +177,15 @@ export class WeatherDialog extends Application {
         await this.render();
 
         try {
+            // Update weather system settings with current form values
+            weatherSystem.settings = {
+                month: this.state.selectedMonth,
+                latitude: this.state.latitude,
+                elevation: this.state.elevation,
+                terrain: this.state.terrain
+            };
+            console.log("DND-Weather | Using settings:", weatherSystem.settings);
+
             const weatherData = await weatherSystem.generateWeather();
             console.log("DND-Weather | Generated weather data:", weatherData);
             

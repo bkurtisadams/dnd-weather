@@ -31,3 +31,27 @@
 .weather-dialog button i {
     margin-right: 5px;
 }
+
+/* Add around line 30 */
+.weather-dialog .form-group {
+    margin-bottom: 10px;
+}
+
+.weather-dialog label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.weather-dialog select,
+.weather-dialog input {
+    width: 150px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.weather-dialog input[type="number"] {
+    text-align: right;
+}
