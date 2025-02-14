@@ -27,6 +27,17 @@
               </select>
           </label>
       </div>
+
+        <div class="form-group">
+          <label>Day:
+              <input type="number" 
+                    name="day" 
+                    value="{{selectedDay}}" 
+                    min="1" 
+                    max="28" 
+                    {{#if loading}}disabled{{/if}}>
+          </label>
+      </div>
         
         <div class="form-group">
             <label>Latitude:
@@ -184,11 +195,13 @@
           <i class="fas fa-moon"></i>
         </div>
         <div class="weather-data">
-          <h3>Moon Phase</h3>
-          <p>{{weather.moonPhase}}</p>
+          <h3>Moon Phases</h3>
+          <div class="moon-details">
+            <p><strong>Luna:</strong> {{weather.moonPhase.luna}}</p>
+            <p><strong>Celene:</strong> {{weather.moonPhase.celene}}</p>
+          </div>
         </div>
       </div>
-    </div>
 
     {{!-- Weather Controls --}}
     <div class="weather-controls">

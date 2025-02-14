@@ -3,7 +3,7 @@ import { baselineData } from './constants/baseline-data.js';
 import { terrainEffects } from './constants/terrain-effects.js';
 import { weatherPhenomena } from './constants/precipitation-table.js';
 import { highWindsTable, windChillTable } from './constants/wind-effects.js';
-import { moonPhases } from './constants/moon-phases.js';
+import { moonPhases, lycanthropeActivity } from './constants/moon-phases.js';
 import { WeatherDialog } from './ui/components/WeatherDialog.js';
 import { rollDice, evalDice } from './utils/dice.js';
 import { registerSettings } from './settings.js';
@@ -16,6 +16,7 @@ export class GreyhawkWeatherSystem {
             elevation: 0,
             terrain: 'plains',
             month: 'Fireseek', // Default to Fireseek for testing
+            day: 1, // Default to 1st day of the month for testing
             ...options
         };
         console.log("DND-Weather | Initialized with settings:", this.settings);
@@ -106,6 +107,10 @@ export class GreyhawkWeatherSystem {
     
             // Step 5: Calculate wind chill if needed
             const windChill = lowTemp < 35 ? this._calculateWindChill(lowTemp, wind.speed) : null;
+
+            // Get moon phases
+            const moonPhase = await this._determineMoonPhases();
+            console.log("DND-Weather | Calculated moon phases:", moonPhase);
     
             return {
                 baseConditions: {
@@ -121,7 +126,11 @@ export class GreyhawkWeatherSystem {
                         speed: wind.speed,
                         direction: wind.direction
                     },
-                    moonPhase: await this._determineMoonPhase(date)
+                    //moonPhase: await this._determineMoonPhase(date)
+                    moonPhase: {
+                        luna: moonPhase.luna,
+                        celene: moonPhase.celene
+                    }
                 },
                 effects: {
                     terrain: terrainEffect?.effects || [],
@@ -337,22 +346,98 @@ _getGreyhawkMonth(date) {
     return months[monthIndex % months.length];
 }
 
+// src/weather-system.js
 async _determineMoonPhase(date) {
-    // Get current month and day
-    const month = this._getGreyhawkMonth(date);
-    const day = date.getDate();
+    console.log("DND-Weather | Determining moon phase");
+    
+    // Use settings values
+    const month = this.settings.month;
+    const day = this.settings.day;
+    
+    console.log("DND-Weather | Using month:", month, "day:", day);
     
     // Check Luna's phase for this day
-    const lunaPhases = moonPhases.Luna[month];
-    if (!lunaPhases) return 'Unknown';
+    const monthPhases = moonPhases.Luna[month];
+    if (!monthPhases) {
+        console.warn("DND-Weather | No moon phase data found for month:", month);
+        return 'Unknown';
+    }
     
-    // Find closest phase day
-    const phaseDays = Object.keys(lunaPhases).map(Number);
-    const closestDay = phaseDays.reduce((prev, curr) => 
-        Math.abs(curr - day) < Math.abs(prev - day) ? curr : prev
-    );
+    console.log("DND-Weather | Available phases for", month, ":", monthPhases);
+
+    // Get all phase days for this month
+    const phaseDays = Object.keys(monthPhases).map(Number);
+    console.log("DND-Weather | Phase days:", phaseDays);
+
+    // Find closest day to current day
+    const closestDay = phaseDays.reduce((prev, curr) => {
+        const prevDiff = Math.abs(prev - day);
+        const currDiff = Math.abs(curr - day);
+        return prevDiff < currDiff ? prev : curr;
+    });
     
-    return lunaPhases[closestDay];
+    const phase = monthPhases[closestDay];
+    console.log("DND-Weather | Selected phase:", phase, "for day", closestDay);
+
+    return phase;
+}
+
+async _determineCelenePhase(date) {
+    const month = this.settings.month;
+    const day = this.settings.day;
+    
+    console.log("DND-Weather | Determining Celene phase for", month, "day", day);
+    
+    const monthPhases = moonPhases.Celene[month];
+    if (!monthPhases) {
+        console.warn("DND-Weather | No Celene phase data found for month:", month);
+        return 'Unknown';
+    }
+    
+    const phaseDays = Object.keys(monthPhases).map(Number);
+    const closestDay = phaseDays.reduce((prev, curr) => {
+        return Math.abs(prev - day) < Math.abs(curr - day) ? prev : curr;
+    });
+    
+    return monthPhases[closestDay];
+}
+
+// src/weather-system.js
+// Around line 410
+async _determineMoonPhases() {
+    console.log("DND-Weather | Determining moon phases");
+    const lunaPhase = await this._determineMoonPhase();
+    const celenePhase = await this._determineCelenePhase();
+    
+    console.log("DND-Weather | Phases calculated:", { lunaPhase, celenePhase });
+    
+    const activity = this._determineLycanthropeActivity(lunaPhase, celenePhase);
+    console.log("DND-Weather | Lycanthrope activity:", activity);
+    
+    return {
+        luna: lunaPhase,
+        celene: celenePhase,
+        lycanthropeActivity: activity
+    };
+}
+
+_determineLycanthropeActivity(lunaPhase, celenePhase) {
+    console.log("DND-Weather | Determining lycanthrope activity for phases:", 
+                { lunaPhase, celenePhase, month: this.settings.month, day: this.settings.day });
+    
+    if (this.settings.month === 'Richfest' && this.settings.day === 4) {
+        return lycanthropeActivity.midsummer;
+    }
+    if (lunaPhase === 'Full' && celenePhase === 'Full') {
+        return lycanthropeActivity.both_full;
+    }
+    if (lunaPhase === 'Full') {
+        return lycanthropeActivity.luna_full;
+    }
+    if (celenePhase === 'Full') {
+        return lycanthropeActivity.celene_full;
+    }
+    return lycanthropeActivity.normal;
 }
 
 // Add to GreyhawkWeatherSystem class

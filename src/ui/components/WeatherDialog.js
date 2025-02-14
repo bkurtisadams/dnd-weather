@@ -32,6 +32,7 @@ export class WeatherDialog extends Application {
             currentWeather: null,
             // Add new state properties
             selectedMonth: this.months[0] || 'Fireseek', // Default to first month or Fireseek
+            selectedDay: 1, // initialize selectedDay
             latitude: game.settings.get('dnd-weather', 'latitude'),
             terrain: game.settings.get('dnd-weather', 'terrain'),
             elevation: game.settings.get('dnd-weather', 'elevation')            
@@ -72,6 +73,7 @@ export class WeatherDialog extends Application {
             const formData = {
                 months: this.months, // Use this.months directly
                 selectedMonth: this.state.selectedMonth,
+                selectedDay: this.state.selectedDay,
                 latitude: this.state.latitude,
                 terrain: this.state.terrain,
                 elevation: this.state.elevation,
@@ -144,16 +146,12 @@ export class WeatherDialog extends Application {
                     windChill: currentWeather.baseConditions.temperature.windChill,
                     wind: currentWeather.baseConditions.wind.speed,
                     windDirection: currentWeather.baseConditions.wind.direction,
-                    /* precipitation: {
-                        type: precipType,
-                        amount: precipDetails?.precipitation?.amount || 'none',
-                        duration: precipDetails?.precipitation?.duration || 'none',
-                        movement: precipDetails?.precipitation?.movement || 'Normal',
-                        vision: precipDetails?.precipitation?.vision || 'Normal',
-                        notes: precipDetails?.notes || ''
-                    }, */
-                    precipitation,
-                    moonPhase: currentWeather.moonPhase,
+                    precipitation: precipitation,
+                    // Add this if it's not already there
+                    moonPhase: {
+                        luna: currentWeather.baseConditions.moonPhase?.luna || 'Unknown',
+                        celene: currentWeather.baseConditions.moonPhase?.celene || 'Unknown'
+                    },
                     conditions: currentWeather.baseConditions.sky
                 },
                 effects: currentWeather.effects,
@@ -206,6 +204,12 @@ export class WeatherDialog extends Application {
             console.log("DND-Weather | Month changed to:", this.state.selectedMonth);
         });
 
+        // Add day input listener
+        html.find('input[name="day"]').on('change', (event) => {
+            this.state.selectedDay = Number(event.target.value);
+            console.log("DND-Weather | Day changed to:", this.state.selectedDay);
+        });
+
         html.find('input[name="latitude"]').on('change', (event) => {
             this.state.latitude = Number(event.target.value);
             console.log("DND-Weather | Latitude changed to:", this.state.latitude);
@@ -240,6 +244,7 @@ export class WeatherDialog extends Application {
             // Update weather system settings with current form values
             weatherSystem.settings = {
                 month: this.state.selectedMonth,
+                day: this.state.selectedDay,
                 latitude: this.state.latitude,
                 elevation: this.state.elevation,
                 terrain: this.state.terrain
