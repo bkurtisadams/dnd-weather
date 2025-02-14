@@ -8,6 +8,12 @@ import { WeatherDialog } from './ui/components/WeatherDialog.js';
 import { rollDice, evalDice } from './utils/dice.js';
 import { registerSettings } from './settings.js';
 import { MILES_PER_LATITUDE } from './utils/latitude.js';
+// Add temperature utilities
+import { 
+    calculateLatitudeAdjustment, 
+    calculateAltitudeAdjustment,
+    applyWindChill 
+} from './utils/temperature.js';
 
 
 export class GreyhawkWeatherSystem {
@@ -20,8 +26,54 @@ export class GreyhawkWeatherSystem {
             day: 1, // Default to 1st day of the month for testing
             ...options
         };
+        
+        //this.temperatureCalculator = new TemperatureCalculator();
+        
         console.log("DND-Weather | Initialized with settings:", this.settings);
+        console.log("DND-Weather | Temperature calculator initialized");
+        
         this.currentWeather = null;
+    }
+
+    /**
+     * Determine current season based on month
+     * @param {string} month - Current month name
+     * @returns {string} Season name
+     */
+    _getSeason(month) {
+        console.log("DND-Weather | Determining season for month:", month);
+        
+        const seasonMap = {
+            // Winter
+            'Fireseek': 'Winter',
+            'Sunsebb': 'Winter',
+            'Needfest': 'Winter',
+            
+            // Spring
+            'Readying': 'Spring',
+            'Coldeven': 'Spring',
+            'Growfest': 'Spring',
+            
+            // Low Summer
+            'Planting': 'Low Summer',
+            'Flocktime': 'Low Summer',
+            'Wealsun': 'Low Summer',
+            'Richfest': 'Low Summer',
+            
+            // High Summer
+            'Reaping': 'High Summer',
+            'Goodmonth': 'High Summer',
+            'Harvester': 'High Summer',
+            
+            // Autumn
+            'Patchwall': 'Autumn',
+            'Ready\'reat': 'Autumn',
+            'Brewfest': 'Autumn'
+        };
+
+        const season = seasonMap[month] || 'Unknown';
+        console.log("DND-Weather | Determined season:", season);
+        return season;
     }
 
     async generateWeather(days = 1) {
@@ -47,6 +99,7 @@ export class GreyhawkWeatherSystem {
             // Get the current month's baseline data
             const month = this.settings.month || this._getGreyhawkMonth(date);
             console.log("DND-Weather | Generating weather for month:", month);
+
             const monthData = baselineData[month];
             if (!monthData) {
                 console.error("DND-Weather | Invalid month:", month);
@@ -55,24 +108,37 @@ export class GreyhawkWeatherSystem {
             
             // Step 1: Calculate base temperature and adjustments
             const baseTemp = monthData.baseDailyTemp;
+            console.log("DND-Weather | Base temperature:", baseTemp);
             
             // Check for temperature extremes
             const tempExtreme = await this._checkTemperatureExtremes(baseTemp);
             let adjustedBaseTemp = tempExtreme.isExtreme ? tempExtreme.adjustedTemp : baseTemp;
+            console.log("DND-Weather | Temperature after extremes check:", {
+                isExtreme: tempExtreme.isExtreme,
+                type: tempExtreme.type,
+                adjustedTemp: adjustedBaseTemp
+            });
     
             // Calculate daily high/low adjustments
             const highAdj = await evalDice(monthData.dailyHighAdj);
             const lowAdj = await evalDice(monthData.dailyLowAdj);
+            console.log("DND-Weather | Daily adjustments:", { highAdj, lowAdj });
             
             // Apply latitude adjustment (2°F per 2 1/3 hexes from 40th parallel)
-            const latitudeAdj = ((this.settings.latitude - 40) / 2.33) * 2;
+            //const latitudeAdj = ((this.settings.latitude - 40) / 2.33) * 2;
+            const latitudeAdj = calculateLatitudeAdjustment(this.settings.latitude);
+            console.log("DND-Weather | Latitude adjustment:", latitudeAdj);
+
             
             // Apply elevation adjustment (-3°F per 1000 feet)
-            const elevationAdj = Math.floor(this.settings.elevation / 1000) * -3;
-    
+            //const elevationAdj = Math.floor(this.settings.elevation / 1000) * -3;
+            const elevationAdj = calculateAltitudeAdjustment(this.settings.elevation);
+            console.log("DND-Weather | Elevation adjustment:", elevationAdj);
+
             // Calculate final temperatures
             const highTemp = adjustedBaseTemp + highAdj + latitudeAdj + elevationAdj;
             const lowTemp = adjustedBaseTemp + lowAdj + latitudeAdj + elevationAdj;
+            console.log("DND-Weather | Final temperatures:", { high: highTemp, low: lowTemp });
     
             // Step 2: Determine sky conditions
             const skyRoll = await rollDice(1, 100)[0];
@@ -107,7 +173,8 @@ export class GreyhawkWeatherSystem {
             }
     
             // Step 5: Calculate wind chill if needed
-            const windChill = lowTemp < 35 ? this._calculateWindChill(lowTemp, wind.speed) : null;
+            //const windChill = lowTemp < 35 ? this._calculateWindChill(lowTemp, wind.speed) : null;
+            const windChill = lowTemp < 35 ? applyWindChill(lowTemp, wind.speed, windChillTable) : null;
 
             // Get moon phases
             const moonPhase = await this._determineMoonPhases();
@@ -209,30 +276,72 @@ export class GreyhawkWeatherSystem {
 
     // Add other necessary methods...
     // Additional helper methods for GreyhawkWeatherSystem class
+    /**
+     * Determine wind conditions when no precipitation
+     * @param {number} baseSpeed - Base wind speed from d20-1 roll
+     * @param {Object} terrainEffect - Terrain modifiers
+     * @returns {Object} Wind conditions
+     */
+    async _determineWind(baseSpeed, terrainEffect) {
+        console.log("DND-Weather | Determining wind for speed:", baseSpeed);
+        
+        // Apply terrain wind modifier
+        const adjustedSpeed = baseSpeed + (terrainEffect?.windSpeedAdjustment || 0);
+        console.log("DND-Weather | Adjusted wind speed:", adjustedSpeed);
+        
+        // Get wind direction
+        const direction = await this._determineWindDirection();
+        
+        // Get effects based on wind speed
+        const effects = this._getWindEffects(adjustedSpeed);
+        
+        return {
+            speed: Math.max(0, adjustedSpeed),
+            direction,
+            effects
+        };
+    }
 
-async _determineWind(baseSpeed, terrainEffect) {
-    // Apply terrain wind modifier
-    const adjustedSpeed = baseSpeed + (terrainEffect?.windSpeedAdjustment || 0);
-    
-    // Get wind direction
-    const direction = await this._determineWindDirection();
-    
-    // Get effects based on wind speed
-    const effects = this._getWindEffects(adjustedSpeed);
-    
-    return {
-        speed: Math.max(0, adjustedSpeed),
-        direction,
-        effects
-    };
-}
+    /**
+     * Determine wind direction based on season and prevailing winds
+     * @returns {string} Wind direction
+     */
+    async _determineWindDirection() {
+        const season = this._getSeason(this.settings.month);
+        console.log("DND-Weather | Determining wind direction for season:", season);
+        
+        // 70% chance of prevailing wind
+        const prevailingRoll = await rollDice(1, 100)[0];
+        console.log("DND-Weather | Prevailing wind roll:", prevailingRoll);
+        
+        if (prevailingRoll <= 70) {
+            // Use prevailing winds based on season
+            if (['Autumn', 'Winter'].includes(season)) {
+                const direction = await rollDice(1, 2)[0] === 1 ? 'North' : 'Northeast';
+                console.log("DND-Weather | Using fall/winter prevailing wind:", direction);
+                return direction;
+            } else {
+                const direction = await rollDice(1, 2)[0] === 1 ? 'East' : 'Southeast';
+                console.log("DND-Weather | Using spring/summer prevailing wind:", direction);
+                return direction;
+            }
+        }
+        
+        // Random direction for remaining 30%
+        const dirRoll = await rollDice(1, 8)[0];
+        const directions = ['North', 'Northeast', 'East', 'Southeast', 
+                        'South', 'Southwest', 'West', 'Northwest'];
+        const direction = directions[dirRoll - 1];
+        console.log("DND-Weather | Using random wind direction:", direction);
+        return direction;
+    }
 
-async _determineWindDirection() {
+/* async _determineWindDirection() {
     // Roll d8 for direction
     const roll = await rollDice(1, 8)[0];
     const directions = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
     return directions[roll - 1];
-}
+} */
 
 async _determineWindForPrecipitation(precipitation) {
     if (!precipitation?.type || precipitation.type === 'none') {
