@@ -203,6 +203,35 @@
           </div>
       </div>
 
+      {{!-- Special Weather Section --}}
+      <div class="weather-section">
+          <h3 class="weather-header">Effects</h3>
+          {{#if effects.precipitation.length}}
+          <div class="weather-value">
+              <label>Precipitation Effects:</label>
+              {{#each effects.precipitation}}
+                  <div>{{this}}</div>
+              {{/each}}
+          </div>
+          {{/if}}
+
+          {{#if effects.special.length}}
+          <div class="weather-value">
+              <label>Special Effects:</label>
+              {{#each effects.special}}
+                  <div>{{this}}</div>
+              {{/each}}
+          </div>
+          {{/if}}
+
+          {{#if weather.precipitation.continues}}
+          <div class="weather-value">
+              <label>Continuing Weather:</label>
+              <div>Precipitation continues for {{weather.precipitation.duration}} hours</div>
+          </div>
+          {{/if}}
+      </div>
+
       {{!-- src/ui/templates/weather-dialog.hbs --}}
       {{!-- Moon Phase Section --}}
       <div class="weather-row">

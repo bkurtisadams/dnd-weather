@@ -193,3 +193,15 @@
     display: inline-block;
     vertical-align: middle;
   }
+
+  /* special weather secition */
+  .weather-value label {
+    font-weight: bold;
+    margin-right: 0.5em;
+}
+
+.weather-section {
+    margin: 0.5em 0;
+    padding: 0.5em;
+    border-top: 1px solid #ddd;
+}
