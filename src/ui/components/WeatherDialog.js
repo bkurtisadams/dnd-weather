@@ -101,6 +101,12 @@ export class WeatherDialog extends Application {
                 };
             }
 
+            // Add explicit logging for moon phases
+            console.log("DND-Weather | Moon phases:", {
+                luna: currentWeather.baseConditions.moonPhase?.luna,
+                celene: currentWeather.baseConditions.moonPhase?.celene
+            });
+
             // Get precipitation details from weatherPhenomena table
             const precipType = currentWeather.baseConditions.precipitation;
             console.log("DND-Weather | Precipitation type:", precipType);

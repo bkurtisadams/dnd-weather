@@ -382,7 +382,7 @@ async _determineMoonPhase(date) {
     return phase;
 }
 
-async _determineCelenePhase(date) {
+/* async _determineCelenePhase(date) {
     const month = this.settings.month;
     const day = this.settings.day;
     
@@ -401,24 +401,164 @@ async _determineCelenePhase(date) {
     
     return monthPhases[closestDay];
 }
-
+ */
 // src/weather-system.js
 // Around line 410
 async _determineMoonPhases() {
-    console.log("DND-Weather | Determining moon phases");
-    const lunaPhase = await this._determineMoonPhase();
-    const celenePhase = await this._determineCelenePhase();
+    console.log("DND-Weather | Determining moon phases for", this.settings.month, "day", this.settings.day);
     
-    console.log("DND-Weather | Phases calculated:", { lunaPhase, celenePhase });
-    
-    const activity = this._determineLycanthropeActivity(lunaPhase, celenePhase);
-    console.log("DND-Weather | Lycanthrope activity:", activity);
+    // Luna phases - pattern varies by month group
+    let lunaPhase = await this._determineLunaPhase();
+    let celenePhase = await this._determineCelenePhase();
     
     return {
         luna: lunaPhase,
-        celene: celenePhase,
-        lycanthropeActivity: activity
+        celene: celenePhase
     };
+}
+
+_determineLunaPhase() {
+    const month = this.settings.month;
+    const day = this.settings.day;
+    
+    // Fireseek-Coldeven pattern
+    if (['Fireseek', 'Readying', 'Coldeven'].includes(month)) {
+        if (day === 4) return '1st Quarter';
+        if (day === 11) return 'Full';
+        if (day === 18) return '3/4';
+        if (day === 25) return 'New';
+    }
+    
+    // Planting-Wealsun pattern
+    else if (['Planting', 'Flocktime', 'Wealsun'].includes(month)) {
+        if (day === 4) return 'Full';
+        if (day === 11) return '3/4';
+        if (day === 18) return 'New';
+        if (day === 25) return '1/4';
+    }
+    
+    // Reaping-Harvester pattern
+    else if (['Reaping', 'Goodmonth', 'Harvester'].includes(month)) {
+        if (day === 4) return '3/4';
+        if (day === 11) return 'New';
+        if (day === 18) return '1/4';
+        if (day === 25) return 'Full';
+    }
+    
+    // Patchwall-Sunsebb pattern
+    else if (['Patchwall', 'Ready\'reat', 'Sunsebb'].includes(month)) {
+        if (day === 4) return 'New';
+        if (day === 11) return '1/4';
+        if (day === 18) return 'Full';
+        if (day === 25) return '3/4';
+    }
+    
+    // Festival months are special cases
+    else if (month === 'Needfest') {
+        if (day === 4) return 'New';
+    }
+    else if (month === 'Growfest') {
+        if (day === 4) return '1/4';
+    }
+    else if (month === 'Richfest') {
+        if (day === 4) return 'Full';
+    }
+    else if (month === 'Brewfest') {
+        if (day === 4) return '3/4';
+    }
+
+    // Calculate phases between main points
+    return this._calculateIntermediateLunaPhase(day);
+}
+
+/* _determineCelenePhase() {
+    const month = this.settings.month;
+    const day = this.settings.day;
+
+    // Handle each month explicitly based on the table
+    if (month === 'Needfest' && day === 4) return 'Full';
+    if (month === 'Fireseek' && day === 19) return '3/4';
+    if (month === 'Readying' && day === 11) return 'New';
+    if (month === 'Coldeven' && day === 4) return '1/4';
+    if (month === 'Growfest' && day === 4) return 'Full';
+    if (month === 'Planting' && day === 19) return '3/4';
+    if (month === 'Flocktime' && day === 11) return 'New';
+    if (month === 'Wealsun' && day === 4) return '1/4';
+    if (month === 'Richfest' && day === 4) return 'Full';
+    if (month === 'Reaping' && day === 19) return '3/4';
+    if (month === 'Goodmonth' && day === 11) return 'New';
+    if (month === 'Harvester' && day === 4) return '1/4';
+    if (month === 'Brewfest' && day === 4) return 'Full';
+    if (month === 'Patchwall' && day === 19) return '3/4';
+    if (month === 'Ready\'reat' && day === 11) return 'New';
+    if (month === 'Sunsebb' && day === 4) return '1/4';
+
+    return null; // Return null for non-phase days
+} */
+
+_determineCelenePhase() {
+    const month = this.settings.month;
+    const day = this.settings.day;
+
+    console.log("DND-Weather | Determining Celene phase for:", { month, day });
+
+    // Define phase days for each month
+    const celenePhases = {
+        'Needfest': { 4: 'Full' },
+        'Fireseek': { 19: '3/4' },
+        'Readying': { 11: 'New' },
+        'Coldeven': { 4: '1/4' },
+        'Growfest': { 4: 'Full' },
+        'Planting': { 19: '3/4' },
+        'Flocktime': { 11: 'New' },
+        'Wealsun': { 4: '1/4' },
+        'Richfest': { 4: 'Full' },
+        'Reaping': { 19: '3/4' },
+        'Goodmonth': { 11: 'New' },
+        'Harvester': { 4: '1/4' },
+        'Brewfest': { 4: 'Full' },
+        'Patchwall': { 19: '3/4' },
+        'Ready\'reat': { 11: 'New' },
+        'Sunsebb': { 4: '1/4' }
+    };
+
+    // Get the phase days for this month
+    const monthPhases = celenePhases[month];
+    if (!monthPhases) {
+        console.warn("DND-Weather | No phase data for month:", month);
+        return 'Unknown';
+    }
+
+    // Find the closest phase day
+    const phaseDays = Object.keys(monthPhases).map(Number);
+    if (phaseDays.includes(day)) {
+        console.log("DND-Weather | Exact phase found:", monthPhases[day]);
+        return monthPhases[day];
+    }
+
+    // Find the most recent phase
+    const mostRecentDay = Math.max(...phaseDays.filter(d => d <= day));
+    if (mostRecentDay > 0) {
+        console.log("DND-Weather | Using most recent phase:", monthPhases[mostRecentDay]);
+        return monthPhases[mostRecentDay];
+    }
+
+    // If we're before the first phase of this month, use the last phase from previous month
+    console.log("DND-Weather | Using transitional phase");
+    const phases = ['New', '1/4', 'Full', '3/4'];
+    const currentPhaseIndex = phases.indexOf(monthPhases[Math.min(...phaseDays)]);
+    const previousPhase = phases[(currentPhaseIndex - 1 + phases.length) % phases.length];
+    return previousPhase;
+}
+    
+
+_calculateIntermediateLunaPhase(day) {
+    // Calculate intermediate phases based on main phase points
+    if (day < 4) return 'Waxing Crescent';
+    if (day < 11) return 'Waxing Gibbous';
+    if (day < 18) return 'Waning Gibbous';
+    if (day < 25) return 'Waning Crescent';
+    return 'Waning Crescent';
 }
 
 _determineLycanthropeActivity(lunaPhase, celenePhase) {

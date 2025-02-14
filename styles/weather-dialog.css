@@ -144,3 +144,31 @@
     margin: 0;
     font-style: italic;
 }
+/* moon details */
+.moon-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .moon-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .moon-label {
+    min-width: 60px;
+    font-weight: bold;
+  }
+  
+  .moon-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .moon-icon {
+    display: inline-block;
+    vertical-align: middle;
+  }

@@ -189,6 +189,7 @@
           </div>
       </div>
 
+      {{!-- src/ui/templates/weather-dialog.hbs --}}
       {{!-- Moon Phase Section --}}
       <div class="weather-row">
         <div class="weather-icon">
@@ -197,8 +198,62 @@
         <div class="weather-data">
           <h3>Moon Phases</h3>
           <div class="moon-details">
-            <p><strong>Luna:</strong> {{weather.moonPhase.luna}}</p>
-            <p><strong>Celene:</strong> {{weather.moonPhase.celene}}</p>
+            <div class="moon-row">
+              <span class="moon-label">Luna:</span>
+              <div class="moon-info">
+                {{#if weather.moonPhase.luna}}
+                  <svg class="moon-icon" viewBox="0 0 100 100" width="24" height="24">
+                    {{#if (eq weather.moonPhase.luna "New")}}
+                      <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                    {{else if (eq weather.moonPhase.luna "1/4")}}
+                      <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                      <path d="M50,2 A48,48 0 0,1 50,98 A48,48 0 0,0 50,2" fill="white"/>
+                    {{else if (eq weather.moonPhase.luna "Full")}}
+                      <circle cx="50" cy="50" r="48" fill="white" stroke="gray"/>
+                    {{else if (eq weather.moonPhase.luna "3/4")}}
+                      <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                      <path d="M50,2 A48,48 0 0,0 50,98 A48,48 0 0,1 50,2" fill="white"/>
+                    {{else if (eq weather.moonPhase.luna "Waxing Crescent")}}
+                      <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                      <path d="M50,2 A48,48 0 0,1 50,98 A24,48 0 0,0 50,2" fill="white"/>
+                    {{else if (eq weather.moonPhase.luna "Waxing Gibbous")}}
+                      <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                      <path d="M50,2 A48,48 0 0,1 50,98 A72,48 0 0,0 50,2" fill="white"/>
+                    {{else if (eq weather.moonPhase.luna "Waning Gibbous")}}
+                      <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                      <path d="M50,2 A48,48 0 0,0 50,98 A72,48 0 0,1 50,2" fill="white"/>
+                    {{else if (eq weather.moonPhase.luna "Waning Crescent")}}
+                      <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                      <path d="M50,2 A48,48 0 0,0 50,98 A24,48 0 0,1 50,2" fill="white"/>
+                    {{/if}}
+                  </svg>
+                {{/if}}
+                <span>{{weather.moonPhase.luna}}</span>
+              </div>
+            </div>
+            <div class="moon-row">
+              <span class="moon-label">Celene:</span>
+              <div class="moon-info">
+                {{#if weather.moonPhase.celene}}
+                        <svg class="moon-icon" viewBox="0 0 100 100" width="24" height="24">
+                            {{#if (eq weather.moonPhase.celene "New")}}
+                                <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                            {{else if (eq weather.moonPhase.celene "1/4")}}
+                                <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                                <path d="M50,2 A48,48 0 0,1 50,98 A48,48 0 0,0 50,2" fill="white"/>
+                            {{else if (eq weather.moonPhase.celene "Full")}}
+                                <circle cx="50" cy="50" r="48" fill="white" stroke="gray"/>
+                            {{else if (eq weather.moonPhase.celene "3/4")}}
+                                <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                                <path d="M50,2 A48,48 0 0,0 50,98 A48,48 0 0,1 50,2" fill="white"/>
+                            {{else}}
+                                <circle cx="50" cy="50" r="48" fill="gray" stroke="darkgray"/>
+                            {{/if}}
+                        </svg>
+                    {{/if}}
+                <span>{{weather.moonPhase.celene}}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
