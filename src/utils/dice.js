@@ -6,7 +6,10 @@
  * @returns {number} The result of the dice roll
  */
 export function evalDice(diceExpression) {
+    console.log("DND-Weather | Evaluating dice expression:", diceExpression);
+    
     if (!diceExpression || diceExpression.trim() === "None") {
+        console.log("DND-Weather | Empty or None expression, returning 0");
         return 0;
     }
 
@@ -14,6 +17,7 @@ export function evalDice(diceExpression) {
     let negative = diceExpression.startsWith('-');
     if (negative) {
         diceExpression = diceExpression.substring(1);
+        console.log("DND-Weather | Negative expression detected, stripped to:", diceExpression);
     }
 
     // Handle fractional dice (e.g., "1/2d6")
@@ -22,7 +26,8 @@ export function evalDice(diceExpression) {
         const [_, numerator, denominator, sides] = fractionMatch;
         const roll = Math.floor(Math.random() * parseInt(sides)) + 1;
         result = Math.floor((parseInt(numerator) / parseInt(denominator)) * roll);
-        console.log(`Rolling fractional dice ${numerator}/${denominator}d${sides}, roll = ${roll}, result = ${result}`);
+        console.log(`DND-Weather | Fractional dice: ${numerator}/${denominator}d${sides}`);
+        console.log(`DND-Weather | Base roll: ${roll}, Final result: ${negative ? -result : result}`);
         return negative ? -result : result;
     }
 
@@ -33,21 +38,34 @@ export function evalDice(diceExpression) {
         const sides = parseInt(match[2]);
         const modifier = parseInt(match[3] || 0);
 
+        console.log(`DND-Weather | Parsed dice: ${count}d${sides}${modifier ? modifier : ''}`);
+        
+        let rolls = [];
         for (let i = 0; i < count; i++) {
-            result += Math.floor(Math.random() * sides) + 1;
+            const roll = Math.floor(Math.random() * sides) + 1;
+            rolls.push(roll);
+            result += roll;
         }
+        
+        const baseResult = result;
         result += modifier;
-        console.log(`Rolling ${count}d${sides}${modifier ? modifier : ''}, result = ${result}`);
+        
+        console.log(`DND-Weather | Individual rolls: [${rolls.join(', ')}]`);
+        console.log(`DND-Weather | Base total: ${baseResult}`);
+        console.log(`DND-Weather | Modifier: ${modifier}`);
+        console.log(`DND-Weather | Final result: ${negative ? -result : result}`);
+        
         return negative ? -result : result;
     }
 
     // Handle plain numbers
     const numericResult = parseInt(diceExpression);
     if (!isNaN(numericResult)) {
+        console.log(`DND-Weather | Plain number: ${numericResult}`);
         return negative ? -numericResult : numericResult;
     }
 
-    console.error(`Invalid dice expression: ${diceExpression}`);
+    console.error(`DND-Weather | Invalid dice expression: ${diceExpression}`);
     return 0;
 }
 
@@ -57,7 +75,9 @@ export function evalDice(diceExpression) {
  * @returns {number} Result of the roll
  */
 export function rollDie(sides) {
-    return Math.floor(Math.random() * sides) + 1;
+    const result = Math.floor(Math.random() * sides) + 1;
+    console.log(`DND-Weather | Rolling d${sides}: ${result}`);
+    return result;
 }
 
 /**
@@ -67,7 +87,10 @@ export function rollDie(sides) {
  * @returns {number[]} Array of roll results
  */
 export function rollDice(count, sides) {
-    return Array(count).fill(0).map(() => rollDie(sides));
+    console.log(`DND-Weather | Rolling ${count}d${sides}`);
+    const rolls = Array(count).fill(0).map(() => rollDie(sides));
+    console.log(`DND-Weather | Results: [${rolls.join(', ')}]`);
+    return rolls;
 }
 
 /**
@@ -75,5 +98,7 @@ export function rollDice(count, sides) {
  * @returns {number} Result between 1 and 100
  */
 export function rollPercentile() {
-    return rollDie(100);
+    const result = rollDie(100);
+    console.log(`DND-Weather | Rolling percentile: ${result}`);
+    return result;
 }
