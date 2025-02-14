@@ -1,6 +1,15 @@
 // WeatherDialog.js
 import { baselineData } from '../../constants/baseline-data.js';
-console.log("WeatherDialog.js loaded, baselineData:", baselineData);
+import { weatherPhenomena } from '../../constants/precipitation-table.js';
+
+Handlebars.registerHelper('isObject', function(value) {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+});
+
+console.log("WeatherDialog.js loaded, importing:", {
+    weatherPhenomena,
+    baselineData
+});
 
 // Add near the top of the file, after imports
 Handlebars.registerHelper('eq', function(a, b) {
@@ -58,7 +67,7 @@ export class WeatherDialog extends Application {
                 console.error("DND-Weather | Weather system not found in getData");
                 return this._getErrorData("Weather system not initialized");
             }
-
+    
             // Add form data
             const formData = {
                 months: this.months, // Use this.months directly
@@ -90,7 +99,39 @@ export class WeatherDialog extends Application {
                 };
             }
 
-            // Prepare the data for the template
+            // Get precipitation details from weatherPhenomena table
+            const precipType = currentWeather.baseConditions.precipitation;
+            console.log("DND-Weather | Precipitation type:", precipType);
+            
+            let precipDetails = null;
+            if (precipType && precipType !== 'none') {
+                // Convert precipitation type to match table keys
+                const precipKey = precipType.toLowerCase().replace(/\s+/g, '-');
+                precipDetails = weatherPhenomena[precipKey];
+                console.log("DND-Weather | Looking up precipitation details for", precipKey, ":", precipDetails);
+            }
+
+            // Add safer data access
+            const precipitation = {
+                type: precipType || 'none',
+                amount: 'none',
+                duration: 'none',
+                movement: 'Normal',
+                vision: 'Normal',
+                notes: ''
+            };
+
+            if (precipDetails) {
+                precipitation.amount = precipDetails.precipitation?.amount || 'none';
+                precipitation.duration = precipDetails.precipitation?.duration || 'none';
+                precipitation.movement = precipDetails.precipitation?.movement || 'Normal';
+                precipitation.vision = precipDetails.precipitation?.vision || 'Normal';
+                precipitation.notes = precipDetails.notes || '';
+            }
+
+            console.log("DND-Weather | Final precipitation data:", precipitation);
+
+            // Return combined data
             return {
                 weather: {
                     temperature: currentWeather.baseConditions.temperature.high,
@@ -98,7 +139,15 @@ export class WeatherDialog extends Application {
                     windChill: currentWeather.baseConditions.temperature.windChill,
                     wind: currentWeather.baseConditions.wind.speed,
                     windDirection: currentWeather.baseConditions.wind.direction,
-                    precipitation: currentWeather.baseConditions.precipitation,
+                    /* precipitation: {
+                        type: precipType,
+                        amount: precipDetails?.precipitation?.amount || 'none',
+                        duration: precipDetails?.precipitation?.duration || 'none',
+                        movement: precipDetails?.precipitation?.movement || 'Normal',
+                        vision: precipDetails?.precipitation?.vision || 'Normal',
+                        notes: precipDetails?.notes || ''
+                    }, */
+                    precipitation,
                     moonPhase: currentWeather.moonPhase,
                     conditions: currentWeather.baseConditions.sky
                 },

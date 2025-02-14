@@ -80,14 +80,61 @@
       </div>
 
       {{!-- Precipitation Section --}}
+      {{!-- Replace the precipitation section (around line 40) --}}
       <div class="weather-row">
-        <div class="weather-icon">
-          <i class="fas fa-cloud-rain"></i>
-        </div>
-        <div class="weather-data">
-          <h3>Precipitation</h3>
-          <p>{{weather.precipitation}}</p>
-        </div>
+          <div class="weather-icon">
+              <i class="fas fa-cloud-rain"></i>
+          </div>
+          <div class="weather-data">
+              <h3>Precipitation</h3>
+              {{#if (eq weather.precipitation.type 'none')}}
+                  <p>None</p>
+              {{else}}
+                  <p class="precip-type">Type: {{weather.precipitation.type}}</p>
+                  
+                  {{#if weather.precipitation.amount}}
+                      <p class="precip-amount">Amount: {{weather.precipitation.amount}}</p>
+                  {{/if}}
+                  
+                  {{#if weather.precipitation.duration}}
+                      <p class="precip-duration">Duration: {{weather.precipitation.duration}}</p>
+                  {{/if}}
+                  
+                  {{#if weather.precipitation.movement}}
+                      <div class="precip-movement">
+                          <p>Movement Effects:</p>
+                          {{#if (isObject weather.precipitation.movement)}}
+                              <ul>
+                                  {{#if weather.precipitation.movement.foot}}
+                                      <li>On foot: {{weather.precipitation.movement.foot}}</li>
+                                  {{/if}}
+                                  {{#if weather.precipitation.movement.horse}}
+                                      <li>Mounted: {{weather.precipitation.movement.horse}}</li>
+                                  {{/if}}
+                                  {{#if weather.precipitation.movement.cart}}
+                                      <li>Carts/Wagons: {{weather.precipitation.movement.cart}}</li>
+                                  {{/if}}
+                              </ul>
+                          {{else}}
+                              <p>{{weather.precipitation.movement}}</p>
+                          {{/if}}
+                      </div>
+                  {{/if}}
+                  
+                  {{#if weather.precipitation.vision}}
+                      <div class="precip-vision">
+                          <p>Visibility: {{weather.precipitation.vision}}</p>
+                      </div>
+                  {{/if}}
+                  
+                  {{#if weather.precipitation.notes}}
+                      <div class="precip-notes">
+                          <p class="notes-header">Notes:</p>
+                          <p>{{weather.precipitation.notes}}</p>
+                      </div>
+                  {{/if}}
+              {{/if}}
+          </div>
       </div>
 
       {{!-- Moon Phase Section --}}

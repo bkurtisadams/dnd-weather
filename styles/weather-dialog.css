@@ -55,3 +55,33 @@
 .weather-dialog input[type="number"] {
     text-align: right;
 }
+
+/* Add at the end of the file */
+.weather-dialog .weather-data .precip-notes {
+    margin-top: 10px;
+    padding: 5px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+}
+
+.weather-dialog .weather-data .notes-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.weather-dialog .weather-data ul {
+    list-style: none;
+    margin: 0;
+    padding-left: 10px;
+}
+
+.weather-dialog .weather-data .precip-movement,
+.weather-dialog .weather-data .precip-vision {
+    margin-top: 5px;
+}
+
+.weather-dialog .weather-data .precip-type,
+.weather-dialog .weather-data .precip-amount,
+.weather-dialog .weather-data .precip-duration {
+    margin-bottom: 5px;
+}
