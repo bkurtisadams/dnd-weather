@@ -85,3 +85,62 @@
 .weather-dialog .weather-data .precip-duration {
     margin-bottom: 5px;
 }
+
+/* Add these styles */
+.weather-dialog .precip-details {
+    margin-top: 10px;
+}
+
+.weather-dialog .precip-details h4 {
+    color: #4a5568;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+}
+
+.weather-dialog .precip-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.weather-dialog .detail-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.weather-dialog .detail-item .label {
+    font-weight: bold;
+    color: #4a5568;
+    font-size: 0.9em;
+}
+
+.weather-dialog .effects-section {
+    border-top: 1px solid #e2e8f0;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.weather-dialog .effect-group {
+    margin-bottom: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.weather-dialog .effect-label {
+    font-weight: bold;
+    color: #4a5568;
+    min-width: 120px;
+}
+
+.weather-dialog .precip-notes {
+    margin-top: 12px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.weather-dialog .precip-notes p {
+    margin: 0;
+    font-style: italic;
+}

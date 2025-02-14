@@ -90,49 +90,90 @@
               {{#if (eq weather.precipitation.type 'none')}}
                   <p>None</p>
               {{else}}
-                  <p class="precip-type">Type: {{weather.precipitation.type}}</p>
-                  
-                  {{#if weather.precipitation.amount}}
-                      <p class="precip-amount">Amount: {{weather.precipitation.amount}}</p>
-                  {{/if}}
-                  
-                  {{#if weather.precipitation.duration}}
-                      <p class="precip-duration">Duration: {{weather.precipitation.duration}}</p>
-                  {{/if}}
-                  
-                  {{#if weather.precipitation.movement}}
-                      <div class="precip-movement">
-                          <p>Movement Effects:</p>
-                          {{#if (isObject weather.precipitation.movement)}}
-                              <ul>
-                                  {{#if weather.precipitation.movement.foot}}
-                                      <li>On foot: {{weather.precipitation.movement.foot}}</li>
-                                  {{/if}}
-                                  {{#if weather.precipitation.movement.horse}}
-                                      <li>Mounted: {{weather.precipitation.movement.horse}}</li>
-                                  {{/if}}
-                                  {{#if weather.precipitation.movement.cart}}
-                                      <li>Carts/Wagons: {{weather.precipitation.movement.cart}}</li>
-                                  {{/if}}
-                              </ul>
-                          {{else}}
-                              <p>{{weather.precipitation.movement}}</p>
+                  <div class="precip-details">
+                      <h4>{{weather.precipitation.type}}</h4>
+                      
+                      <div class="precip-grid">
+                          {{#if weather.precipitation.amount}}
+                              <div class="detail-item">
+                                  <span class="label">Amount:</span>
+                                  <span class="value">{{weather.precipitation.amount}}</span>
+                              </div>
+                          {{/if}}
+                          
+                          {{#if weather.precipitation.duration}}
+                              <div class="detail-item">
+                                  <span class="label">Duration:</span>
+                                  <span class="value">{{weather.precipitation.duration}}</span>
+                              </div>
                           {{/if}}
                       </div>
-                  {{/if}}
-                  
-                  {{#if weather.precipitation.vision}}
-                      <div class="precip-vision">
-                          <p>Visibility: {{weather.precipitation.vision}}</p>
+
+                      <div class="effects-section">
+                          <h4>Effects</h4>
+                          
+                          {{!-- Movement Effects --}}
+                          <div class="effect-group">
+                              <span class="effect-label">Movement:</span>
+                              {{#if (isObject weather.precipitation.movement)}}
+                                  <ul>
+                                      {{#if weather.precipitation.movement.foot}}
+                                          <li>On foot: {{weather.precipitation.movement.foot}}</li>
+                                      {{/if}}
+                                      {{#if weather.precipitation.movement.horse}}
+                                          <li>Mounted: {{weather.precipitation.movement.horse}}</li>
+                                      {{/if}}
+                                      {{#if weather.precipitation.movement.cart}}
+                                          <li>Carts/Wagons: {{weather.precipitation.movement.cart}}</li>
+                                      {{/if}}
+                                  </ul>
+                              {{else}}
+                                  <span>{{weather.precipitation.movement}}</span>
+                              {{/if}}
+                          </div>
+
+                          {{!-- Vision Effects --}}
+                          <div class="effect-group">
+                              <span class="effect-label">Visibility:</span>
+                              <span>{{weather.precipitation.vision}}</span>
+                          </div>
+
+                          {{#if weather.precipitation.infraUltra}}
+                              <div class="effect-group">
+                                  <span class="effect-label">Infra/Ultra Vision:</span>
+                                  <span>{{weather.precipitation.infraUltra}}</span>
+                              </div>
+                          {{/if}}
+
+                          {{#if weather.precipitation.tracking}}
+                              <div class="effect-group">
+                                  <span class="effect-label">Tracking:</span>
+                                  <span>{{weather.precipitation.tracking}}</span>
+                              </div>
+                          {{/if}}
+
+                          {{#if weather.precipitation.chanceLost}}
+                              <div class="effect-group">
+                                  <span class="effect-label">Chance of Getting Lost:</span>
+                                  <span>{{weather.precipitation.chanceLost}}</span>
+                              </div>
+                          {{/if}}
+
+                          {{#if weather.precipitation.windSpeed}}
+                              <div class="effect-group">
+                                  <span class="effect-label">Wind Speed:</span>
+                                  <span>{{weather.precipitation.windSpeed}}</span>
+                              </div>
+                          {{/if}}
                       </div>
-                  {{/if}}
-                  
-                  {{#if weather.precipitation.notes}}
-                      <div class="precip-notes">
-                          <p class="notes-header">Notes:</p>
-                          <p>{{weather.precipitation.notes}}</p>
-                      </div>
-                  {{/if}}
+
+                      {{#if weather.precipitation.notes}}
+                          <div class="precip-notes">
+                              <h4>Notes</h4>
+                              <p>{{weather.precipitation.notes}}</p>
+                          </div>
+                      {{/if}}
+                  </div>
               {{/if}}
           </div>
       </div>

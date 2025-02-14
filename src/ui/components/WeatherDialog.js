@@ -121,15 +121,20 @@ export class WeatherDialog extends Application {
                 notes: ''
             };
 
+            // Modify the precipitation object creation in getData()
             if (precipDetails) {
                 precipitation.amount = precipDetails.precipitation?.amount || 'none';
                 precipitation.duration = precipDetails.precipitation?.duration || 'none';
                 precipitation.movement = precipDetails.precipitation?.movement || 'Normal';
                 precipitation.vision = precipDetails.precipitation?.vision || 'Normal';
+                precipitation.infraUltra = precipDetails.precipitation?.infraUltra || 'Normal';
+                precipitation.tracking = precipDetails.precipitation?.tracking || 'Normal';
+                precipitation.chanceLost = precipDetails.precipitation?.chanceLost || 'Normal';
+                precipitation.windSpeed = precipDetails.precipitation?.windSpeed || 'Normal';
                 precipitation.notes = precipDetails.notes || '';
+                
+                console.log("DND-Weather | Full precipitation details:", precipitation);
             }
-
-            console.log("DND-Weather | Final precipitation data:", precipitation);
 
             // Return combined data
             return {
