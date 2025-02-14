@@ -76,7 +76,7 @@ export class GreyhawkWeatherSystem {
         return season;
     }
 
-    async generateWeather(days = 1) {
+    /* async generateWeather(days = 1) {
         console.log("DND-Weather | Generating weather for", days, "days");
         const weatherData = [];
         const currentDate = new Date(); // TODO: Use calendar integration
@@ -92,7 +92,33 @@ export class GreyhawkWeatherSystem {
         }
 
         return weatherData;
-    }
+    } */
+
+        // /weather-system.js - generateWeather method
+        async generateWeather(days = 1) {
+            console.log("DND-Weather | Generating weather for", days, "days");
+            try {
+                const weatherData = [];
+                const currentDate = new Date(); // TODO: Use calendar integration
+                
+                for (let i = 0; i < days; i++) {
+                    const weather = await this.generateDailyWeather(currentDate);
+                    weatherData.push(weather);
+                }
+                
+                // Validate weather data before returning
+                if (weatherData.length > 0) {
+                    console.log("DND-Weather | Generated weather data:", weatherData[0]);
+                } else {
+                    console.warn("DND-Weather | No weather data generated");
+                }
+                
+                return weatherData;
+            } catch (error) {
+                console.error("DND-Weather | Error generating weather:", error);
+                throw error;
+            }
+        }
 
     async generateDailyWeather(date) {
         try {
@@ -189,12 +215,24 @@ export class GreyhawkWeatherSystem {
                         extremeType: tempExtreme.type
                     },
                     sky: skyConditions,
-                    precipitation: precipitation.type,
+                    precipitation: {
+                        type: precipitation.type,
+                        amount: precipitation.amount,
+                        duration: precipitation.duration,
+                        details: {
+                            movement: precipitation.movement,
+                            visibility: precipitation.vision,
+                            infraUltra: precipitation.infraUltra,
+                            tracking: precipitation.tracking,
+                            chanceLost: precipitation.chanceLost,
+                            windSpeed: precipitation.windSpeed,
+                            notes: precipitation.notes
+                        }
+                    },
                     wind: {
                         speed: wind.speed,
                         direction: wind.direction
                     },
-                    //moonPhase: await this._determineMoonPhase(date)
                     moonPhase: {
                         luna: moonPhase.luna,
                         celene: moonPhase.celene
@@ -203,11 +241,10 @@ export class GreyhawkWeatherSystem {
                 effects: {
                     terrain: terrainEffect?.effects || [],
                     temperature: this._getTemperatureEffects(highTemp, lowTemp),
-                    precipitation: precipitation.effects,
+                    // Don't duplicate precipitation effects here
                     wind: wind.effects,
                     special: precipitation.specialEvent ? [precipitation.specialEvent] : []
                 },
-                duration: precipitation.duration,
                 terrain: this.settings.terrain,
                 elevation: this.settings.elevation,
                 timestamp: new Date().toLocaleString()
@@ -419,8 +456,15 @@ _getPrecipitationEffects(precipData) {
     const effects = [];
     
     // Add movement effects
-    if (precipData.precipitation.movement && precipData.precipitation.movement !== 'Normal') {
-        effects.push(`Movement: ${precipData.precipitation.movement}`);
+    if (precipData.precipitation.movement) {
+        if (typeof precipData.precipitation.movement === 'object') {
+            const movementStr = Object.entries(precipData.precipitation.movement)
+                .map(([type, value]) => `${type}: ${value}`)
+                .join(', ');
+            effects.push(`Movement: ${movementStr}`);
+        } else if (precipData.precipitation.movement !== 'Normal') {
+            effects.push(`Movement: ${precipData.precipitation.movement}`);
+        }
     }
     
     // Add visibility effects

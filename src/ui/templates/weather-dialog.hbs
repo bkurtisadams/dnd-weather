@@ -105,7 +105,6 @@
       </div>
 
       {{!-- Precipitation Section --}}
-      {{!-- Replace the precipitation section (around line 40) --}}
       <div class="weather-row">
           <div class="weather-icon">
               <i class="fas fa-cloud-rain"></i>
@@ -190,6 +189,12 @@
                                   <span>{{weather.precipitation.windSpeed}}</span>
                               </div>
                           {{/if}}
+                          {{#if weather.precipitation.rainbowChance}}
+                              <div class="effect-group">
+                                  <span class="effect-label">Rainbow Chance:</span>
+                                  <span>{{weather.precipitation.rainbowChance}}%</span>
+                              </div>
+                          {{/if}}
                       </div>
 
                       {{#if weather.precipitation.notes}}
@@ -206,22 +211,7 @@
       {{!-- Special Weather Section --}}
       <div class="weather-section">
           <h3 class="weather-header">Effects</h3>
-          {{#if effects.precipitation.length}}
-          <div class="weather-value">
-              <label>Precipitation Effects:</label>
-              {{#each effects.precipitation}}
-                  <div>{{this}}</div>
-              {{/each}}
-          </div>
-          {{/if}}
-
-          {{#if weather.precipitation.rainbowChance}}
-              <div class="effect-group">
-                  <span class="effect-label">Rainbow Chance:</span>
-                  <span>{{weather.precipitation.rainbowChance}}%</span>
-              </div>
-          {{/if}}
-
+          
           {{#if effects.special.length}}
           <div class="weather-value">
               <label>Special Effects:</label>
@@ -238,7 +228,7 @@
           </div>
           {{/if}}
       </div>
-
+      
       {{!-- src/ui/templates/weather-dialog.hbs --}}
       {{!-- Moon Phase Section --}}
       <div class="weather-row">

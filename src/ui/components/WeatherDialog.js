@@ -62,6 +62,11 @@ export class WeatherDialog extends Application {
 
     getData() {
         console.log("WeatherDialog getData called");
+        console.log("DND-Weather | getData called with state:", {
+            currentWeather: this.state.currentWeather,
+            weatherSystem: globalThis.dndWeather?.weatherSystem
+        });
+
         try {
             const weatherSystem = globalThis.dndWeather?.weatherSystem;
             if (!weatherSystem) {
@@ -108,36 +113,50 @@ export class WeatherDialog extends Application {
                 vision: 'Normal',
                 notes: ''
             };
-    
-            // Get precipitation details from weatherPhenomena table
-            const precipType = currentWeather.baseConditions.precipitation;
-            console.log("DND-Weather | Precipitation type:", precipType);
-            
-            if (precipType && precipType !== 'none') {
-                // Convert precipitation type to match table keys
-                const precipKey = precipType.toLowerCase().replace(/\s+/g, '-');
-                const precipDetails = weatherPhenomena[precipKey];
-                console.log("DND-Weather | Looking up precipitation details for", precipKey, ":", precipDetails);
-    
-                if (precipDetails) {
-                    precipitation = {
-                        type: precipType,
-                        amount: precipDetails.precipitation?.amount || 'none',
-                        duration: precipDetails.precipitation?.duration || 'none',
-                        movement: precipDetails.precipitation?.movement || 'Normal',
-                        vision: precipDetails.precipitation?.vision || 'Normal',
-                        infraUltra: precipDetails.precipitation?.infraUltra || 'Normal',
-                        tracking: precipDetails.precipitation?.tracking || 'Normal',
-                        chanceLost: precipDetails.precipitation?.chanceLost || 'Normal',
-                        windSpeed: precipDetails.precipitation?.windSpeed || 'Normal',
-                        notes: precipDetails.notes || '',
-                        rainbowChance: precipDetails.chanceRainbow || 0,
-                        continues: currentWeather.baseConditions.continues || false,
-                        continuingDuration: currentWeather.baseConditions.duration || 0
-                    };
+
+            try {
+                // Get precipitation details from weatherPhenomena table
+                const precipData = currentWeather.baseConditions.precipitation;
+                console.log("DND-Weather | Base precipitation data:", precipData);
+                
+                if (precipData && precipData !== 'none') {
+                    // Handle both string and object precipitation types
+                    const precipType = typeof precipData === 'string' ? precipData : precipData.type;
+                    console.log("DND-Weather | Processed precipitation type:", precipType);
                     
-                    console.log("DND-Weather | Full precipitation details:", precipitation);
+                    if (precipType && precipType !== 'none') {
+                        const precipKey = precipType.toLowerCase().replace(/\s+/g, '-');
+                        console.log("DND-Weather | Generated precipitation key:", precipKey);
+                        
+                        const precipDetails = weatherPhenomena[precipKey];
+                        console.log("DND-Weather | Looking up precipitation details for", precipKey, ":", precipDetails);
+
+                        if (precipDetails) {
+                            precipitation = {
+                                type: precipType,
+                                amount: precipDetails.precipitation?.amount || 'none',
+                                duration: precipDetails.precipitation?.duration || 'none',
+                                movement: precipDetails.precipitation?.movement || 'Normal',
+                                vision: precipDetails.precipitation?.vision || 'Normal',
+                                infraUltra: precipDetails.precipitation?.infraUltra || 'Normal',
+                                tracking: precipDetails.precipitation?.tracking || 'Normal',
+                                chanceLost: precipDetails.precipitation?.chanceLost || 'Normal',
+                                windSpeed: precipDetails.precipitation?.windSpeed || 'Normal',
+                                notes: precipDetails.notes || '',
+                                rainbowChance: precipDetails.chanceRainbow || 0,
+                                continues: currentWeather.baseConditions.continues || false,
+                                continuingDuration: currentWeather.baseConditions.duration || 0
+                            };
+                            
+                            console.log("DND-Weather | Full precipitation details:", precipitation);
+                        } else {
+                            console.warn("DND-Weather | No precipitation details found for key:", precipKey);
+                        }
+                    }
                 }
+            } catch (error) {
+                console.error("DND-Weather | Error processing precipitation data:", error);
+                // Continue with default precipitation values
             }
     
             // Return combined data
