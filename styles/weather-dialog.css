@@ -144,6 +144,27 @@
     margin: 0;
     font-style: italic;
 }
+/* sky conditions */
+.weather-group {
+    display: flex;
+    align-items: center;
+    margin: 5px 0;
+}
+
+.weather-label {
+    flex: 0 0 120px;
+    font-weight: bold;
+}
+
+.weather-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.weather-value i {
+    color: #666;
+}
 /* moon details */
 .moon-details {
     display: flex;

@@ -61,7 +61,19 @@
             </label>
         </div>
     </div>
-
+  
+    {{!-- Sky conditions --}}
+    <div class="weather-group">
+        <div class="weather-label">Sky Conditions:</div>
+        <div class="weather-value">
+            {{weather.conditions}}
+            <i class="fas {{#if (eq weather.conditions 'Clear')}}fa-sun{{/if}}
+                        {{#if (eq weather.conditions 'Partly Cloudy')}}fa-cloud-sun{{/if}}
+                        {{#if (eq weather.conditions 'Cloudy')}}fa-cloud{{/if}}">
+            </i>
+        </div>
+    </div>
+{{!-- Weather Display Section --}}
     <div class="weather-current {{#if loading}}loading{{/if}}">
       {{!-- Temperature Section --}}
       <div class="weather-row">

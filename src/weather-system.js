@@ -7,6 +7,7 @@ import { moonPhases, lycanthropeActivity } from './constants/moon-phases.js';
 import { WeatherDialog } from './ui/components/WeatherDialog.js';
 import { rollDice, evalDice } from './utils/dice.js';
 import { registerSettings } from './settings.js';
+import { MILES_PER_LATITUDE } from './utils/latitude.js';
 
 
 export class GreyhawkWeatherSystem {
