@@ -583,6 +583,7 @@ _determineLycanthropeActivity(lunaPhase, celenePhase) {
 
 // Add to GreyhawkWeatherSystem class
 
+// weather-system.js around line 300
 async updateWeather() {
     console.log("DND-Weather | Updating current weather");
     
@@ -608,6 +609,18 @@ async updateWeather() {
                 duration: continuationResult.duration
             };
             return this.currentWeather;
+        } else if (continuationResult.rainbow) {
+            // Log and handle rainbow event
+            console.log("DND-Weather | Rainbow appears:", continuationResult.rainbow);
+            // Add rainbow to effects
+            this.currentWeather.effects.special = [
+                ...this.currentWeather.effects.special,
+                `Rainbow appears: ${continuationResult.rainbow.type}${
+                    continuationResult.rainbow.isOmen ? ' (possible omen)' : ''
+                }${
+                    continuationResult.rainbow.description ? ` - ${continuationResult.rainbow.description}` : ''
+                }`
+            ];
         }
     }
 
@@ -626,8 +639,15 @@ async _checkPrecipitationContinuation() {
     // Roll for continuation
     const continuationRoll = await rollDice(1, 100)[0];
     if (continuationRoll > precipData.chanceContinuing) {
-        return { continues: false };
-    }
+       // Add rainbow check here since precipitation is ending
+       const precipHandler = new PrecipitationHandler(this.temperatureCalculator);
+       const rainbow = precipHandler.checkForRainbow(precipData);
+       
+       return { 
+           continues: false,
+           rainbow: rainbow  // Add rainbow data to return object
+       };
+   }
 
     // Roll for precipitation change
     const changeRoll = await rollDice(1, 10)[0];
