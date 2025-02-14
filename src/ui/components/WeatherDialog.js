@@ -71,7 +71,7 @@ export class WeatherDialog extends Application {
     
             // Add form data
             const formData = {
-                months: this.months, // Use this.months directly
+                months: this.months,
                 selectedMonth: this.state.selectedMonth,
                 selectedDay: this.state.selectedDay,
                 latitude: this.state.latitude,
@@ -87,63 +87,59 @@ export class WeatherDialog extends Application {
                     'ocean'
                 ]
             };
-
-            console.log("DND-Weather | Form data:", formData); // debug log
-
+    
             // Get current weather data
             const currentWeather = this.state.currentWeather || weatherSystem.getCurrentWeather();
             console.log("DND-Weather | Current weather data:", currentWeather);
-
+    
             if (!currentWeather || !currentWeather.baseConditions) {
                 return {
                     ...this._getErrorData("No weather data available"),
                     ...formData
                 };
             }
-
-            // Add explicit logging for moon phases
-            console.log("DND-Weather | Moon phases:", {
-                luna: currentWeather.baseConditions.moonPhase?.luna,
-                celene: currentWeather.baseConditions.moonPhase?.celene
-            });
-
-            // Get precipitation details from weatherPhenomena table
-            const precipType = currentWeather.baseConditions.precipitation;
-            console.log("DND-Weather | Precipitation type:", precipType);
-            
-            let precipDetails = null;
-            if (precipType && precipType !== 'none') {
-                // Convert precipitation type to match table keys
-                const precipKey = precipType.toLowerCase().replace(/\s+/g, '-');
-                precipDetails = weatherPhenomena[precipKey];
-                console.log("DND-Weather | Looking up precipitation details for", precipKey, ":", precipDetails);
-            }
-
-            // Add safer data access
-            const precipitation = {
-                type: precipType || 'none',
+    
+            // Initialize precipitation object first
+            let precipitation = {
+                type: 'none',
                 amount: 'none',
                 duration: 'none',
                 movement: 'Normal',
                 vision: 'Normal',
                 notes: ''
             };
-
-            // Modify the precipitation object creation in getData()
-            if (precipDetails) {
-                precipitation.amount = precipDetails.precipitation?.amount || 'none';
-                precipitation.duration = precipDetails.precipitation?.duration || 'none';
-                precipitation.movement = precipDetails.precipitation?.movement || 'Normal';
-                precipitation.vision = precipDetails.precipitation?.vision || 'Normal';
-                precipitation.infraUltra = precipDetails.precipitation?.infraUltra || 'Normal';
-                precipitation.tracking = precipDetails.precipitation?.tracking || 'Normal';
-                precipitation.chanceLost = precipDetails.precipitation?.chanceLost || 'Normal';
-                precipitation.windSpeed = precipDetails.precipitation?.windSpeed || 'Normal';
-                precipitation.notes = precipDetails.notes || '';
-                
-                console.log("DND-Weather | Full precipitation details:", precipitation);
+    
+            // Get precipitation details from weatherPhenomena table
+            const precipType = currentWeather.baseConditions.precipitation;
+            console.log("DND-Weather | Precipitation type:", precipType);
+            
+            if (precipType && precipType !== 'none') {
+                // Convert precipitation type to match table keys
+                const precipKey = precipType.toLowerCase().replace(/\s+/g, '-');
+                const precipDetails = weatherPhenomena[precipKey];
+                console.log("DND-Weather | Looking up precipitation details for", precipKey, ":", precipDetails);
+    
+                if (precipDetails) {
+                    precipitation = {
+                        type: precipType,
+                        amount: precipDetails.precipitation?.amount || 'none',
+                        duration: precipDetails.precipitation?.duration || 'none',
+                        movement: precipDetails.precipitation?.movement || 'Normal',
+                        vision: precipDetails.precipitation?.vision || 'Normal',
+                        infraUltra: precipDetails.precipitation?.infraUltra || 'Normal',
+                        tracking: precipDetails.precipitation?.tracking || 'Normal',
+                        chanceLost: precipDetails.precipitation?.chanceLost || 'Normal',
+                        windSpeed: precipDetails.precipitation?.windSpeed || 'Normal',
+                        notes: precipDetails.notes || '',
+                        rainbowChance: precipDetails.chanceRainbow || 0,
+                        continues: currentWeather.baseConditions.continues || false,
+                        continuingDuration: currentWeather.baseConditions.duration || 0
+                    };
+                    
+                    console.log("DND-Weather | Full precipitation details:", precipitation);
+                }
             }
-
+    
             // Return combined data
             return {
                 weather: {
@@ -153,7 +149,6 @@ export class WeatherDialog extends Application {
                     wind: currentWeather.baseConditions.wind.speed,
                     windDirection: currentWeather.baseConditions.wind.direction,
                     precipitation: precipitation,
-                    // Add this if it's not already there
                     moonPhase: {
                         luna: currentWeather.baseConditions.moonPhase?.luna || 'Unknown',
                         celene: currentWeather.baseConditions.moonPhase?.celene || 'Unknown'

@@ -215,6 +215,13 @@
           </div>
           {{/if}}
 
+          {{#if weather.precipitation.rainbowChance}}
+              <div class="effect-group">
+                  <span class="effect-label">Rainbow Chance:</span>
+                  <span>{{weather.precipitation.rainbowChance}}%</span>
+              </div>
+          {{/if}}
+
           {{#if effects.special.length}}
           <div class="weather-value">
               <label>Special Effects:</label>

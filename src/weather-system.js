@@ -593,24 +593,27 @@ async updateWeather() {
 
     // Check if current precipitation should continue
     if (this.currentWeather.baseConditions.precipitation !== 'none') {
+        console.log("DND-Weather | Checking precipitation continuation");
         const continuationResult = await this._checkPrecipitationContinuation();
+        
         if (continuationResult.continues) {
+            console.log("DND-Weather | Precipitation continues:", continuationResult);
             // Update current weather with new precipitation data
             this.currentWeather = {
                 ...this.currentWeather,
                 baseConditions: {
                     ...this.currentWeather.baseConditions,
-                    precipitation: continuationResult.type
+                    precipitation: continuationResult.type,
+                    continues: true,
+                    duration: continuationResult.duration
                 },
                 effects: {
                     ...this.currentWeather.effects,
                     precipitation: continuationResult.effects
-                },
-                duration: continuationResult.duration
+                }
             };
             return this.currentWeather;
         } else if (continuationResult.rainbow) {
-            // Log and handle rainbow event
             console.log("DND-Weather | Rainbow appears:", continuationResult.rainbow);
             // Add rainbow to effects
             this.currentWeather.effects.special = [
