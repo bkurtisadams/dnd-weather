@@ -1,4 +1,18 @@
-{{!-- Weather dialog template --}} 
+{{!-- Weather dialog template --}}
+<form class="dnd-weather-dialog compact">
+  {{!-- Quick Settings Header --}}
+  <div class="weather-quick-settings">
+    <div class="setting-group">
+      <select name="terrain" {{#if loading}}disabled{{/if}}>
+          {{#each terrainTypes}}
+              <option value="{{this}}" {{#if (eq this ../terrain)}}selected{{/if}}>{{this}}</option>
+          {{/each}}
+      </select>
+      <input type="number" name="elevation" value="{{elevation}}" 
+             title="Elevation (ft)" placeholder="Elevation" 
+             class="small-input" {{#if loading}}disabled{{/if}}>
+    </div>
+  </div>
 <form class="dnd-weather-dialog">
   <div class="dialog-content">
     {{#if loading}}
@@ -228,7 +242,7 @@
           </div>
           {{/if}}
       </div>
-      
+
       {{!-- src/ui/templates/weather-dialog.hbs --}}
       {{!-- Moon Phase Section --}}
       <div class="weather-row">

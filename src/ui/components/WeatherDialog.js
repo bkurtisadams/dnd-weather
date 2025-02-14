@@ -19,6 +19,7 @@ Handlebars.registerHelper('eq', function(a, b) {
 export class WeatherDialog extends Application {
     constructor(options = {}) {
         super(options);
+        this.weatherTimer = null;
         console.log("WeatherDialog constructor called");
 
         // Initialize months from baselineData
@@ -48,15 +49,109 @@ export class WeatherDialog extends Application {
         this._onOpenSettings = this._onOpenSettings.bind(this);
     }
 
+    // Add timer methods
+    _startWeatherTimer(duration) {
+        if (this.weatherTimer) clearInterval(this.weatherTimer);
+        
+        const endTime = Date.now() + (duration * 3600 * 1000); // Convert hours to ms
+        
+        this.weatherTimer = setInterval(() => {
+            const remaining = endTime - Date.now();
+            if (remaining <= 0) {
+                this._handleWeatherExpiration();
+                return;
+            }
+            
+            // Update timer display
+            const hours = Math.floor(remaining / (3600 * 1000));
+            const minutes = Math.floor((remaining % (3600 * 1000)) / (60 * 1000));
+            this.element.find('.weather-timer').text(`${hours}h ${minutes}m remaining`);
+        }, 60000); // Update every minute
+    }
+
+    _handleWeatherExpiration() {
+        if (this.weatherTimer) {
+            clearInterval(this.weatherTimer);
+            this.weatherTimer = null;
+        }
+        
+        // Check for weather continuation
+        if (game.user.isGM) {
+            this._onUpdateWeather();
+        }
+    }
+
+    async _checkWeatherContinuation() {
+        console.log("DND-Weather | Checking weather continuation");
+        const currentWeather = this.state.currentWeather;
+        
+        if (!currentWeather?.baseConditions?.precipitation) {
+            console.log("DND-Weather | No precipitation to continue");
+            return;
+        }
+        
+        // Get continuation chance from precipitation table
+        const precipType = currentWeather.baseConditions.precipitation.type;
+        const precipData = weatherPhenomena[precipType?.toLowerCase()];
+        
+        if (!precipData) {
+            console.warn("DND-Weather | No precipitation data found for type:", precipType);
+            return;
+        }
+        
+        const continuationChance = precipData.chanceContinuing || 0;
+        console.log("DND-Weather | Continuation chance:", continuationChance);
+        
+        // Roll for continuation
+        const roll = await rollDice(1, 100);
+        if (roll <= continuationChance) {
+            ui.notifications.info("Current weather continues...");
+            // Generate new duration
+            const duration = await this._calculateNewDuration(precipData);
+            this._startWeatherTimer(duration);
+        } else {
+            ui.notifications.info("Weather is changing...");
+            this._onGenerateWeather();
+        }
+    }
+
+    _notifyWeatherChanges(newWeather, oldWeather) {
+        console.log("DND-Weather | Checking for notable weather changes");
+        
+        if (!oldWeather) return;
+        
+        // Check precipitation changes
+        if (newWeather.precipitation?.type !== oldWeather.precipitation?.type) {
+            ui.notifications.info(`Weather changing to: ${newWeather.precipitation.type}`);
+        }
+        
+        // Check for rainbow formation
+        if (newWeather.precipitation?.rainbowChance > 0) {
+            const roll = Math.random() * 100;
+            if (roll <= newWeather.precipitation.rainbowChance) {
+                ui.notifications.info("A rainbow appears!");
+            }
+        }
+        
+        // Check for severe temperature changes
+        const tempDiff = Math.abs(newWeather.temperature - oldWeather.temperature);
+        if (tempDiff >= 15) {
+            ui.notifications.warn(`Temperature changing dramatically by ${tempDiff}°F!`);
+        }
+    }
+
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
             id: "weather-dialog",
             template: "modules/dnd-weather/src/ui/templates/weather-dialog.hbs",
-            width: 500,
+            width: 300,  // Reduced width for compact display
             height: 'auto',
-            title: "Weather System",
+            title: "Greyhawk Weather",
             resizable: true,
-            classes: ["dnd-weather", "weather-dialog"]
+            classes: ["dnd-weather", "weather-dialog"],
+            minimizable: true,
+            dragable: true,
+            position: { height: "auto" }  // Allow auto-height for docking
         });
     }
 
