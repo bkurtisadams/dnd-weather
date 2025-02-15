@@ -1,6 +1,7 @@
 // WeatherDialog.js
 import { baselineData } from '../../constants/baseline-data.js';
 import { weatherPhenomena } from '../../constants/precipitation-table.js';
+import { rollDice } from '../../utils/dice.js';
 
 Handlebars.registerHelper('isObject', function(value) {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
