@@ -236,14 +236,22 @@ export class WeatherDialog extends Application {
                         if (precipDetails) {
                             precipitation = {
                                 type: precipType,
-                                amount: precipData.amount ? `${precipData.amount} inches` : 'none',
-                                duration: precipData.duration ? `${precipData.duration} hours` : 'none',
-                                movement: precipData.details?.movement || 'Normal',
-                                vision: precipData.details?.vision || 'Normal',
-                                infraUltra: precipData.details?.infraUltra || 'Normal',
-                                tracking: precipData.details?.tracking || 'Normal',
-                                chanceLost: precipData.details?.chanceLost || 'Normal',
-                                windSpeed: precipData.details?.windSpeed || 'Normal',
+                                amount: precipData.amount || precipDetails.precipitation.amount,
+                                duration: precipData.duration || precipDetails.precipitation.duration,
+                                // Properly map movement based on structure
+                                movement: typeof precipDetails.precipitation.movement === 'object' 
+                                    ? precipDetails.precipitation.movement 
+                                    : precipDetails.precipitation.movement || 'Normal',
+                                // Properly map vision based on structure    
+                                vision: typeof precipDetails.precipitation.vision === 'object'
+                                    ? precipDetails.precipitation.vision.normal
+                                    : precipDetails.precipitation.vision || 'Normal',
+                                infraUltra: typeof precipDetails.precipitation.vision === 'object'
+                                    ? precipDetails.precipitation.vision.infraUltra
+                                    : precipDetails.precipitation.infraUltra || 'Normal',
+                                tracking: precipDetails.precipitation.tracking || 'Normal',
+                                chanceLost: precipDetails.precipitation.chanceLost || 'Normal',
+                                windSpeed: precipDetails.precipitation.windSpeed || 'Normal',
                                 notes: precipDetails.notes || '',
                                 rainbowChance: precipDetails.chanceRainbow || 0,
                                 continues: currentWeather.baseConditions.continues || false,

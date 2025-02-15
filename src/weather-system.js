@@ -219,15 +219,16 @@ export class GreyhawkWeatherSystem {
                         type: precipitation.type,
                         amount: precipitation.amount,
                         duration: precipitation.duration,
-                        details: {
-                            movement: precipitation.movement,
-                            visibility: precipitation.vision,
-                            infraUltra: precipitation.infraUltra,
-                            tracking: precipitation.tracking,
-                            chanceLost: precipitation.chanceLost,
-                            windSpeed: precipitation.windSpeed,
-                            notes: precipitation.notes
-                        }
+                        movement: precipitation.movement,
+                        vision: precipitation.vision,
+                        infraUltra: precipitation.infraUltra,
+                        tracking: precipitation.tracking,
+                        chanceLost: precipitation.chanceLost,
+                        windSpeed: precipitation.windSpeed,
+                        notes: precipitation.notes,
+                        chanceRainbow: precipitation.chanceRainbow,
+                        chanceContinuing: precipitation.chanceContinuing,
+                        effects: precipitation.effects
                     },
                     wind: {
                         speed: wind.speed,
@@ -236,12 +237,15 @@ export class GreyhawkWeatherSystem {
                     moonPhase: {
                         luna: moonPhase.luna,
                         celene: moonPhase.celene
+                    },
+                    daylight: {
+                        sunrise: monthData.sunrise,
+                        sunset: monthData.sunset
                     }
                 },
                 effects: {
                     terrain: terrainEffect?.effects || [],
                     temperature: this._getTemperatureEffects(highTemp, lowTemp),
-                    // Don't duplicate precipitation effects here
                     wind: wind.effects,
                     special: precipitation.specialEvent ? [precipitation.specialEvent] : []
                 },
@@ -288,7 +292,7 @@ export class GreyhawkWeatherSystem {
                 if (data.temperature.min && temperature < data.temperature.min) {
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
                 }
-
+    
                 // Calculate duration
                 const duration = await this._calculatePrecipitationDuration(data);
                 
@@ -301,24 +305,48 @@ export class GreyhawkWeatherSystem {
                         amount = await rollDice(parseInt(count), parseInt(sides))[0];
                     }
                 }
-
+    
+                // Handle complex movement/vision structures
+                const movement = typeof data.precipitation.movement === 'object' 
+                    ? data.precipitation.movement 
+                    : { all: data.precipitation.movement || 'Normal' };
+    
+                const vision = typeof data.precipitation.vision === 'object'
+                    ? data.precipitation.vision
+                    : { normal: data.precipitation.vision || 'Normal' };
+    
                 return {
                     type,
                     amount,
                     duration,
-                    details: {
-                        movement: data.precipitation.movement || 'Normal',
-                        vision: data.precipitation.vision || 'Normal',
-                        infraUltra: data.precipitation.infraUltra || 'Normal',
-                        tracking: data.precipitation.tracking || 'Normal',
-                        chanceLost: data.precipitation.chanceLost || 'Normal',
-                        windSpeed: data.precipitation.windSpeed || 'Normal'
-                    },
-                    effects: this._getPrecipitationEffects(data)
+                    movement,
+                    vision: vision.normal || 'Normal',
+                    infraUltra: vision.infraUltra || data.precipitation.infraUltra || 'Normal',
+                    tracking: data.precipitation.tracking || 'Normal',
+                    chanceLost: data.precipitation.chanceLost || 'Normal',
+                    windSpeed: data.precipitation.windSpeed || 'Normal',
+                    notes: data.notes || '',
+                    effects: this._getPrecipitationEffects(data),
+                    chanceRainbow: data.chanceRainbow || 0,
+                    chanceContinuing: data.chanceContinuing || 0
                 };
             }
         }
-        return { type: 'none', amount: null, duration: 0, details: {}, effects: [] };
+        return { 
+            type: 'none', 
+            amount: null, 
+            duration: 0, 
+            movement: 'Normal',
+            vision: 'Normal',
+            infraUltra: 'Normal',
+            tracking: 'Normal',
+            chanceLost: 'Normal',
+            windSpeed: 'Normal',
+            notes: '',
+            effects: [],
+            chanceRainbow: 0,
+            chanceContinuing: 0
+        };
     }
 
     getCurrentWeather() {
