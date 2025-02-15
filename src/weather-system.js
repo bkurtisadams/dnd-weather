@@ -276,27 +276,37 @@ export class GreyhawkWeatherSystem {
         return 'Cloudy';
     }
 
+    // weather-system.js, around line 316
     async _determinePrecipitation(roll, temperature) {
         // Find matching precipitation type from table
         for (const [type, data] of Object.entries(weatherPhenomena)) {
             if (roll >= data.diceRange[0] && roll <= data.diceRange[1]) {
                 // Check temperature requirements
                 if (data.temperature.max && temperature > data.temperature.max) {
-                    // Reroll if too warm
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
                 }
                 if (data.temperature.min && temperature < data.temperature.min) {
-                    // Reroll if too cold
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
                 }
 
                 // Calculate duration
                 const duration = await this._calculatePrecipitationDuration(data);
+                
+                // Roll for amount if present
+                let amount = null;
+                if (data.precipitation.amount) {
+                    const amountMatch = data.precipitation.amount.match(/(\d+)d(\d+)/);
+                    if (amountMatch) {
+                        const [_, count, sides] = amountMatch;
+                        amount = await rollDice(parseInt(count), parseInt(sides))[0];
+                    }
+                }
 
                 return {
                     type: type,
                     effects: this._getPrecipitationEffects(data),
                     duration,
+                    amount,
                     movement: data.precipitation.movement,
                     visibility: data.precipitation.vision,
                     tracking: data.precipitation.tracking,
@@ -304,7 +314,7 @@ export class GreyhawkWeatherSystem {
                 };
             }
         }
-        return { type: 'none', effects: [], duration: 0 };
+        return { type: 'none', effects: [], duration: 0, amount: 0 };
     }
 
     getCurrentWeather() {

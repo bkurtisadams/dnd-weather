@@ -229,16 +229,18 @@ export class WeatherDialog extends Application {
                         if (precipDetails) {
                             precipitation = {
                                 type: precipType,
-                                amount: precipDetails.precipitation?.amount || 'none',
-                                duration: precipDetails.precipitation?.duration || 'none',
-                                movement: precipDetails.precipitation?.movement || 'Normal',
-                                vision: precipDetails.precipitation?.vision || 'Normal',
-                                infraUltra: precipDetails.precipitation?.infraUltra || 'Normal',
-                                tracking: precipDetails.precipitation?.tracking || 'Normal',
-                                chanceLost: precipDetails.precipitation?.chanceLost || 'Normal',
-                                windSpeed: precipDetails.precipitation?.windSpeed || 'Normal',
-                                notes: precipDetails.notes || '',
-                                rainbowChance: precipDetails.chanceRainbow || 0,
+                                // Use the actual rolled values from precipData instead of the dice formulas
+                                amount: precipData.amount ? `${precipData.amount} inches` : 'none',
+                                duration: precipData.duration ? `${precipData.duration} hours` : 'none',
+                                // Only show non-normal movement effects
+                                movement: precipData.movement !== 'Normal' ? precipData.movement : 'Normal',
+                                vision: precipData.vision !== 'Normal' ? precipData.vision : 'Normal',
+                                infraUltra: precipData.infraUltra !== 'Normal' ? precipData.infraUltra : 'Normal',
+                                tracking: precipData.tracking !== 'Normal' ? precipData.tracking : 'Normal',
+                                chanceLost: precipData.chanceLost !== 'Normal' ? precipData.chanceLost : 'Normal',
+                                windSpeed: precipData.windSpeed !== 'Normal' ? precipData.windSpeed : 'Normal',
+                                notes: precipData.notes || '',
+                                rainbowChance: precipData.chanceRainbow || 0,
                                 continues: currentWeather.baseConditions.continues || false,
                                 continuingDuration: currentWeather.baseConditions.duration || 0
                             };
