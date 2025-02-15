@@ -144,7 +144,7 @@ export class WeatherDialog extends Application {
         return foundry.utils.mergeObject(super.defaultOptions, {
             id: "weather-dialog",
             template: "modules/dnd-weather/src/ui/templates/weather-dialog.hbs",
-            width: 300,  // Reduced width for compact display
+            width: 400,  // Reduced width for compact display
             height: 'auto',
             title: "Greyhawk Weather",
             resizable: true,

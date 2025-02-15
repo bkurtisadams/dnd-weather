@@ -1,68 +1,42 @@
 {{!-- Weather dialog template --}}
 <form class="dnd-weather-dialog">
   <div class="dialog-content">
-    {{#if loading}}
-      <div class="weather-loading">
-        <i class="fas fa-spinner fa-spin"></i> Loading...
-      </div>
-    {{/if}}
-
-    {{#if error}}
-      <div class="weather-error">
-        <i class="fas fa-exclamation-circle"></i>
-        <span>{{error}}</span>
-      </div>
-    {{/if}}
-
-    {{!-- Add before the weather display section, around line 12 --}}
-    <div class="weather-controls mb-2">
+    <div class="weather-controls">
         <div class="form-group">
-          <label>Month:
-              <select name="month" {{#if loading}}disabled{{/if}}>
-                  {{#each months}}
-                      <option value="{{this}}" {{#if (eq ../selectedMonth this)}}selected{{/if}}>
-                          {{this}}
-                      </option>
-                  {{/each}}
-              </select>
-          </label>
-      </div>
-
-        <div class="form-group">
-          <label>Day:
-              <input type="number" 
-                    name="day" 
-                    value="{{selectedDay}}" 
-                    min="1" 
-                    max="28" 
-                    {{#if loading}}disabled{{/if}}>
-          </label>
-      </div>
-        
-        <div class="form-group">
-            <label>Latitude:
-                <input type="number" name="latitude" value="{{latitude}}" min="0" max="90" {{#if loading}}disabled{{/if}}>
-            </label>
+            <label>Month:</label>
+            <select name="month" {{#if loading}}disabled{{/if}}>
+                {{#each months}}
+                    <option value="{{this}}" {{#if (eq ../selectedMonth this)}}selected{{/if}}>{{this}}</option>
+                {{/each}}
+            </select>
         </div>
-        
+
         <div class="form-group">
-            <label>Terrain:
-                <select name="terrain" {{#if loading}}disabled{{/if}}>
-                    {{#each terrainTypes}}
-                        <option value="{{this}}" {{#if (eq this ../terrain)}}selected{{/if}}>{{this}}</option>
-                    {{/each}}
-                </select>
-            </label>
+            <label>Day:</label>
+            <input type="number" name="day" value="{{selectedDay}}" min="1" max="28" {{#if loading}}disabled{{/if}}>
         </div>
-        
+
         <div class="form-group">
-            <label>Elevation (ft):
-                <input type="number" name="elevation" value="{{elevation}}" min="0" step="100" {{#if loading}}disabled{{/if}}>
-            </label>
+            <label>Latitude:</label>
+            <input type="number" name="latitude" value="{{latitude}}" min="0" max="90" {{#if loading}}disabled{{/if}}>
+        </div>
+
+        <div class="form-group">
+            <label>Terrain:</label>
+            <select name="terrain" {{#if loading}}disabled{{/if}}>
+                {{#each terrainTypes}}
+                    <option value="{{this}}" {{#if (eq this ../terrain)}}selected{{/if}}>{{this}}</option>
+                {{/each}}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Elevation (ft):</label>
+            <input type="number" name="elevation" value="{{elevation}}" min="0" step="100" {{#if loading}}disabled{{/if}}>
         </div>
     </div>
-  
-    {{!-- Sky Conditions section with matching style --}}
+
+    {{!-- Sky Conditions Section --}}
     <div class="flexcol">
         <h3 class="weather-header">Sky Conditions</h3>
         <div class="weather-value">
@@ -75,7 +49,7 @@
         </div>
     </div>
 
-{{!-- Weather Display Section --}}
+    {{!-- Weather Display Section --}}
     <div class="weather-current {{#if loading}}loading{{/if}}">
       {{!-- Temperature Section --}}
       <div class="weather-row">
@@ -229,7 +203,6 @@
           {{/if}}
       </div>
 
-      {{!-- src/ui/templates/weather-dialog.hbs --}}
       {{!-- Moon Phase Section --}}
       <div class="weather-row">
         <div class="weather-icon">
@@ -275,64 +248,65 @@
               <span class="moon-label">Celene:</span>
               <div class="moon-info">
                 {{#if weather.moonPhase.celene}}
-                        <svg class="moon-icon" viewBox="0 0 100 100" width="24" height="24">
-                            {{#if (eq weather.moonPhase.celene "New")}}
-                                <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                            {{else if (eq weather.moonPhase.celene "1/4")}}
-                                <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                                <path d="M50,2 A48,48 0 0,1 50,98 A48,48 0 0,0 50,2" fill="white"/>
-                            {{else if (eq weather.moonPhase.celene "Full")}}
-                                <circle cx="50" cy="50" r="48" fill="white" stroke="gray"/>
-                            {{else if (eq weather.moonPhase.celene "3/4")}}
-                                <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                                <path d="M50,2 A48,48 0 0,0 50,98 A48,48 0 0,1 50,2" fill="white"/>
-                            {{else}}
-                                <circle cx="50" cy="50" r="48" fill="gray" stroke="darkgray"/>
-                            {{/if}}
-                        </svg>
-                    {{/if}}
+                    <svg class="moon-icon" viewBox="0 0 100 100" width="24" height="24">
+                        {{#if (eq weather.moonPhase.celene "New")}}
+                            <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                        {{else if (eq weather.moonPhase.celene "1/4")}}
+                            <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                            <path d="M50,2 A48,48 0 0,1 50,98 A48,48 0 0,0 50,2" fill="white"/>
+                        {{else if (eq weather.moonPhase.celene "Full")}}
+                            <circle cx="50" cy="50" r="48" fill="white" stroke="gray"/>
+                        {{else if (eq weather.moonPhase.celene "3/4")}}
+                            <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
+                            <path d="M50,2 A48,48 0 0,0 50,98 A48,48 0 0,1 50,2" fill="white"/>
+                        {{else}}
+                            <circle cx="50" cy="50" r="48" fill="gray" stroke="darkgray"/>
+                        {{/if}}
+                    </svg>
+                {{/if}}
                 <span>{{weather.moonPhase.celene}}</span>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
     {{!-- Weather Controls --}}
-    <div class="weather-controls">
-      <button type="button" class="generate-weather" {{#if loading}}disabled{{/if}}>
-        <i class="fas fa-dice"></i> Generate New Weather
-      </button>
-      
-      {{#if isGM}}
+    <div class="dialog-buttons">
+        <button type="button" class="generate-weather" {{#if loading}}disabled{{/if}}>
+            Generate New Weather
+        </button>
+        
+        {{#if isGM}}
         <button type="button" class="update-weather" {{#if loading}}disabled{{/if}}>
-          <i class="fas fa-sync"></i> Update Weather
+            Update Weather
         </button>
         <button type="button" class="settings" {{#if loading}}disabled{{/if}}>
-          <i class="fas fa-cog"></i> Settings
+            Settings
         </button>
-      {{/if}}
+        {{/if}}
 
-      <button type="button" class="refresh-weather" {{#if loading}}disabled{{/if}}>
-        <i class="fas fa-redo"></i> Refresh
-      </button>
+        <button type="button" class="refresh-weather" {{#if loading}}disabled{{/if}}>
+            Refresh
+        </button>
     </div>
+
+    {{!-- Debug info section --}}
+    {{#if error}}
+    <div class="error-message" style="color: red; margin-top: 10px;">
+        Error: {{error}}
+    </div>
+    {{/if}}
+
+    {{#if debugMode}}
+    <div class="debug-info" style="margin-top: 10px; font-size: 0.8em; color: #666;">
+        Available Months: {{#each months}}{{this}}, {{/each}}<br>
+        Selected Month: {{selectedMonth}}<br>
+        Latitude: {{latitude}}<br>
+        Terrain: {{terrain}}<br>
+        Elevation: {{elevation}}
+    </div>
+    {{/if}}
   </div>
 </form>
-
-{{!-- Add debug info section at bottom of template --}}
-{{#if error}}
-<div class="error-message" style="color: red; margin-top: 10px;">
-    Error: {{error}}
-</div>
-{{/if}}
-
-{{#if debugMode}}
-<div class="debug-info" style="margin-top: 10px; font-size: 0.8em; color: #666;">
-    Available Months: {{#each months}}{{this}}, {{/each}}<br>
-    Selected Month: {{selectedMonth}}<br>
-    Latitude: {{latitude}}<br>
-    Terrain: {{terrain}}<br>
-    Elevation: {{elevation}}
-</div>
-{{/if}}

@@ -1,47 +1,35 @@
-.weather-dialog .weather-display {
-    padding: 10px;
+/* Base Dialog Styles */
+.weather-dialog {
+    min-width: 300px;
+    max-width: 400px;
 }
 
-.weather-dialog .weather-info {
-    margin-bottom: 1em;
-}
-
-.weather-dialog .info-row {
+.dialog-content {
     display: flex;
-    justify-content: space-between;
-    margin: 5px 0;
-    padding: 5px 0;
-    border-bottom: 1px solid #ddd;
-}
-
-.weather-dialog .dialog-buttons {
-    display: flex;
+    flex-direction: column;
     gap: 10px;
-    justify-content: center;
-    padding: 10px;
 }
 
-.weather-dialog button {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px 10px;
+/* Form Controls Section */
+.weather-dialog .weather-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
 }
 
-.weather-dialog button i {
-    margin-right: 5px;
-}
-
-/* Add around line 30 */
 .weather-dialog .form-group {
+    display: flex;
+    flex-direction: column;
     margin-bottom: 10px;
 }
 
-.weather-dialog label {
+.weather-dialog .form-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
 }
 
 .weather-dialog select,
@@ -56,37 +44,36 @@
     text-align: right;
 }
 
-/* Add at the end of the file */
-.weather-dialog .weather-data .precip-notes {
-    margin-top: 10px;
-    padding: 5px;
-    background: rgba(0, 0, 0, 0.05);
-    border-radius: 3px;
+/* Weather Sections */
+.weather-dialog .weather-section {
+    margin: 0.5em 0;
+    padding: 0.5em;
+    border-top: 1px solid #ddd;
 }
 
-.weather-dialog .weather-data .notes-header {
+.weather-dialog .weather-header {
+    font-size: 1.1em;
     font-weight: bold;
     margin-bottom: 5px;
+    color: #444;
 }
 
-.weather-dialog .weather-data ul {
-    list-style: none;
-    margin: 0;
-    padding-left: 10px;
+.weather-dialog .weather-value {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.weather-dialog .weather-data .precip-movement,
-.weather-dialog .weather-data .precip-vision {
-    margin-top: 5px;
+.weather-dialog .weather-value i {
+    color: #666;
 }
 
-.weather-dialog .weather-data .precip-type,
-.weather-dialog .weather-data .precip-amount,
-.weather-dialog .weather-data .precip-duration {
-    margin-bottom: 5px;
+.weather-dialog .weather-value label {
+    font-weight: bold;
+    margin-right: 0.5em;
 }
 
-/* Add these styles */
+/* Precipitation Details */
 .weather-dialog .precip-details {
     margin-top: 10px;
 }
@@ -115,6 +102,7 @@
     font-size: 0.9em;
 }
 
+/* Effects Section */
 .weather-dialog .effects-section {
     border-top: 1px solid #e2e8f0;
     padding-top: 12px;
@@ -133,6 +121,53 @@
     min-width: 120px;
 }
 
+/* Moon Phase Styles */
+.weather-dialog .moon-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.weather-dialog .moon-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.weather-dialog .moon-label {
+    min-width: 60px;
+    font-weight: bold;
+}
+
+.weather-dialog .moon-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.weather-dialog .moon-icon {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Button Styles */
+.weather-dialog .dialog-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+}
+
+.weather-dialog .dialog-buttons button {
+    width: 100%;
+    padding: 8px;
+    text-align: center;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Notes & Special Effects */
 .weather-dialog .precip-notes {
     margin-top: 12px;
     padding: 8px;
@@ -144,66 +179,12 @@
     margin: 0;
     font-style: italic;
 }
-/* sky conditions */
-.weather-group {
-    display: flex;
-    align-items: center;
-    margin: 5px 0;
-}
 
-.weather-label {
-    flex: 0 0 120px;
-    font-weight: bold;
-}
-
-.weather-value {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.weather-value i {
-    color: #666;
-}
-/* moon details */
-.moon-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-  
-  .moon-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  .moon-label {
-    min-width: 60px;
-    font-weight: bold;
-  }
-  
-  .moon-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .moon-icon {
-    display: inline-block;
-    vertical-align: middle;
-  }
-
-  /* special weather secition */
-  .weather-value label {
-    font-weight: bold;
-    margin-right: 0.5em;
-}
-
-.weather-section {
-    margin: 0.5em 0;
+.weather-dialog .continuing-weather {
+    margin-top: 0.5em;
     padding: 0.5em;
-    border-top: 1px solid #ddd;
+    background: rgba(0, 0, 0, 0.05);
+    border-left: 3px solid #4a4a4a;
 }
 
 .weather-dialog .rainbow-info {
@@ -220,43 +201,4 @@
         rgba(238, 130, 238, 0.1)
     );
     border-radius: 4px;
-}
-
-.weather-dialog .continuing-weather {
-    margin-top: 0.5em;
-    padding: 0.5em;
-    background: rgba(0, 0, 0, 0.05);
-    border-left: 3px solid #4a4a4a;
-}
-
-/* Compact Layout Styles */
-.weather-dialog.compact {
-    min-width: 300px;
-    max-width: 400px;
-}
-
-.weather-quick-settings {
-    padding: 5px;
-    background: rgba(0, 0, 0, 0.05);
-    border-bottom: 1px solid #ddd;
-    display: flex;
-    gap: 5px;
-}
-
-.setting-group {
-    display: flex;
-    gap: 5px;
-    align-items: center;
-}
-
-.small-input {
-    width: 80px;
-}
-
-/* Weather Display Grid */
-.weather-current-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    padding: 10px;
 }
