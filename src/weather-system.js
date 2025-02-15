@@ -844,7 +844,9 @@ async updateWeather(options = {}) {
                 ...this.currentWeather.baseConditions,
                 precipitation: {
                     ...newPrecip,
-                    continues: true
+                    continues: true,
+                    previousType: currentPrecip.type,
+                    changed: newPrecip.type !== currentPrecip.type
                 },
                 wind
             },

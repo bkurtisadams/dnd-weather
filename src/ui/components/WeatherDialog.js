@@ -254,8 +254,10 @@ export class WeatherDialog extends Application {
                                 windSpeed: precipDetails.precipitation.windSpeed || 'Normal',
                                 notes: precipDetails.notes || '',
                                 rainbowChance: precipDetails.chanceRainbow || 0,
-                                continues: currentWeather.baseConditions.continues || false,
-                                continuingDuration: currentWeather.baseConditions.duration || 0
+                                continues: precipData.continues || false,
+                                previousType: precipData.previousType,
+                                changed: precipData.changed,
+                                continuingDuration: precipData.duration
                             };
                             
                             console.log("DND-Weather | Full precipitation details:", precipitation);

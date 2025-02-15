@@ -121,6 +121,24 @@
     min-width: 120px;
 }
 
+/* weather continuing */
+.weather-dialog .continuing-weather {
+    margin-top: 12px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.05);
+    border-left: 3px solid #4a5568;
+    border-radius: 4px;
+}
+
+.weather-dialog .continuing-weather h4 {
+    margin: 0 0 8px 0;
+    color: #4a5568;
+}
+
+.weather-dialog .continuation-details p {
+    margin: 4px 0;
+}
+
 /* Moon Phase Styles */
 .weather-dialog .moon-details {
     display: flex;
