@@ -225,22 +225,20 @@ export class WeatherDialog extends Application {
                         
                         const precipDetails = weatherPhenomena[precipKey];
                         console.log("DND-Weather | Looking up precipitation details for", precipKey, ":", precipDetails);
-
+            
                         if (precipDetails) {
                             precipitation = {
                                 type: precipType,
-                                // Use the actual rolled values from precipData instead of the dice formulas
                                 amount: precipData.amount ? `${precipData.amount} inches` : 'none',
                                 duration: precipData.duration ? `${precipData.duration} hours` : 'none',
-                                // Only show non-normal movement effects
-                                movement: precipData.movement !== 'Normal' ? precipData.movement : 'Normal',
-                                vision: precipData.vision !== 'Normal' ? precipData.vision : 'Normal',
-                                infraUltra: precipData.infraUltra !== 'Normal' ? precipData.infraUltra : 'Normal',
-                                tracking: precipData.tracking !== 'Normal' ? precipData.tracking : 'Normal',
-                                chanceLost: precipData.chanceLost !== 'Normal' ? precipData.chanceLost : 'Normal',
-                                windSpeed: precipData.windSpeed !== 'Normal' ? precipData.windSpeed : 'Normal',
-                                notes: precipData.notes || '',
-                                rainbowChance: precipData.chanceRainbow || 0,
+                                movement: precipData.details?.movement || 'Normal',
+                                vision: precipData.details?.vision || 'Normal',
+                                infraUltra: precipData.details?.infraUltra || 'Normal',
+                                tracking: precipData.details?.tracking || 'Normal',
+                                chanceLost: precipData.details?.chanceLost || 'Normal',
+                                windSpeed: precipData.details?.windSpeed || 'Normal',
+                                notes: precipDetails.notes || '',
+                                rainbowChance: precipDetails.chanceRainbow || 0,
                                 continues: currentWeather.baseConditions.continues || false,
                                 continuingDuration: currentWeather.baseConditions.duration || 0
                             };

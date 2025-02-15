@@ -303,18 +303,22 @@ export class GreyhawkWeatherSystem {
                 }
 
                 return {
-                    type: type,
-                    effects: this._getPrecipitationEffects(data),
-                    duration,
+                    type,
                     amount,
-                    movement: data.precipitation.movement,
-                    visibility: data.precipitation.vision,
-                    tracking: data.precipitation.tracking,
-                    chanceLost: data.precipitation.chanceLost
+                    duration,
+                    details: {
+                        movement: data.precipitation.movement || 'Normal',
+                        vision: data.precipitation.vision || 'Normal',
+                        infraUltra: data.precipitation.infraUltra || 'Normal',
+                        tracking: data.precipitation.tracking || 'Normal',
+                        chanceLost: data.precipitation.chanceLost || 'Normal',
+                        windSpeed: data.precipitation.windSpeed || 'Normal'
+                    },
+                    effects: this._getPrecipitationEffects(data)
                 };
             }
         }
-        return { type: 'none', effects: [], duration: 0, amount: 0 };
+        return { type: 'none', amount: null, duration: 0, details: {}, effects: [] };
     }
 
     getCurrentWeather() {
