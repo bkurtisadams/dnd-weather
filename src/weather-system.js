@@ -850,7 +850,8 @@ async updateWeather(options = {}) {
                     continues: true,
                     duration: duration,
                     previousType: currentPrecip.type,
-                    changed: newPrecip.type !== currentPrecip.type
+                    changed: newPrecip.type !== currentPrecip.type,
+                    chanceContinuing: weatherPhenomena[newPrecipType].chanceContinuing || 0
                 },
                 wind
             },

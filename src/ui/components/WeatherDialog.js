@@ -265,6 +265,8 @@ export class WeatherDialog extends Application {
                                 notes: precipDetails.notes || '',
                                 rainbowChance: precipDetails.chanceRainbow || 0,
                                 continues: precipData.continues || false,
+                                chanceContinuing: precipDetails.chanceContinuing || 0,
+                                continuingDuration: precipData.duration || 0,
                                 previousType: precipData.previousType,
                                 changed: precipData.changed,
                                 continuingDuration: precipData.duration || 0
