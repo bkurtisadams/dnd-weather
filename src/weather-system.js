@@ -183,6 +183,11 @@ export class GreyhawkWeatherSystem {
                 // Roll for precipitation type
                 const typeRoll = await rollDice(1, 100)[0];
                 precipitation = await this._determinePrecipitation(typeRoll, highTemp);
+                console.log("DND-Weather | Checking precipitation continuation data:", {
+                    type: precipitation.type,
+                    chanceContinuing: precipitation.chanceContinuing,
+                    duration: precipitation.duration
+                });
                 
                 // If special weather (00), check terrain table
                 if (precipitation.type === 'special') {
@@ -315,21 +320,21 @@ export class GreyhawkWeatherSystem {
                     ? data.precipitation.vision
                     : { normal: data.precipitation.vision || 'Normal' };
     
-                return {
-                    type,
-                    amount,
-                    duration,
-                    movement,
-                    vision: vision.normal || 'Normal',
-                    infraUltra: vision.infraUltra || data.precipitation.infraUltra || 'Normal',
-                    tracking: data.precipitation.tracking || 'Normal',
-                    chanceLost: data.precipitation.chanceLost || 'Normal',
-                    windSpeed: data.precipitation.windSpeed || 'Normal',
-                    notes: data.notes || '',
-                    effects: this._getPrecipitationEffects(data),
-                    chanceRainbow: data.chanceRainbow || 0,
-                    chanceContinuing: data.chanceContinuing || 0
-                };
+                    return {
+                        type,
+                        amount,
+                        duration,  // This will now be the actual rolled number
+                        movement: data.precipitation.movement,
+                        vision: data.precipitation.vision,
+                        infraUltra: data.precipitation.infraUltra,
+                        tracking: data.precipitation.tracking,
+                        chanceLost: data.precipitation.chanceLost,
+                        windSpeed: data.precipitation.windSpeed,
+                        notes: data.notes,
+                        chanceContinuing: data.chanceContinuing,
+                        chanceRainbow: data.chanceRainbow,
+                        originalDuration: data.precipitation.duration  // Keep the original string for reference
+                    };
             }
         }
         return { 
@@ -459,15 +464,24 @@ _calculateWindChill(temp, windSpeed) {
     return windChillTable[closestSpeed][closestTemp];
 }
 
-async _calculatePrecipitationDuration(precipData) {
-    if (!precipData.precipitation.duration) return 0;
+async _calculatePrecipitationDuration(data) {
+    if (!data.precipitation.duration) return 0;
 
-    // Parse duration string (e.g., "3d8 hours")
-    const durationMatch = precipData.precipitation.duration.match(/(\d+)d(\d+)/);
+    // Parse duration string (e.g., "d4 hours" or "3d8 hours")
+    const durationMatch = data.precipitation.duration.match(/(\d*)[dD](\d+)/);
     if (!durationMatch) return 0;
 
     const [_, count, sides] = durationMatch;
-    return await rollDice(parseInt(count), parseInt(sides))[0];
+    const diceCount = count ? parseInt(count) : 1;  // If no count specified, use 1
+    const result = await rollDice(diceCount, parseInt(sides))[0];
+    
+    console.log("DND-Weather | Calculated duration:", {
+        original: data.precipitation.duration,
+        parsed: { count: diceCount, sides: parseInt(sides) },
+        result
+    });
+    
+    return result;
 }
 
 async _determineSpecialWeather(terrainEffect) {

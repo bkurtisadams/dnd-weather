@@ -406,7 +406,7 @@ export class WeatherDialog extends Application {
         }
     }
 
-    async _onUpdateWeather(event) {
+    /* async _onUpdateWeather(event) {
         event.preventDefault();
         console.log("DND-Weather | Update weather clicked");
         
@@ -428,6 +428,91 @@ export class WeatherDialog extends Application {
                 ui.notifications.info("Weather updated successfully");
             } else {
                 throw new Error("No weather data updated");
+            }
+        } catch (error) {
+            console.error("DND-Weather | Update failed:", error);
+            ui.notifications.error(error.message);
+            this.state.error = error.message;
+        } finally {
+            this.state.loading = false;
+            await this.render();
+        }
+    } */
+
+    async _onUpdateWeather(event) {
+        event.preventDefault();
+        console.log("DND-Weather | Update weather clicked");
+        
+        const weatherSystem = globalThis.dndWeather?.weatherSystem;
+        if (!weatherSystem) {
+            ui.notifications.error("Weather system not initialized");
+            return;
+        }
+    
+        this.state.loading = true;
+        this.state.error = null;
+        await this.render();
+    
+        try {
+            const currentWeather = this.state.currentWeather;
+            if (!currentWeather) {
+                console.log("DND-Weather | No current weather, generating new");
+                const weather = await weatherSystem.generateWeather();
+                this.state.currentWeather = weather[0];
+                this.state.lastUpdate = new Date().toLocaleTimeString();
+                ui.notifications.info("New weather generated");
+                return;
+            }
+    
+            const precipitation = currentWeather.baseConditions.precipitation;
+            
+            // Check for continuation if there's current precipitation
+            if (precipitation.type !== 'none' && precipitation.chanceContinuing) {
+                console.log("DND-Weather | Checking precipitation continuation for", precipitation.type);
+                
+                const continuationRoll = await rollDice(1, 100)[0];
+                console.log("DND-Weather | Continuation roll:", continuationRoll, "vs chance:", precipitation.chanceContinuing);
+    
+                if (continuationRoll <= precipitation.chanceContinuing) {
+                    // Roll for type change
+                    const changeRoll = await rollDice(1, 10)[0];
+                    console.log("DND-Weather | Precipitation continues, type change roll:", changeRoll);
+    
+                    const weather = await weatherSystem.updateWeather({
+                        continues: true,
+                        changeRoll: changeRoll,
+                        currentType: precipitation.type
+                    });
+    
+                    if (weather) {
+                        this.state.currentWeather = weather;
+                        this.state.lastUpdate = new Date().toLocaleTimeString();
+                        ui.notifications.info(`Weather continues with ${weather.baseConditions.precipitation.type}`);
+                    }
+                } else {
+                    console.log("DND-Weather | Precipitation ends, checking for rainbow");
+                    const weather = await weatherSystem.updateWeather({
+                        continues: false,
+                        checkRainbow: true
+                    });
+    
+                    if (weather) {
+                        this.state.currentWeather = weather;
+                        this.state.lastUpdate = new Date().toLocaleTimeString();
+                        ui.notifications.info("Weather system updated - precipitation ended");
+                    }
+                }
+            } else {
+                console.log("DND-Weather | No precipitation to continue, generating new weather");
+                const weather = await weatherSystem.updateWeather();
+                
+                if (weather) {
+                    this.state.currentWeather = weather;
+                    this.state.lastUpdate = new Date().toLocaleTimeString();
+                    ui.notifications.info("Weather updated successfully");
+                } else {
+                    throw new Error("No weather data updated");
+                }
             }
         } catch (error) {
             console.error("DND-Weather | Update failed:", error);
