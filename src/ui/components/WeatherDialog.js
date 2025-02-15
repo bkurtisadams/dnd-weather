@@ -3,6 +3,10 @@ import { baselineData } from '../../constants/baseline-data.js';
 import { weatherPhenomena } from '../../constants/precipitation-table.js';
 import { rollDice } from '../../utils/dice.js';
 
+import { highWindsTable, windChillTable } from '../../constants/wind-effects.js';
+import { terrainEffects } from '../../constants/terrain-effects.js';
+import { moonPhases, lycanthropeActivity } from '../../constants/moon-phases.js';
+
 Handlebars.registerHelper('isObject', function(value) {
     return typeof value === 'object' && value !== null && !Array.isArray(value);
 });

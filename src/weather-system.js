@@ -2,6 +2,9 @@
 import { baselineData } from './constants/baseline-data.js';
 import { terrainEffects } from './constants/terrain-effects.js';
 import { weatherPhenomena } from './constants/precipitation-table.js';
+// weather-system.js - check/add these with imports at top
+import { specialWeatherTable } from './constants/special-weather-events.js';
+import { calendarLabels } from './constants/baseline-data.js';
 import { highWindsTable, windChillTable } from './constants/wind-effects.js';
 import { moonPhases, lycanthropeActivity } from './constants/moon-phases.js';
 import { WeatherDialog } from './ui/components/WeatherDialog.js';
