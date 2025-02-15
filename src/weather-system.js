@@ -790,10 +790,6 @@ _determineLycanthropeActivity(lunaPhase, celenePhase) {
     return lycanthropeActivity.normal;
 }
 
-// Add to GreyhawkWeatherSystem class
-
-// weather-system.js around line 300
-// weather-system.js
 async updateWeather(options = {}) {
     console.log("DND-Weather | Updating current weather", options);
     
