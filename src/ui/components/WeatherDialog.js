@@ -198,6 +198,13 @@ export class WeatherDialog extends Application {
                     ...formData
                 };
             }
+
+            // Get sunrise/sunset times from baselineData
+            const monthData = baselineData[this.state.selectedMonth];
+            const daylight = {
+                sunrise: monthData?.sunrise || 'Unknown',
+                sunset: monthData?.sunset || 'Unknown'
+            };
     
             // Initialize precipitation object first
             let precipitation = {
@@ -267,7 +274,8 @@ export class WeatherDialog extends Application {
                         luna: currentWeather.baseConditions.moonPhase?.luna || 'Unknown',
                         celene: currentWeather.baseConditions.moonPhase?.celene || 'Unknown'
                     },
-                    conditions: currentWeather.baseConditions.sky
+                    conditions: currentWeather.baseConditions.sky,
+                    daylight: daylight  // Add new daylight data
                 },
                 effects: currentWeather.effects,
                 terrain: currentWeather.terrain,
@@ -293,7 +301,11 @@ export class WeatherDialog extends Application {
                 windDirection: 'Unknown',
                 precipitation: 'Unknown',
                 moonPhase: 'Unknown',
-                conditions: 'Unknown'
+                conditions: 'Unknown',
+                daylight: {
+                    sunrise: 'Unknown',
+                    sunset: 'Unknown'
+                }
             },
             effects: { terrain: [], temperature: [], precipitation: [], wind: [], special: [] },
             isGM: game.user.isGM,

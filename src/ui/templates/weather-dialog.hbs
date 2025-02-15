@@ -272,6 +272,26 @@
       </div>
     </div>
 
+    {{!-- Sunrise/Sunset Section --}}
+    <div class="weather-row">
+      <div class="weather-icon">
+        <i class="fas fa-sun"></i>
+      </div>
+      <div class="weather-data">
+        <h3>Daylight</h3>
+        <div class="daylight-details">
+          <div class="daylight-row">
+            <span class="daylight-label">Sunrise:</span>
+            <span>{{weather.daylight.sunrise}}</span>
+          </div>
+          <div class="daylight-row">
+            <span class="daylight-label">Sunset:</span>
+            <span>{{weather.daylight.sunset}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     {{!-- Weather Controls --}}
     <div class="dialog-buttons">
         <button type="button" class="generate-weather" {{#if loading}}disabled{{/if}}>

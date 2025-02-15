@@ -150,6 +150,24 @@
     vertical-align: middle;
 }
 
+/* Daylight Section Styles */
+.weather-dialog .daylight-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.weather-dialog .daylight-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.weather-dialog .daylight-label {
+    min-width: 60px;
+    font-weight: bold;
+}
+
 /* Button Styles */
 .weather-dialog .dialog-buttons {
     display: flex;
