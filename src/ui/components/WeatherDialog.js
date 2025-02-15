@@ -39,6 +39,7 @@ export class WeatherDialog extends Application {
             // Add new state properties
             selectedMonth: this.months[0] || 'Fireseek', // Default to first month or Fireseek
             selectedDay: 1, // initialize selectedDay
+            ...this.state,
             latitude: game.settings.get('dnd-weather', 'latitude'),
             terrain: game.settings.get('dnd-weather', 'terrain'),
             elevation: game.settings.get('dnd-weather', 'elevation')            
@@ -314,6 +315,13 @@ export class WeatherDialog extends Application {
         }
     }
 
+    // save settings
+    async _saveSettings() {
+        await game.settings.set('dnd-weather', 'latitude', this.state.latitude);
+        await game.settings.set('dnd-weather', 'terrain', this.state.terrain);
+        await game.settings.set('dnd-weather', 'elevation', this.state.elevation);
+    }
+
     _getErrorData(errorMessage) {
         return {
             weather: {
@@ -336,7 +344,7 @@ export class WeatherDialog extends Application {
         };
     }
 
-    // Add to activateListeners method around line 85
+    // activateListeners method
     activateListeners(html) {
         super.activateListeners(html);
         console.log("DND-Weather | Activating listeners");
@@ -373,6 +381,15 @@ export class WeatherDialog extends Application {
             this.state.elevation = Number(event.target.value);
             console.log("DND-Weather | Elevation changed to:", this.state.elevation);
         });
+
+        // save latitude settings
+        html.find('input[name="latitude"]').on('change', async (event) => {
+            this.state.latitude = Number(event.target.value);
+            await this._saveSettings();
+            console.log("DND-Weather | Latitude changed to:", this.state.latitude);
+        });
+        
+        // Do the same for terrain and elevation
     }
 
     async _onGenerateWeather(event) {

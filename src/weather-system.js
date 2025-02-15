@@ -1029,6 +1029,18 @@ Hooks.once('init', async () => {
         }),
         WeatherDialog: WeatherDialog
     };
+
+    // Add settings change handler
+    Hooks.on('updateSetting', (setting) => {
+        if (setting.key.startsWith('dnd-weather')) {
+            globalThis.dndWeather.weatherSystem.settings = {
+                ...globalThis.dndWeather.weatherSystem.settings,
+                latitude: game.settings.get('dnd-weather', 'latitude'),
+                elevation: game.settings.get('dnd-weather', 'elevation'),
+                terrain: game.settings.get('dnd-weather', 'terrain')
+            };
+        }
+    });
     
     // Register the module API
     const module = game.modules.get('dnd-weather');

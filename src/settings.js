@@ -1,5 +1,6 @@
+import { WeatherDialog } from './ui/components/WeatherDialog.js';
+
 // System settings 
-// settings.js
 export const registerSettings = () => {
     // Register module settings
     game.settings.register('dnd-weather', 'latitude', {
@@ -69,7 +70,7 @@ export const registerSettings = () => {
   };
   
   // WeatherDialog class
-  class WeatherDialog extends Application {
+  /* class WeatherDialog extends Application {
     static get defaultOptions() {
       return mergeObject(super.defaultOptions, {
         id: 'dnd-weather-dialog',
@@ -114,4 +115,4 @@ export const registerSettings = () => {
       event.preventDefault();
       new SettingsConfig().render(true);
     }
-  }
+  } */
