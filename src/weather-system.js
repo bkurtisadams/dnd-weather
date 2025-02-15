@@ -285,7 +285,6 @@ export class GreyhawkWeatherSystem {
         return 'Cloudy';
     }
 
-    // weather-system.js, around line 316
     async _determinePrecipitation(roll, temperature) {
         // Find matching precipitation type from table
         for (const [type, data] of Object.entries(weatherPhenomena)) {
@@ -300,6 +299,10 @@ export class GreyhawkWeatherSystem {
     
                 // Calculate duration
                 const duration = await this._calculatePrecipitationDuration(data);
+                console.log("DND-Weather | Duration calculation:", {
+                    data: data.precipitation.duration,
+                    calculated: duration
+                });
                 
                 // Roll for amount if present
                 let amount = null;
@@ -323,7 +326,7 @@ export class GreyhawkWeatherSystem {
                     return {
                         type,
                         amount,
-                        duration,  // This will now be the actual rolled number
+                        duration: duration,  // Use the calculated duration
                         movement: data.precipitation.movement,
                         vision: data.precipitation.vision,
                         infraUltra: data.precipitation.infraUltra,
@@ -333,7 +336,7 @@ export class GreyhawkWeatherSystem {
                         notes: data.notes,
                         chanceContinuing: data.chanceContinuing,
                         chanceRainbow: data.chanceRainbow,
-                        originalDuration: data.precipitation.duration  // Keep the original string for reference
+                        continues: false  // Initialize this
                     };
             }
         }
@@ -829,6 +832,7 @@ async updateWeather(options = {}) {
         const typeRoll = this._getPrecipitationRollForType(newPrecipType);
         const temperature = this.currentWeather.baseConditions.temperature.high;
         const newPrecip = await this._determinePrecipitation(typeRoll, temperature);
+        const duration = await this._calculatePrecipitationDuration(weatherPhenomena[newPrecipType]);
         
         // Get wind data for the precipitation
         const wind = await this._determineWindForPrecipitation(newPrecip);
@@ -841,6 +845,7 @@ async updateWeather(options = {}) {
                 precipitation: {
                     ...newPrecip,
                     continues: true,
+                    duration: duration,
                     previousType: currentPrecip.type,
                     changed: newPrecip.type !== currentPrecip.type
                 },

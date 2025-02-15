@@ -107,6 +107,18 @@
                           {{/if}}
                       </div>
 
+                          {{#if weather.precipitation.continues}}
+                            <div class="continuing-weather">
+                                <h4>Continuing Weather</h4>
+                                <div class="continuation-details">
+                                    <p>Current precipitation continues for {{weather.precipitation.duration}} hours</p>
+                                    {{#if weather.precipitation.changed}}
+                                    <p>Type changed from {{weather.precipitation.previousType}} to {{weather.precipitation.type}}</p>
+                                    {{/if}}
+                                </div>
+                            </div>
+                            {{/if}}
+
                       <div class="effects-section">
                           <h4>Effects</h4>
                           
@@ -182,18 +194,6 @@
           </div>
       </div>
 
-      {{#if weather.precipitation.continues}}
-        <div class="continuing-weather">
-            <h4>Continuing Weather</h4>
-            <div class="continuation-details">
-                <p>Current precipitation continues for {{weather.precipitation.duration}} hours</p>
-                {{#if weather.precipitation.changed}}
-                <p>Type changed from {{weather.precipitation.previousType}} to {{weather.precipitation.type}}</p>
-                {{/if}}
-            </div>
-        </div>
-        {{/if}}
-
       {{!-- Special Weather Section --}}
       <div class="weather-section">
           <h3 class="weather-header">Effects</h3>
@@ -204,13 +204,6 @@
               {{#each effects.special}}
                   <div>{{this}}</div>
               {{/each}}
-          </div>
-          {{/if}}
-
-          {{#if weather.precipitation.continues}}
-          <div class="weather-value">
-              <label>Continuing Weather:</label>
-              <div>Precipitation continues for {{weather.precipitation.duration}} hours</div>
           </div>
           {{/if}}
       </div>

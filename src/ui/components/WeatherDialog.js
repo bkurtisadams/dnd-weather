@@ -224,7 +224,12 @@ export class WeatherDialog extends Application {
                 if (precipData && precipData !== 'none') {
                     // Handle both string and object precipitation types
                     const precipType = typeof precipData === 'string' ? precipData : precipData.type;
-                    console.log("DND-Weather | Processed precipitation type:", precipType);
+                    console.log("DND-Weather | Precipitation continuation data:", {
+                        continues: precipData.continues,
+                        duration: precipData.duration,
+                        previousType: precipData.previousType,
+                        changed: precipData.changed
+                    });
                     
                     if (precipType && precipType !== 'none') {
                         const precipKey = precipType.toLowerCase().replace(/\s+/g, '-');
@@ -257,7 +262,7 @@ export class WeatherDialog extends Application {
                                 continues: precipData.continues || false,
                                 previousType: precipData.previousType,
                                 changed: precipData.changed,
-                                continuingDuration: precipData.duration
+                                continuingDuration: precipData.duration || 0
                             };
                             
                             console.log("DND-Weather | Full precipitation details:", precipitation);
@@ -467,13 +472,22 @@ export class WeatherDialog extends Application {
             }
     
             const precipitation = currentWeather.baseConditions.precipitation;
+            // Before attempting the update
+            console.log("DND-Weather | Current precipitation state:", {
+                type: precipitation.type,
+                chanceContinuing: precipitation.chanceContinuing,
+                duration: precipitation.duration
+            });
             
             // Check for continuation if there's current precipitation
             if (precipitation.type !== 'none' && precipitation.chanceContinuing) {
                 console.log("DND-Weather | Checking precipitation continuation for", precipitation.type);
                 
                 const continuationRoll = await rollDice(1, 100)[0];
-                console.log("DND-Weather | Continuation roll:", continuationRoll, "vs chance:", precipitation.chanceContinuing);
+                console.log("DND-Weather | Continuation check:", {
+                    roll: continuationRoll,
+                    chance: precipitation.chanceContinuing
+                });
     
                 if (continuationRoll <= precipitation.chanceContinuing) {
                     // Roll for type change
