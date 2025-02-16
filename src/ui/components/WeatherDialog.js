@@ -74,6 +74,23 @@ export class WeatherDialog extends Application {
         this._onOpenSettings = this._onOpenSettings.bind(this);
     }
 
+    // Add method to ensure display window
+    async _ensureDisplayWindow() {
+        if (!this.displayWindow) {
+            this.displayWindow = new WeatherDisplay();
+            await this.displayWindow.render(true);
+        }
+        return this.displayWindow;
+    }
+
+    // Add method to refresh display
+    async _refreshDisplay() {
+        if (this.state.currentWeather && this.displayWindow) {
+            await this.displayWindow.update(this.state.currentWeather);
+        }
+    }
+
+
     // Add timer methods
     _startWeatherTimer(duration) {
         if (this.weatherTimer) clearInterval(this.weatherTimer);
@@ -450,13 +467,31 @@ export class WeatherDialog extends Application {
             if (weatherData && weatherData.length > 0) {
                 this.state.currentWeather = weatherData[0];
                 this.state.lastUpdate = new Date().toLocaleTimeString();
+
+                // Ensure display window exists and update it
+                const display = await this._ensureDisplayWindow();
+                await display.update(this.state.currentWeather);
+
+                // before updating the display window
+                if (this.state.currentWeather) {
+                    console.log("Weather data being sent to display:", {
+                        baseConditions: this.state.currentWeather.baseConditions,
+                        effects: this.state.currentWeather.effects
+                    });
+                }
                 
                 // Create or update display window
                 if (!this.displayWindow) {
                     this.displayWindow = new WeatherDisplay();
-                    this.displayWindow.render(true);
+                    // Set the initial data before first render
+                    this.displayWindow.weatherData = this.state.currentWeather;
                 }
+                // Then render and update
+                await this.displayWindow.render(true);
                 await this.displayWindow.update(this.state.currentWeather);
+                
+                // Save settings after successful generation
+                await this._saveSettings();
                 
                 ui.notifications.info("Weather generated successfully");
             } else {
@@ -574,6 +609,10 @@ export class WeatherDialog extends Application {
                     if (weather) {
                         this.state.currentWeather = weather;
                         this.state.lastUpdate = new Date().toLocaleTimeString();
+                        // Add display window
+                        if (this.displayWindow) {
+                            await this.displayWindow.update(this.state.currentWeather);
+                        }
                         ui.notifications.info("Weather system updated - precipitation ended");
                     }
                 }
@@ -613,6 +652,11 @@ export class WeatherDialog extends Application {
             lastUpdate: null,
             currentWeather: null
         };
+        if (this.displayWindow) {
+            await this.displayWindow.close();
+            this.displayWindow = null;
+        }
+        
         return super.close(options);
     }
 }

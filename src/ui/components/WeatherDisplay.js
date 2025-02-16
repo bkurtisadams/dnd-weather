@@ -1,4 +1,5 @@
-// src/ui/components/WeatherDisplay.js
+// src/ui/components/WeatherDisplay.js - Update these methods
+
 export class WeatherDisplay extends Application {
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
@@ -14,23 +15,61 @@ export class WeatherDisplay extends Application {
     }
 
     getData() {
+        console.log("Weather Display getData called with weatherData:", this.weatherData);
+        
+        // Ensure we have weather data
+        if (!this.weatherData?.baseConditions) {
+            console.warn("Weather Display: No base conditions in weather data");
+            return {
+                weather: {},
+                effects: {},
+                isGM: game.user.isGM,
+                loading: false
+            };
+        }
+
+        const baseConditions = this.weatherData.baseConditions;
+        
+        // Structure the data to match the template
         return {
-            weather: this.weatherData?.baseConditions || {},
-            effects: this.weatherData?.effects || {},
+            weather: {
+                // Sky conditions
+                conditions: baseConditions.sky,
+                
+                // Temperature data
+                temperature: baseConditions.temperature.high,
+                temperatureLow: baseConditions.temperature.low,
+                windChill: baseConditions.temperature.windChill,
+                
+                // Wind data
+                wind: baseConditions.wind.speed,
+                windDirection: baseConditions.wind.direction,
+                
+                // Precipitation data
+                precipitation: baseConditions.precipitation,
+                
+                // Moon phases
+                moonPhase: baseConditions.moonPhase,
+                
+                // Daylight data
+                daylight: baseConditions.daylight
+            },
+            effects: this.weatherData.effects || {},
             isGM: game.user.isGM,
             loading: false
         };
     }
 
     async update(weatherData) {
+        console.log("Weather Display updating with:", weatherData);
         this.weatherData = weatherData;
-        this.render(true);
+        await this.render(true);
     }
 
-    // Add Handlebars helpers
     activateListeners(html) {
         super.activateListeners(html);
         
+        // Register required Handlebars helpers
         Handlebars.registerHelper('isObject', function(value) {
             return typeof value === 'object' && value !== null && !Array.isArray(value);
         });
