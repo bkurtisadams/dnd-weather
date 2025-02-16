@@ -1,4 +1,5 @@
 // WeatherDialog.js
+import { WeatherDisplay } from './WeatherDisplay.js';
 import { baselineData } from '../../constants/baseline-data.js';
 import { weatherPhenomena } from '../../constants/precipitation-table.js';
 import { rollDice } from '../../utils/dice.js';
@@ -42,6 +43,7 @@ export class WeatherDialog extends Application {
     constructor(options = {}) {
         super(options);
         this.weatherTimer = null;
+        this.displayWindow = null;
         console.log("WeatherDialog constructor called");
 
         // Initialize months from baselineData
@@ -426,11 +428,11 @@ export class WeatherDialog extends Application {
             ui.notifications.error("Weather system not initialized");
             return;
         }
-
+    
         this.state.loading = true;
         this.state.error = null;
         await this.render();
-
+    
         try {
             // Update weather system settings with current form values
             weatherSystem.settings = {
@@ -441,13 +443,21 @@ export class WeatherDialog extends Application {
                 terrain: this.state.terrain
             };
             console.log("DND-Weather | Using settings:", weatherSystem.settings);
-
+    
             const weatherData = await weatherSystem.generateWeather();
             console.log("DND-Weather | Generated weather data:", weatherData);
             
             if (weatherData && weatherData.length > 0) {
                 this.state.currentWeather = weatherData[0];
                 this.state.lastUpdate = new Date().toLocaleTimeString();
+                
+                // Create or update display window
+                if (!this.displayWindow) {
+                    this.displayWindow = new WeatherDisplay();
+                    this.displayWindow.render(true);
+                }
+                await this.displayWindow.update(this.state.currentWeather);
+                
                 ui.notifications.info("Weather generated successfully");
             } else {
                 throw new Error("No weather data generated");
