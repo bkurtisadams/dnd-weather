@@ -309,7 +309,7 @@ export const weatherPhenomena = {
         chanceRainbow: 10,
         restrictedTerrain: ["Desert", "plains"],
         precipitation: {
-            amount: "d6/day",
+            amount: "d6/day", // Will show as "X inches per day"
             duration: "1/2d6 days",
             movement: {
                 foot: "1/4",
@@ -335,7 +335,7 @@ export const weatherPhenomena = {
         chanceRainbow: 5,
         restrictedTerrain: ["Desert", "dust", "plains"],
         precipitation: {
-            amount: "d8/day",
+            amount: "d8/day", // Will show as "X inches per day"
             duration: "d6+6 days",
             movement: {
                 foot: "1/4",

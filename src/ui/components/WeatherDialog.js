@@ -21,6 +21,23 @@ Handlebars.registerHelper('eq', function(a, b) {
     return a === b;
 });
 
+// In WeatherDialog.js after other Handlebars helpers
+Handlebars.registerHelper('gt', function(a, b) {
+    return a > b;
+});
+
+Handlebars.registerHelper('floor', function(value) {
+    return Math.floor(value);
+});
+
+Handlebars.registerHelper('divide', function(a, b) {
+    return a / b;
+});
+
+Handlebars.registerHelper('mod', function(a, b) {
+    return a % b;
+});
+
 export class WeatherDialog extends Application {
     constructor(options = {}) {
         super(options);
@@ -249,10 +266,14 @@ export class WeatherDialog extends Application {
                         console.log("DND-Weather | Looking up precipitation details for", precipKey, ":", precipDetails);
             
                         if (precipDetails) {
+                            const isLongDurationEvent = /day/.test(precipDetails.precipitation.duration);
+                            const amount = precipData.amount || precipDetails.precipitation.amount;
+                            const duration = precipData.duration || precipDetails.precipitation.duration;
                             precipitation = {
                                 type: precipType,
-                                amount: typeof precipData.amount === 'number' ? precipData.amount : 1, // Default to 1 for drizzle
-                                duration: precipData.duration || precipDetails.precipitation.duration,
+                                amount: typeof amount === 'number' ? amount : 1,
+                                duration: isLongDurationEvent ? duration * 24 : duration, // Convert days to hours
+                                amountSuffix: /day/.test(precipDetails.precipitation.amount) ? ' per day' : '',
                                 // Properly map movement based on structure
                                 movement: typeof precipDetails.precipitation.movement === 'object' 
                                     ? precipDetails.precipitation.movement 

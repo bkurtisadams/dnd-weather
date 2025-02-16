@@ -95,29 +95,53 @@
                           {{#if weather.precipitation.amount}}
                               <div class="detail-item">
                                   <span class="label">Amount:</span>
-                                  <span class="value">{{weather.precipitation.amount}}</span>
+                                  <span class="value">
+                                      {{#if (eq weather.precipitation.type "hailstorm")}}
+                                          {{weather.precipitation.amount}} inches diameter
+                                      {{else}}
+                                          {{weather.precipitation.amount}}{{#if weather.precipitation.amountSuffix}}{{weather.precipitation.amountSuffix}}{{else}} {{#if (gt weather.precipitation.amount 1)}}inches{{else}}inch{{/if}}{{/if}}
+                                      {{/if}}
+                                  </span>
                               </div>
                           {{/if}}
                           
                           {{#if weather.precipitation.duration}}
                               <div class="detail-item">
                                   <span class="label">Duration:</span>
-                                  <span class="value">{{weather.precipitation.duration}}</span>
+                                  <span class="value">
+                                      {{#if (gt weather.precipitation.duration 24)}}
+                                          {{floor (divide weather.precipitation.duration 24)}} {{#if (eq (floor (divide weather.precipitation.duration 24)) 1)}}day{{else}}days{{/if}}
+                                          {{#if (gt (mod weather.precipitation.duration 24) 0)}}
+                                              , {{mod weather.precipitation.duration 24}} {{#if (eq (mod weather.precipitation.duration 24) 1)}}hour{{else}}hours{{/if}}
+                                          {{/if}}
+                                      {{else}}
+                                          {{weather.precipitation.duration}} {{#if (eq weather.precipitation.duration 1)}}hour{{else}}hours{{/if}}
+                                      {{/if}}
+                                  </span>
                               </div>
                           {{/if}}
                       </div>
 
-                          {{#if weather.precipitation.continues}}
-                              <div class="continuing-weather">
-                                  <h4>Continuing Weather</h4>
-                                  <div class="continuation-details">
-                                      <p>Current precipitation continues for {{weather.precipitation.duration}} hours</p>
-                                      {{#if weather.precipitation.changed}}
-                                          <p>Type changed from {{weather.precipitation.previousType}} to {{weather.precipitation.type}}</p>
+                      {{#if weather.precipitation.continues}}
+                          <div class="continuing-weather">
+                              <h4>Continuing Weather</h4>
+                              <div class="continuation-details">
+                                  <p>Current precipitation continues for 
+                                      {{#if (gt weather.precipitation.duration 24)}}
+                                          {{floor (divide weather.precipitation.duration 24)}} {{#if (eq (floor (divide weather.precipitation.duration 24)) 1)}}day{{else}}days{{/if}}
+                                          {{#if (gt (mod weather.precipitation.duration 24) 0)}}
+                                              , {{mod weather.precipitation.duration 24}} {{#if (eq (mod weather.precipitation.duration 24) 1)}}hour{{else}}hours{{/if}}
+                                          {{/if}}
+                                      {{else}}
+                                          {{weather.precipitation.duration}} {{#if (eq weather.precipitation.duration 1)}}hour{{else}}hours{{/if}}
                                       {{/if}}
-                                  </div>
+                                  </p>
+                                  {{#if weather.precipitation.changed}}
+                                      <p>Type changed from {{weather.precipitation.previousType}} to {{weather.precipitation.type}}</p>
+                                  {{/if}}
                               </div>
-                          {{/if}}
+                          </div>
+                      {{/if}}
 
                       <div class="effects-section">
                           <h4>Effects</h4>
@@ -168,19 +192,6 @@
                                   <span>{{weather.precipitation.chanceLost}}</span>
                               </div>
                           {{/if}}
-
-                          {{!-- {{#if weather.precipitation.windSpeed}}
-                              <div class="effect-group">
-                                  <span class="effect-label">Wind Speed:</span>
-                                  <span>{{weather.precipitation.windSpeed}}</span>
-                              </div>
-                          {{/if}}
-                          {{#if weather.precipitation.rainbowChance}}
-                              <div class="effect-group">
-                                  <span class="effect-label">Rainbow Chance:</span>
-                                  <span>{{weather.precipitation.rainbowChance}}%</span>
-                              </div>
-                          {{/if}} --}}
                       </div>
 
                       {{#if weather.precipitation.notes}}
