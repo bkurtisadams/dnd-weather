@@ -219,7 +219,11 @@ export class WeatherDialog extends Application {
                 duration: 'none',
                 movement: 'Normal',
                 vision: 'Normal',
-                notes: ''
+                notes: '',
+                continues: false,
+                chanceContinuing: 0,
+                previousType: null,
+                changed: false
             };
 
             try {
@@ -247,7 +251,7 @@ export class WeatherDialog extends Application {
                         if (precipDetails) {
                             precipitation = {
                                 type: precipType,
-                                amount: precipData.amount || precipDetails.precipitation.amount,
+                                amount: typeof precipData.amount === 'number' ? precipData.amount : 1, // Default to 1 for drizzle
                                 duration: precipData.duration || precipDetails.precipitation.duration,
                                 // Properly map movement based on structure
                                 movement: typeof precipDetails.precipitation.movement === 'object' 
@@ -262,9 +266,9 @@ export class WeatherDialog extends Application {
                                     : precipDetails.precipitation.infraUltra || 'Normal',
                                 tracking: precipDetails.precipitation.tracking || 'Normal',
                                 chanceLost: precipDetails.precipitation.chanceLost || 'Normal',
-                                windSpeed: precipDetails.precipitation.windSpeed || 'Normal',
+                                //windSpeed: precipDetails.precipitation.windSpeed || 'Normal',
                                 notes: precipDetails.notes || '',
-                                rainbowChance: precipDetails.chanceRainbow || 0,
+                                //rainbowChance: precipDetails.chanceRainbow || 0,
                                 continues: precipData.continues || false,
                                 chanceContinuing: precipDetails.chanceContinuing || 0,
                                 continuingDuration: precipData.duration || 0,

@@ -207,8 +207,10 @@ export class GreyhawkWeatherSystem {
             }
     
             // Step 5: Calculate wind chill if needed
-            //const windChill = lowTemp < 35 ? this._calculateWindChill(lowTemp, wind.speed) : null;
-            const windChill = lowTemp < 35 ? applyWindChill(lowTemp, wind.speed, windChillTable) : null;
+            let windChill = null;
+            if (lowTemp < 35) {
+                windChill = applyWindChill(lowTemp, wind.speed, windChillTable);
+            }
 
             // Get moon phases
             const moonPhase = await this._determineMoonPhases();
@@ -282,7 +284,9 @@ export class GreyhawkWeatherSystem {
         return { isExtreme: false, type: 'normal', adjustedTemp: baseTemp };
     }
 
+    // _determineSkyConditions method 
     _determineSkyConditions(roll, conditions) {
+        console.log("Sky conditions roll:", roll);
         if (roll <= conditions.clear[1]) return 'Clear';
         if (roll <= conditions.partlyCloudy[1]) return 'Partly Cloudy';
         return 'Cloudy';
@@ -292,11 +296,18 @@ export class GreyhawkWeatherSystem {
         // Find matching precipitation type from table
         for (const [type, data] of Object.entries(weatherPhenomena)) {
             if (roll >= data.diceRange[0] && roll <= data.diceRange[1]) {
+                // Check terrain restrictions first
+                if (data.restrictedTerrain?.includes(this.settings.terrain)) {
+                    console.log(`DND-Weather | Weather type ${type} is restricted in ${this.settings.terrain}, rerolling...`);
+                    return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
+                }                
                 // Check temperature requirements
                 if (data.temperature.max && temperature > data.temperature.max) {
+                    console.log(`DND-Weather | Temperature ${temperature}°F too high for ${type}, rerolling...`);
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
                 }
                 if (data.temperature.min && temperature < data.temperature.min) {
+                    console.log(`DND-Weather | Temperature ${temperature}°F too low for ${type}, rerolling...`);
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
                 }
     
@@ -337,9 +348,12 @@ export class GreyhawkWeatherSystem {
                         chanceLost: data.precipitation.chanceLost,
                         windSpeed: data.precipitation.windSpeed,
                         notes: data.notes,
-                        chanceContinuing: data.chanceContinuing,
-                        chanceRainbow: data.chanceRainbow,
-                        continues: false  // Initialize this
+                        chanceContinuing: data.chanceContinuing || 0,
+                        chanceRainbow: data.chanceRainbow || 0,
+                        continues: false,
+                        previousType: null,
+                        changed: false,
+                        effects: this._getPrecipitationEffects(data)
                     };
             }
         }
@@ -353,10 +367,12 @@ export class GreyhawkWeatherSystem {
             tracking: 'Normal',
             chanceLost: 'Normal',
             windSpeed: 'Normal',
-            notes: '',
-            effects: [],
+            chanceContinuing: 0,
             chanceRainbow: 0,
-            chanceContinuing: 0
+            continues: false,
+            previousType: null,
+            changed: false,
+            effects: []
         };
     }
 
@@ -435,7 +451,9 @@ export class GreyhawkWeatherSystem {
 
 async _determineWindForPrecipitation(precipitation) {
     if (!precipitation?.type || precipitation.type === 'none') {
-        return { speed: 0, direction: 'North', effects: [] };
+        const baseSpeed = await rollDice(1, 20)[0];
+        const direction = await this._determineWindDirection();
+        return { speed: baseSpeed, direction, effects: [] };
     }
 
     const precipData = weatherPhenomena[precipitation.type];
@@ -796,7 +814,7 @@ _determineLycanthropeActivity(lunaPhase, celenePhase) {
     return lycanthropeActivity.normal;
 }
 
-async updateWeather(options = {}) {
+/* async updateWeather(options = {}) {
     console.log("DND-Weather | Updating current weather", options);
     
     if (!this.currentWeather) {
@@ -806,6 +824,7 @@ async updateWeather(options = {}) {
 
     // Check if current precipitation should continue
     const currentPrecip = this.currentWeather.baseConditions.precipitation;
+
     if (currentPrecip.type !== 'none' && options.continues) {
         console.log("DND-Weather | Handling precipitation continuation");
         
@@ -894,7 +913,95 @@ async updateWeather(options = {}) {
     // If no continuation or rainbow, generate new weather
     console.log("DND-Weather | Generating new weather");
     return this.generateDailyWeather(new Date());
-}
+} */
+
+    async updateWeather(options = {}) {
+        console.log("DND-Weather | Updating weather with options:", options);
+        
+        if (!this.currentWeather?.baseConditions?.precipitation) {
+            console.log("DND-Weather | No current weather, generating new");
+            return this.generateDailyWeather(new Date());
+        }
+    
+        const currentPrecip = this.currentWeather.baseConditions.precipitation;
+        
+        if (currentPrecip.type !== 'none' && !options.checkRainbow) {
+            console.log("DND-Weather | Checking precipitation continuation for:", currentPrecip.type);
+            
+            const continuationRoll = await rollDice(1, 100)[0];
+            console.log("DND-Weather | Continuation roll:", continuationRoll, "needed:", currentPrecip.chanceContinuing);
+    
+            if (continuationRoll <= currentPrecip.chanceContinuing) {
+                const changeRoll = await rollDice(1, 10)[0];
+                console.log("DND-Weather | Type change roll:", changeRoll);
+    
+                let newPrecipType = currentPrecip.type;
+                const types = Object.keys(weatherPhenomena);
+                const currentIndex = types.indexOf(currentPrecip.type.toLowerCase());
+    
+                if (changeRoll === 1 && currentIndex > 0) {
+                    newPrecipType = types[currentIndex - 1];
+                    console.log("DND-Weather | Precipitation type moving up to:", newPrecipType);
+                } else if (changeRoll === 10 && currentIndex < types.length - 1) {
+                    newPrecipType = types[currentIndex + 1];
+                    console.log("DND-Weather | Precipitation type moving down to:", newPrecipType);
+                }
+    
+                // Use helper methods instead of direct object creation
+                const typeRoll = this._getPrecipitationRollForType(newPrecipType);
+                const temperature = this.currentWeather.baseConditions.temperature.high;
+                const newPrecip = await this._determinePrecipitation(typeRoll, temperature);
+                const duration = await this._calculatePrecipitationDuration(weatherPhenomena[newPrecipType]);
+                const wind = await this._determineWindForPrecipitation(newPrecip);
+    
+                return {
+                    ...this.currentWeather,
+                    baseConditions: {
+                        ...this.currentWeather.baseConditions,
+                        precipitation: {
+                            ...newPrecip,
+                            continues: true,
+                            duration,
+                            previousType: currentPrecip.type,
+                            changed: newPrecipType !== currentPrecip.type,
+                            chanceContinuing: weatherPhenomena[newPrecipType].chanceContinuing || 0
+                        },
+                        wind
+                    },
+                    timestamp: new Date().toLocaleString()
+                };
+            }
+        }
+    
+        if (currentPrecip.type !== 'none' && options.checkRainbow) {
+            const rainbowRoll = await rollDice(1, 100)[0];
+            if (rainbowRoll <= currentPrecip.chanceRainbow) {
+                console.log("DND-Weather | Rainbow appears!");
+                const typeRoll = await rollDice(1, 100)[0];
+                let rainbowEffect = {};
+                
+                if (typeRoll <= 89) rainbowEffect = { type: 'single' };
+                else if (typeRoll <= 95) rainbowEffect = { type: 'double', isOmen: true };
+                else if (typeRoll <= 98) rainbowEffect = { type: 'triple', isOmen: true };
+                else if (typeRoll === 99) rainbowEffect = { type: 'bifrost', description: 'Bifrost bridge or clouds in shape of rain deity' };
+                else rainbowEffect = { type: 'deity', description: 'Rain deity or servant in sky' };
+                
+                const newWeather = await this.generateDailyWeather(new Date());
+                return {
+                    ...newWeather,
+                    effects: {
+                        ...newWeather.effects,
+                        special: [...(newWeather.effects.special || []), 
+                            `Rainbow appears: ${rainbowEffect.type}${rainbowEffect.isOmen ? ' (possible omen)' : ''}${rainbowEffect.description ? ` - ${rainbowEffect.description}` : ''}`
+                        ]
+                    }
+                };
+            }
+        }
+    
+        console.log("DND-Weather | Generating new weather");
+        return this.generateDailyWeather(new Date());
+    }    
 
 // Helper method to get the correct roll value for a precipitation type
 _getPrecipitationRollForType(type) {

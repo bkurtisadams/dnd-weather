@@ -73,6 +73,12 @@
     margin-right: 0.5em;
 }
 
+.weather-dialog .wind-chill {
+    font-size: 0.9em;
+    color: #666;
+    font-style: italic;
+}
+
 /* Precipitation Details */
 .weather-dialog .precip-details {
     margin-top: 10px;
