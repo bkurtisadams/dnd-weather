@@ -84,25 +84,54 @@
                       {{/if}}
                   </div>
 
+                  <!-- Modify in weather-display.hbs -->
                   {{#if weather.precipitation.continues}}
-                      <div class="continuing-weather">
-                          <h4>Continuing Weather</h4>
-                          <div class="continuation-details">
-                              <p>Current precipitation continues for 
-                                  {{#if (gt weather.precipitation.duration 24)}}
-                                      {{floor (divide weather.precipitation.duration 24)}} {{#if (eq (floor (divide weather.precipitation.duration 24)) 1)}}day{{else}}days{{/if}}
-                                      {{#if (gt (mod weather.precipitation.duration 24) 0)}}
-                                          , {{mod weather.precipitation.duration 24}} {{#if (eq (mod weather.precipitation.duration 24) 1)}}hour{{else}}hours{{/if}}
-                                      {{/if}}
-                                  {{else}}
-                                      {{weather.precipitation.duration}} {{#if (eq weather.precipitation.duration 1)}}hour{{else}}hours{{/if}}
-                                  {{/if}}
-                              </p>
-                              {{#if weather.precipitation.changed}}
-                                  <p>Type changed from {{weather.precipitation.previousType}} to {{weather.precipitation.type}}</p>
-                              {{/if}}
-                          </div>
+                  <div class="continuing-weather {{#if weather.precipitation.changed}}transition{{/if}}">
+                    <div class="continuation-header">
+                      <h4>
+                        <i class="fas fa-sync-alt"></i> 
+                        Continuing Weather 
+                        {{#if weather.precipitation.changed}}
+                        <span class="changed-indicator">(Changed)</span>
+                        {{/if}}
+                      </h4>
+                    </div>
+                    
+                    <div class="continuation-details">
+                      {{#if weather.precipitation.changed}}
+                      <div class="weather-transition">
+                        <div class="previous-weather">
+                          <span class="transition-label">From:</span>
+                          <span class="weather-type">{{weather.precipitation.previousType}}</span>
+                        </div>
+                        <div class="transition-arrow">
+                          <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="current-weather">
+                          <span class="transition-label">To:</span>
+                          <span class="weather-type">{{weather.precipitation.type}}</span>
+                        </div>
                       </div>
+                      {{/if}}
+                      
+                      <div class="duration-display">
+                        <span class="duration-label">Continues for:</span>
+                        <span class="duration-value">
+                          {{#if (gt weather.precipitation.duration 24)}}
+                            {{floor (divide weather.precipitation.duration 24)}} 
+                            {{#if (eq (floor (divide weather.precipitation.duration 24)) 1)}}day{{else}}days{{/if}}
+                            {{#if (gt (mod weather.precipitation.duration 24) 0)}}
+                              , {{mod weather.precipitation.duration 24}} 
+                              {{#if (eq (mod weather.precipitation.duration 24) 1)}}hour{{else}}hours{{/if}}
+                            {{/if}}
+                          {{else}}
+                            {{weather.precipitation.duration}} 
+                            {{#if (eq weather.precipitation.duration 1)}}hour{{else}}hours{{/if}}
+                          {{/if}}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                   {{/if}}
 
                   <div class="effects-section">

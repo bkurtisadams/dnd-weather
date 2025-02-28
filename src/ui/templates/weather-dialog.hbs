@@ -56,6 +56,123 @@
         </button>
     </div>
 
+    <!-- Add to weather-dialog.hbs -->
+    {{#if weather}}
+    <div class="current-weather-summary">
+    <h3>Current Weather</h3>
+    <div class="weather-status {{#if weather.precipitation.continues}}continuing{{/if}}">
+        <div class="weather-icon">
+        <i class="fas {{weatherIcon weather.conditions weather.precipitation.type}}"></i>
+        </div>
+        <div class="weather-text">
+        <span class="weather-condition">{{weather.conditions}}</span>
+        {{#if weather.precipitation.type}}
+            <span class="precipitation-type">{{weather.precipitation.type}}</span>
+        {{/if}}
+        {{#if weather.precipitation.continues}}
+            <span class="continuation-indicator">
+            <i class="fas fa-sync-alt"></i> Continuing
+            </span>
+        {{/if}}
+        </div>
+    </div>
+    </div>
+    {{/if}}
+
+    <!-- Add to weather-dialog.hbs -->
+    {{#if weather.precipitation.continues}}
+    <div class="weather-timeline">
+    <div class="timeline-point previous">
+        <span class="time-label">Previous</span>
+        <span class="weather-type">{{weather.precipitation.previousType}}</span>
+    </div>
+    <div class="timeline-connector {{#if weather.precipitation.changed}}changed{{/if}}">
+        <i class="fas fa-long-arrow-alt-right"></i>
+    </div>
+    <div class="timeline-point current">
+        <span class="time-label">Current</span>
+        <span class="weather-type">{{weather.precipitation.type}}</span>
+    </div>
+    <div class="timeline-duration">
+        <i class="fas fa-clock"></i>
+        {{formatDuration weather.precipitation.duration}}
+    </div>
+    </div>
+    {{/if}}
+
+    <!-- Add to weather-dialog.hbs -->
+    <div class="weather-history-section">
+    <button type="button" class="collapse-toggle">
+        <i class="fas fa-history"></i> Weather History
+        <i class="fas fa-chevron-down"></i>
+    </button>
+    <div class="weather-history-content collapsed">
+        <ul class="weather-history-list">
+        {{#each weatherHistory}}
+        <li class="weather-history-item">
+            <span class="history-time">{{this.timestamp}}</span>
+            <span class="history-condition">{{this.baseConditions.sky}}</span>
+            <span class="history-precipitation">{{this.baseConditions.precipitation.type}}</span>
+            <button type="button" class="restore-weather" data-index="{{@index}}">
+            <i class="fas fa-undo"></i>
+            </button>
+        </li>
+        {{/each}}
+        </ul>
+    </div>
+    </div>
+
+    <!-- Add to weather-dialog.hbs -->
+    {{#if isGM}}
+    <div class="weather-override-section">
+    <button type="button" class="collapse-toggle">
+        <i class="fas fa-sliders-h"></i> Weather Controls
+        <i class="fas fa-chevron-down"></i>
+    </button>
+    <div class="weather-override-content collapsed">
+        <div class="override-form">
+        <div class="form-row">
+            <label for="override-precipitation">Precipitation:</label>
+            <select id="override-precipitation">
+            <option value="none">None</option>
+            {{#each precipitationTypes}}
+                <option value="{{this}}">{{this}}</option>
+            {{/each}}
+            </select>
+        </div>
+        
+        <div class="form-row">
+            <label for="override-duration">Duration (hours):</label>
+            <input type="number" id="override-duration" min="1" max="72" value="4">
+        </div>
+        
+        <div class="form-row">
+            <label>
+            <input type="checkbox" id="override-continuation">
+            Mark as continuation
+            </label>
+        </div>
+        
+        <div class="form-row">
+            <label for="override-previous-type" class="conditional-field">
+            Previous Type:
+            </label>
+            <select id="override-previous-type" class="conditional-field">
+            <option value="none">None</option>
+            {{#each precipitationTypes}}
+                <option value="{{this}}">{{this}}</option>
+            {{/each}}
+            </select>
+        </div>
+        
+        <button type="button" class="apply-override">
+            Apply Weather Override
+        </button>
+        </div>
+    </div>
+    </div>
+    {{/if}}
+
     {{!-- Debug info section --}}
     {{#if error}}
     <div class="error-message" style="color: red; margin-top: 10px;">

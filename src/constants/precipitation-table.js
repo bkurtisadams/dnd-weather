@@ -1,3 +1,11 @@
+// Add to constants/precipitation-table.js
+export const terrainPrecipitationRestrictions = {
+    'desert': ['rainstorm-heavy', 'thunderstorm', 'tropical-storm', 'hurricane'],
+    'plains': ['tropical-storm', 'hurricane'],
+    'mountains': ['tropical-storm', 'hurricane'],
+    // Add more terrain-precipitation restrictions
+  };
+
 // Combined precipitation occurrence and standard weather effects
 export const weatherPhenomena = {
     "blizzard-heavy": {
@@ -333,7 +341,7 @@ export const weatherPhenomena = {
         },
         chanceContinuing: 30,
         chanceRainbow: 5,
-        restrictedTerrain: ["Desert", "dust", "plains"],
+        restrictedTerrain: ["Desert", "dust", "plains", "mountains"],
         precipitation: {
             amount: "d8/day", // Will show as "X inches per day"
             duration: "d6+6 days",
@@ -358,7 +366,7 @@ export const weatherPhenomena = {
         },
         chanceContinuing: 15,
         chanceRainbow: 10,
-        restrictedTerrain: ["Desert"],
+        restrictedTerrain: ["Desert", "mountains"],
         precipitation: {
             amount: "d8/day",
             duration: "1/2d6 days",
@@ -383,7 +391,7 @@ export const weatherPhenomena = {
         },
         chanceContinuing: 20,
         chanceRainbow: 5,
-        restrictedTerrain: ["Desert", "dust"],
+        restrictedTerrain: ["Desert", "dust", "mountains"],
         precipitation: {
             amount: "d10/day",
             duration: "1/2d8 days",

@@ -17,6 +17,32 @@ console.log("WeatherDialog.js loaded, importing:", {
     baselineData
 });
 
+// Add to WeatherDialog.js
+Handlebars.registerHelper('weatherIcon', function(condition, precipitation) {
+    if (precipitation && precipitation !== 'none') {
+      if (precipitation.includes('snow')) return 'fa-snowflake';
+      if (precipitation.includes('rain') || precipitation.includes('drizzle')) return 'fa-cloud-rain';
+      if (precipitation.includes('thunder')) return 'fa-bolt';
+      if (precipitation.includes('hail')) return 'fa-cloud-meatball';
+      if (precipitation.includes('fog')) return 'fa-smog';
+    }
+    
+    if (condition === 'Clear') return 'fa-sun';
+    if (condition === 'Partly Cloudy') return 'fa-cloud-sun';
+    if (condition === 'Cloudy') return 'fa-cloud';
+    
+    return 'fa-cloud';
+  });
+  
+  Handlebars.registerHelper('formatDuration', function(hours) {
+    if (hours >= 24) {
+      const days = Math.floor(hours / 24);
+      const remainingHours = hours % 24;
+      return `${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
+    }
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  });
+
 // Add near the top of the file, after imports
 Handlebars.registerHelper('eq', function(a, b) {
     return a === b;
@@ -44,6 +70,8 @@ export class WeatherDialog extends Application {
         super(options);
         this.weatherTimer = null;
         this.displayWindow = null;
+        this.weatherHistory = [];
+        this.maxHistoryLength = 10; // Keep only the last 10 weather events
         console.log("WeatherDialog constructor called");
 
         // Initialize months from baselineData
@@ -342,7 +370,10 @@ export class WeatherDialog extends Application {
                         celene: currentWeather.baseConditions.moonPhase?.celene || 'Unknown'
                     },
                     conditions: currentWeather.baseConditions.sky,
+                    weatherHistory: this.weatherHistory,
+                    precipitationTypes: Object.keys(weatherPhenomena),
                     daylight: daylight  // Add new daylight data
+                    
                 },
                 effects: currentWeather.effects,
                 terrain: currentWeather.terrain,
@@ -433,6 +464,48 @@ export class WeatherDialog extends Application {
             console.log("DND-Weather | Latitude changed to:", this.state.latitude);
         });
         
+        // Add to WeatherDialog.js in activateListeners method
+        html.find('.collapse-toggle').on('click', function() {
+            const content = $(this).next('.collapsed');
+            content.toggleClass('collapsed');
+            $(this).find('.fa-chevron-down, .fa-chevron-up').toggleClass('fa-chevron-down fa-chevron-up');
+        });
+        
+        // For the weather history restore buttons
+        html.find('.restore-weather').on('click', async (event) => {
+            const index = event.currentTarget.dataset.index;
+            if (this.weatherHistory && this.weatherHistory[index]) {
+            this.state.currentWeather = this.weatherHistory[index];
+            await this.render();
+            }
+        });
+        
+        // For the weather override
+        html.find('#override-continuation').on('change', function() {
+            const isChecked = $(this).prop('checked');
+            $('.conditional-field').toggleClass('visible', isChecked);
+        });
+        
+        html.find('.apply-override').on('click', async () => {
+            const precipType = html.find('#override-precipitation').val();
+            const duration = parseInt(html.find('#override-duration').val(), 10);
+            const isContinuation = html.find('#override-continuation').prop('checked');
+            const previousType = isContinuation ? html.find('#override-previous-type').val() : null;
+            
+            // Create modified weather data
+            const weather = await this._createOverrideWeather(precipType, duration, isContinuation, previousType);
+            
+            // Update current weather
+            this.state.currentWeather = weather;
+            this.state.lastUpdate = new Date().toLocaleTimeString();
+            
+            // Update display
+            if (this.displayWindow) {
+            await this.displayWindow.update(weather);
+            }
+            
+            await this.render();
+        });
         // Do the same for terrain and elevation
     }
 
@@ -467,6 +540,12 @@ export class WeatherDialog extends Application {
             if (weatherData && weatherData.length > 0) {
                 this.state.currentWeather = weatherData[0];
                 this.state.lastUpdate = new Date().toLocaleTimeString();
+
+                if (this.state.currentWeather) {
+                    this._addToWeatherHistory(this.state.currentWeather);
+                  }
+
+                  this.state.currentWeather = weatherData[0];
 
                 // Ensure display window exists and update it
                 const display = await this._ensureDisplayWindow();
@@ -609,6 +688,11 @@ export class WeatherDialog extends Application {
                     if (weather) {
                         this.state.currentWeather = weather;
                         this.state.lastUpdate = new Date().toLocaleTimeString();
+                        if (this.state.currentWeather) {
+                            this._addToWeatherHistory(this.state.currentWeather);
+                          }
+                          
+                          this.state.currentWeather = weather;
                         // Add display window
                         if (this.displayWindow) {
                             await this.displayWindow.update(this.state.currentWeather);
@@ -638,6 +722,16 @@ export class WeatherDialog extends Application {
         }
     }
 
+    // Helper method to add to weather history
+    _addToWeatherHistory(weather) {
+        this.weatherHistory.unshift({...weather}); // Add at beginning
+        
+        // Keep history limited to maxHistoryLength
+        if (this.weatherHistory.length > this.maxHistoryLength) {
+        this.weatherHistory = this.weatherHistory.slice(0, this.maxHistoryLength);
+        }
+    }
+
     _onOpenSettings(event) {
         event.preventDefault();
         console.log("DND-Weather | Settings clicked");
@@ -659,4 +753,51 @@ export class WeatherDialog extends Application {
         
         return super.close(options);
     }
+
+    // Add to WeatherDialog.js
+async _createOverrideWeather(precipType, duration, isContinuation, previousType) {
+    // Start with current weather as a base
+    const baseWeather = this.state.currentWeather || 
+      (await globalThis.dndWeather.weatherSystem.generateDailyWeather(new Date()));
+    
+    // Get precipitation data
+    const precipData = weatherPhenomena[precipType] || { 
+      precipitation: { 
+        movement: 'Normal', 
+        vision: 'Normal',
+        infraUltra: 'Normal',
+        tracking: 'Normal',
+        chanceLost: 'Normal'
+      },
+      chanceContinuing: 0,
+      chanceRainbow: 0,
+      notes: ''
+    };
+    
+    // Create modified weather object
+    return {
+      ...baseWeather,
+      baseConditions: {
+        ...baseWeather.baseConditions,
+        precipitation: {
+          type: precipType,
+          amount: precipData.precipitation.amount ? await evalDice(precipData.precipitation.amount) : null,
+          duration: duration,
+          movement: precipData.precipitation.movement,
+          vision: precipData.precipitation.vision,
+          infraUltra: precipData.precipitation.infraUltra,
+          tracking: precipData.precipitation.tracking,
+          chanceLost: precipData.precipitation.chanceLost,
+          notes: precipData.notes,
+          chanceContinuing: precipData.chanceContinuing || 0,
+          chanceRainbow: precipData.chanceRainbow || 0,
+          continues: isContinuation,
+          previousType: previousType,
+          changed: isContinuation && previousType !== precipType,
+          effects: this._getPrecipitationEffects(precipData)
+        }
+      },
+      timestamp: new Date().toLocaleString()
+    };
+  }
 }

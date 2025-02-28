@@ -314,22 +314,9 @@ export class GreyhawkWeatherSystem {
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
                 }
                 
-                // Fix for temperatures near freezing (convert rain to snow)
-                let finalType = type;
-                if (temperature <= 37) {
-                    if (type === 'rainstorm-light') {
-                        console.log(`DND-Weather | Converting rainstorm-light to snowstorm-light due to freezing temperature (${temperature}°F)`);
-                        finalType = 'snowstorm-light';
-                    } else if (type === 'rainstorm-heavy') {
-                        console.log(`DND-Weather | Converting rainstorm-heavy to snowstorm-heavy due to freezing temperature (${temperature}°F)`);
-                        finalType = 'snowstorm-heavy';
-                    } else if (type === 'drizzle') {
-                        console.log(`DND-Weather | Converting drizzle to light snow due to freezing temperature (${temperature}°F)`);
-                        finalType = 'snowstorm-light';
-                    } else if (type === 'thunderstorm') {
-                        console.log(`DND-Weather | Converting thunderstorm to snow with thunder due to freezing temperature (${temperature}°F)`);
-                        finalType = 'snowstorm-heavy';  // With added thunder effect
-                    }
+                let finalType = this._convertPrecipitationByTemperature(type, temperature);
+                if (finalType !== type) {
+                    console.log(`DND-Weather | Converting ${type} to ${finalType} due to freezing temperature (${temperature}°F)`);
                 }
                 
                 // If we converted the type, get the new data
@@ -1067,25 +1054,15 @@ async updateWeather(options = {}) {
             }
 
             // Get the new precipitation type based on the index
-            let newPrecipType = types[newTypeIndex];
+            /* let newPrecipType = types[newTypeIndex]; */
+            newPrecipType = convertPrecipitationByTemperature(newPrecipType, temperature);
 
             // Convert rain to snow at near freezing temperatures if needed
-            if (temperature <= 37) {
-                if (newPrecipType === 'rainstorm-light') {
-                    console.log(`DND-Weather | Converting rainstorm-light to snowstorm-light due to freezing temperature (${temperature}°F)`);
-                    newPrecipType = 'snowstorm-light';
-                } else if (newPrecipType === 'rainstorm-heavy') {
-                    console.log(`DND-Weather | Converting rainstorm-heavy to snowstorm-heavy due to freezing temperature (${temperature}°F)`);
-                    newPrecipType = 'snowstorm-heavy';
-                } else if (newPrecipType === 'drizzle') {
-                    console.log(`DND-Weather | Converting drizzle to light snow due to freezing temperature (${temperature}°F)`);
-                    newPrecipType = 'snowstorm-light';
-                } else if (newPrecipType === 'thunderstorm') {
-                    console.log(`DND-Weather | Converting thunderstorm to snow with thunder due to freezing temperature (${temperature}°F)`);
-                    newPrecipType = 'snowstorm-heavy';
-                }
+            newPrecipType = this._convertPrecipitationByTemperature(newPrecipType, temperature);
+            if (newPrecipType !== precipType) {
+                console.log(`DND-Weather | Converting ${precipType} to ${newPrecipType} due to freezing temperature (${temperature}°F)`);
             }
-
+            
             // Now get the precipitation data for the final type
             const newPrecipData = weatherPhenomena[newPrecipType];
             
@@ -1263,6 +1240,30 @@ _calculateVisibility(precipitation, specialEvent) {
     
     return 'Normal';
 }
+
+/**
+ * Converts rain-type precipitation to snow-type at near-freezing temperatures
+ * @param {string} precipType - Type of precipitation
+ * @param {number} temperature - Current temperature in °F
+ * @returns {string} - Potentially converted precipitation type
+ */
+_convertPrecipitationByTemperature(precipType, temperature) {
+    // Skip if no precipitation, or if temperature is above freezing threshold
+    if (!precipType || precipType === 'none' || temperature > 37) {
+      return precipType;
+    }
+    
+    // Map of rain precipitation types to their snow equivalents
+    const conversions = {
+      'rainstorm-light': 'snowstorm-light',
+      'rainstorm-heavy': 'snowstorm-heavy',
+      'drizzle': 'snowstorm-light',
+      'thunderstorm': 'snowstorm-heavy'
+    };
+    
+    // Return the converted type if available, otherwise return the original
+    return conversions[precipType] || precipType;
+  }
 
 _calculateMovementModifiers(precipitation, specialEvent) {
     let modifier = 1.0;
