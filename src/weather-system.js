@@ -17,6 +17,7 @@ import {
     calculateAltitudeAdjustment,
     applyWindChill 
 } from './utils/temperature.js';
+import { CalendarIntegration } from './CalendarIntegration.js';
 
 
 export class GreyhawkWeatherSystem {
@@ -29,13 +30,160 @@ export class GreyhawkWeatherSystem {
             day: 1, // Default to 1st day of the month for testing
             ...options
         };
-        
-        //this.temperatureCalculator = new TemperatureCalculator();
+
+        // Initialize calendar integration as null first
+        this.calendarIntegration = null;
+        this.currentWeatherStart = null;
+        this.currentWeatherEnd = null;
         
         console.log("DND-Weather | Initialized with settings:", this.settings);
-        console.log("DND-Weather | Temperature calculator initialized");
         
         this.currentWeather = null;
+    }
+
+    /**
+     * Initialize calendar integration
+     * Should be called after Foundry is ready
+     */
+    /**
+ * Initialize calendar integration
+ * Should be called after Foundry is ready
+ */
+async initializeCalendar() {
+    try {
+        // Defensive checks for game object
+        if (!game) {
+            console.warn("DND-Weather | Game object not available");
+            return false;
+        }
+        
+        if (!game.modules) {
+            console.warn("DND-Weather | Game modules collection not available");
+            return false;
+        }
+        
+        // Check if Simple Calendar is active
+        const simpleCalendarModule = game.modules.get('simple-calendar');
+        if (!simpleCalendarModule) {
+            console.warn("DND-Weather | Simple Calendar module not found");
+            return false;
+        }
+        
+        const isSimpleCalendarActive = simpleCalendarModule.active;
+        if (!isSimpleCalendarActive) {
+            console.log("DND-Weather | Simple Calendar module not active, skipping integration");
+            return false;
+        }
+        
+        // Wait for simple-calendar to be ready
+        if (!window.SimpleCalendar) {
+            console.log("DND-Weather | Waiting for Simple Calendar to initialize...");
+            // Wait up to 10 seconds for Simple Calendar to load
+            for (let i = 0; i < 10; i++) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                if (window.SimpleCalendar) break;
+            }
+            
+            if (!window.SimpleCalendar) {
+                console.warn("DND-Weather | Simple Calendar not found after 10 seconds");
+                return false;
+            }
+        }
+        
+        console.log("DND-Weather | Simple Calendar found, initializing integration");
+        
+        // Check if CalendarIntegration class is available
+        if (typeof CalendarIntegration !== 'function') {
+            console.error("DND-Weather | CalendarIntegration class not found");
+            return false;
+        }
+        
+        try {
+            this.calendarIntegration = new CalendarIntegration();
+            const success = await this.calendarIntegration.initialize();
+            
+            if (success) {
+                console.log("DND-Weather | Calendar integration initialized successfully");
+                this._setupCalendarListeners();
+                return true;
+            } else {
+                console.warn("DND-Weather | Failed to initialize calendar integration");
+                return false;
+            }
+        } catch (error) {
+            console.error("DND-Weather | Error creating CalendarIntegration instance:", error);
+            return false;
+        }
+    } catch (error) {
+        console.error("DND-Weather | Error initializing calendar:", error);
+        return false;
+    }
+}
+    
+// Add method to setup calendar listeners
+_setupCalendarListeners() {
+    if (!this.calendarIntegration) return;
+    
+    document.addEventListener('weatherDateChanged', (event) => {
+        console.log("DND-Weather | Calendar date changed:", event.detail);
+        this._checkWeatherExpiration(event.detail.date);
+    });
+}
+    
+// Add this new method to start duration tracking
+_startDurationTracking() {
+    // Clear any existing interval
+    if (this.durationUpdateInterval) {
+        clearInterval(this.durationUpdateInterval);
+    }
+    
+    // Set the start time if not already set
+    if (!this.weatherStartTime) {
+        this.weatherStartTime = new Date();
+    }
+    
+    // Start a new interval
+    this.durationUpdateInterval = setInterval(() => {
+        this._updateDurationDisplay();
+    }, 1000); // Update every second
+}
+
+// Add this method to update the duration display
+_updateDurationDisplay() {
+    if (!this.weatherStartTime) return;
+    
+    const now = new Date();
+    const elapsedMs = now - this.weatherStartTime;
+    const elapsedMinutes = Math.floor(elapsedMs / 60000);
+    const elapsedSeconds = Math.floor((elapsedMs % 60000) / 1000);
+    
+    // Find the duration element
+    const durationElement = this.element.find('#weatherDuration');
+    if (durationElement.length) {
+        durationElement.text(`Weather event duration: ${elapsedMinutes} minutes ${elapsedSeconds} seconds`);
+    }
+}
+    // Add method to check if weather should expire
+    _checkWeatherExpiration(currentDate) {
+        if (!this.calendarIntegration || !this.currentWeatherEnd) return;
+        
+        try {
+            // Convert dates to timestamps for comparison
+            const currentTimestamp = this.calendarIntegration.simpleCalendar.dateToTimestamp(currentDate);
+            const endTimestamp = this.calendarIntegration.simpleCalendar.dateToTimestamp(this.currentWeatherEnd);
+            
+            if (currentTimestamp >= endTimestamp) {
+                console.log("DND-Weather | Weather event has expired, generating new weather");
+                // Only GM should update the weather
+                if (game.user.isGM) {
+                    this.updateWeather({
+                        checkRainbow: true
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("DND-Weather | Error checking weather expiration:", error);
+        }
     }
 
     /**
@@ -215,6 +363,29 @@ export class GreyhawkWeatherSystem {
             // Get moon phases
             const moonPhase = await this._determineMoonPhases();
             console.log("DND-Weather | Calculated moon phases:", moonPhase);
+
+            if (this.calendarIntegration?.initialized) {
+                try {
+                    this.currentWeatherStart = this.calendarIntegration.simpleCalendar.getCurrentDate();
+                    
+                    // Calculate end time if there's precipitation with duration
+                    if (precipitation.duration) {
+                        this.currentWeatherEnd = this.calendarIntegration.calculateWeatherEndTime(precipitation.duration);
+                        console.log("DND-Weather | Weather event scheduled to end at:", this.currentWeatherEnd);
+                    } else {
+                        // For non-precipitation weather, set a default duration (e.g., 6 hours)
+                        this.currentWeatherEnd = this.calendarIntegration.calculateWeatherEndTime(6);
+                    }
+                    
+                    // Add timing info to weather data
+                    weatherData.timing = {
+                        start: this.currentWeatherStart,
+                        end: this.currentWeatherEnd
+                    };
+                } catch (error) {
+                    console.error("DND-Weather | Error setting weather timing:", error);
+                }
+            }
     
             return {
                 baseConditions: {
@@ -1013,7 +1184,9 @@ _determineLycanthropeActivity(lunaPhase, celenePhase) {
     return lycanthropeActivity.normal;
 }
 
+// In weather-system.js, modify the updateWeather method
 async updateWeather(options = {}) {
+    const currentDuration = this.currentWeather?.baseConditions?.precipitation?.duration || 0;
     console.log("DND-Weather | Updating weather with options:", options);
     
     if (!this.currentWeather?.baseConditions?.precipitation) {
@@ -1054,20 +1227,26 @@ async updateWeather(options = {}) {
             }
 
             // Get the new precipitation type based on the index
-            /* let newPrecipType = types[newTypeIndex]; */
-            newPrecipType = convertPrecipitationByTemperature(newPrecipType, temperature);
-
+            let newPrecipType = types[newTypeIndex];
+            
+            // Check temperature compatibility for new type
+            const temperature = this.currentWeather.baseConditions.temperature.high;
+            
             // Convert rain to snow at near freezing temperatures if needed
             newPrecipType = this._convertPrecipitationByTemperature(newPrecipType, temperature);
-            if (newPrecipType !== precipType) {
-                console.log(`DND-Weather | Converting ${precipType} to ${newPrecipType} due to freezing temperature (${temperature}°F)`);
+            if (newPrecipType !== types[newTypeIndex]) {
+                console.log(`DND-Weather | Converting ${types[newTypeIndex]} to ${newPrecipType} due to freezing temperature (${temperature}°F)`);
             }
             
             // Now get the precipitation data for the final type
             const newPrecipData = weatherPhenomena[newPrecipType];
             
+            if (!newPrecipData) {
+                console.error("DND-Weather | Precipitation data not found for type:", newPrecipType);
+                return this.generateDailyWeather(new Date());
+            }
+            
             // Check temperature compatibility for new type
-            const temperature = this.currentWeather.baseConditions.temperature.high;
             if ((newPrecipData.temperature.max && temperature > newPrecipData.temperature.max) ||
                 (newPrecipData.temperature.min && temperature < newPrecipData.temperature.min)) {
                 console.log(`DND-Weather | Temperature ${temperature}°F incompatible with ${newPrecipType}, ending precipitation`);
@@ -1081,8 +1260,22 @@ async updateWeather(options = {}) {
             const windSpeed = await evalDice(newPrecipData.precipitation.windSpeed);
             const windDirection = this.currentWeather.baseConditions.wind.direction;
             
-            // Create updated weather object
-            return {
+            // Note: Time advancement is now handled by the WeatherDialog component
+
+            // Set new start/end times
+            if (this.calendarIntegration?.initialized) {
+                try {
+                    this.currentWeatherStart = this.calendarIntegration.simpleCalendar.getCurrentDate();
+                    
+                    // Calculate new end time based on new precipitation duration
+                    this.currentWeatherEnd = this.calendarIntegration.calculateWeatherEndTime(duration);
+                } catch (error) {
+                    console.error("DND-Weather | Error updating weather timing:", error);
+                }
+            }
+            
+            // Create updated weather object with timing information
+            const updatedWeather = {
                 ...this.currentWeather,
                 baseConditions: {
                     ...this.currentWeather.baseConditions,
@@ -1112,6 +1305,16 @@ async updateWeather(options = {}) {
                 },
                 timestamp: new Date().toLocaleString()
             };
+            
+            // Add timing information if available
+            if (this.currentWeatherStart && this.currentWeatherEnd) {
+                updatedWeather.timing = {
+                    start: this.currentWeatherStart,
+                    end: this.currentWeatherEnd
+                };
+            }
+            
+            return updatedWeather;
         }
     }
 
@@ -1289,22 +1492,52 @@ _calculateMovementModifiers(precipitation, specialEvent) {
 }
 }
 
-// Initialize the module
-Hooks.once('init', async () => {
-    console.log('DND-Weather | Initializing weather system');
-    
-    // Register module settings first
-    registerSettings();
-    
-    // Create global namespace for the module
-    globalThis.dndWeather = {
-        weatherSystem: new GreyhawkWeatherSystem({
-            latitude: game.settings.get('dnd-weather', 'latitude'),
-            elevation: game.settings.get('dnd-weather', 'elevation'),
-            terrain: game.settings.get('dnd-weather', 'terrain')
-        }),
-        WeatherDialog: WeatherDialog
-    };
+    // Corrected 'init' hook
+    Hooks.once('init', async () => {
+        console.log('DND-Weather | Initializing weather system');
+        
+        // Register module settings first
+        registerSettings();
+        
+        // Create global namespace for the module
+        globalThis.dndWeather = {
+            weatherSystem: new GreyhawkWeatherSystem({
+                latitude: game.settings.get('dnd-weather', 'latitude'),
+                elevation: game.settings.get('dnd-weather', 'elevation'),
+                terrain: game.settings.get('dnd-weather', 'terrain')
+            }),
+            WeatherDialog: WeatherDialog
+        };
+
+        // Register the module API
+        const module = game.modules.get('dnd-weather');
+        module.api = globalThis.dndWeather;
+        
+        // Also set the weatherSystem directly
+        module.weatherSystem = globalThis.dndWeather.weatherSystem;
+
+        console.log('DND-Weather | Weather system initialized:', globalThis.dndWeather.weatherSystem);
+    });
+
+    // Add separate 'ready' hook for calendar initialization
+    Hooks.once('ready', async () => {
+        console.log('DND-Weather | Foundry ready, initializing calendar integration');
+        
+        // Wait a short time to ensure all modules are fully loaded
+        setTimeout(async () => {
+            // Initialize calendar integration
+            if (globalThis.dndWeather?.weatherSystem) {
+                try {
+                    const success = await globalThis.dndWeather.weatherSystem.initializeCalendar();
+                    console.log('DND-Weather | Calendar integration initialized:', success);
+                } catch (error) {
+                    console.error('DND-Weather | Error initializing calendar integration:', error);
+                }
+            } else {
+                console.warn('DND-Weather | Weather system not available for calendar integration');
+            }
+        }, 1000);
+    });
 
     // Add settings change handler
     Hooks.on('updateSetting', (setting) => {
@@ -1318,16 +1551,6 @@ Hooks.once('init', async () => {
         }
     });
     
-    // Register the module API
-    const module = game.modules.get('dnd-weather');
-    module.api = globalThis.dndWeather;
-    
-    // Also set the weatherSystem directly
-    module.weatherSystem = globalThis.dndWeather.weatherSystem;
-
-    console.log('DND-Weather | Weather system initialized:', globalThis.dndWeather.weatherSystem);
-});
-
 // Add Scene Controls
 Hooks.on("getSceneControlButtons", function(controls) {
     console.log("DND-Weather | Adding weather controls");

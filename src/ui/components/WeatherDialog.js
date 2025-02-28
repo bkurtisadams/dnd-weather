@@ -34,14 +34,19 @@ Handlebars.registerHelper('weatherIcon', function(condition, precipitation) {
     return 'fa-cloud';
   });
   
-  Handlebars.registerHelper('formatDuration', function(hours) {
-    if (hours >= 24) {
-      const days = Math.floor(hours / 24);
-      const remainingHours = hours % 24;
-      return `${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
-    }
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-  });
+Handlebars.registerHelper('formatDuration', function(hours) {
+if (hours >= 24) {
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return `${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
+}
+return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+});
+
+Handlebars.registerHelper('debug', function(value) {
+    console.log("DND-Weather | Template Debug:", value);
+    return '';
+});
 
 // Add near the top of the file, after imports
 Handlebars.registerHelper('eq', function(a, b) {
@@ -71,9 +76,11 @@ export class WeatherDialog extends Application {
         this.weatherTimer = null;
         this.displayWindow = null;
         this.weatherHistory = [];
-        this.maxHistoryLength = 10; // Keep only the last 10 weather events
+        this.maxHistoryLength = 10;
+        this.weatherStartTime = null;  // Initialize the start time property
+        this.durationUpdateInterval = null; // Add this for the interval timer
         console.log("WeatherDialog constructor called");
-
+    
         // Initialize months from baselineData
         this.months = Object.keys(baselineData);
         console.log("Available months:", this.months);
@@ -91,15 +98,51 @@ export class WeatherDialog extends Application {
             terrain: game.settings.get('dnd-weather', 'terrain'),
             elevation: game.settings.get('dnd-weather', 'elevation')            
         };
-
-        // Add months array from baselineData.js
-        /* this.months = Object.keys(globalThis.dndWeather?.weatherSystem?.baselineData || {});
-        console.log("Available months:", this.months); */
-
+    
         // Bind methods to preserve 'this' context
         this._onGenerateWeather = this._onGenerateWeather.bind(this);
         this._onUpdateWeather = this._onUpdateWeather.bind(this);
         this._onOpenSettings = this._onOpenSettings.bind(this);
+        this._updateDurationDisplay = this._updateDurationDisplay.bind(this);
+    }
+
+        // Update _startDurationTracking method
+        _startDurationTracking() {
+        // Clear any existing interval
+        if (this.durationUpdateInterval) {
+            clearInterval(this.durationUpdateInterval);
+            this.durationUpdateInterval = null;
+        }
+        
+        // Don't start a new interval, just update once
+        this._updateDurationDisplay();
+    }
+    
+    // method to update duration
+    // Replace the _updateDurationDisplay method in WeatherDialog.js
+    _updateDurationDisplay() {
+        console.log("DND-Weather | Updating duration display");
+        
+        // Find the duration element
+        const durationElement = this.element.find('#weatherDuration');
+        
+        if (durationElement.length) {
+            // Get the precipitation duration directly from the current weather
+            const precipitation = this.state.currentWeather?.baseConditions?.precipitation;
+            let text;
+            
+            if (precipitation && precipitation.type !== 'none' && precipitation.duration) {
+                // Format it the same way as in getData
+                const duration = precipitation.duration;
+                text = `Weather event duration: ${duration} ${duration === 1 ? 'hour' : 'hours'}`;
+            } else {
+                // No precipitation or clear weather
+                text = "Weather event duration: Not applicable (clear weather)";
+            }
+            
+            console.log("DND-Weather | Setting duration text:", text);
+            durationElement.text(text);
+        }
     }
 
     // Add method to ensure display window
@@ -358,6 +401,49 @@ export class WeatherDialog extends Application {
                 // Continue with default precipitation values
             }
     
+            // Add timing information if available
+            let weatherTiming = {};
+    
+            if (this.state.currentWeather?.timing) {
+                const timing = this.state.currentWeather.timing;
+                
+                if (timing.start) {
+                    weatherTiming.start = this._formatCalendarDate(timing.start);
+                }
+                
+                if (timing.end) {
+                    weatherTiming.end = this._formatCalendarDate(timing.end);
+                    
+                    // Calculate remaining time
+                    if (this.state.currentWeather?.baseConditions?.precipitation?.duration) {
+                        const weatherSystem = globalThis.dndWeather?.weatherSystem;
+                        if (weatherSystem?.calendarIntegration?.initialized) {
+                            try {
+                                const currentDate = weatherSystem.calendarIntegration.simpleCalendar.getCurrentDate();
+                                const currentTimestamp = weatherSystem.calendarIntegration.simpleCalendar.dateToTimestamp(currentDate);
+                                const endTimestamp = weatherSystem.calendarIntegration.simpleCalendar.dateToTimestamp(timing.end);
+                                
+                                const remainingSeconds = Math.max(0, endTimestamp - currentTimestamp);
+                                const remainingHours = Math.floor(remainingSeconds / 3600);
+                                const remainingMinutes = Math.floor((remainingSeconds % 3600) / 60);
+                                
+                                weatherTiming.remaining = `${remainingHours}h ${remainingMinutes}m`;
+                            } catch (error) {
+                                console.error("DND-Weather | Error calculating remaining time:", error);
+                            }
+                        }
+                    }
+                }
+            }
+
+            let weatherDuration = null;
+            if (this.state.currentWeather?.baseConditions?.precipitation?.duration) {
+                // Use the actual weather event duration from precipitation
+                const duration = this.state.currentWeather.baseConditions.precipitation.duration;
+                weatherDuration = `${duration} ${duration === 1 ? 'hour' : 'hours'}`;
+                console.log("DND-Weather | Setting weather duration:", weatherDuration);
+            }
+
             // Return combined data
             return {
                 weather: {
@@ -374,6 +460,8 @@ export class WeatherDialog extends Application {
                     conditions: currentWeather.baseConditions.sky,
                     
                     precipitationTypes: Object.keys(weatherPhenomena),
+                    // Add the new timing property
+                    weatherTiming: weatherTiming,
                     daylight: daylight  // Add new daylight data
                     
                 },
@@ -385,6 +473,7 @@ export class WeatherDialog extends Application {
                 loading: this.state.loading,
                 error: this.state.error,
                 lastUpdate: this.state.lastUpdate || currentWeather.timestamp,
+                weatherDuration: weatherDuration,
                 ...formData
             };
         } catch (error) {
@@ -420,6 +509,22 @@ export class WeatherDialog extends Application {
             loading: false,
             error: errorMessage
         };
+    }
+
+    // Add helper method to format calendar dates
+    _formatCalendarDate(calendarDate) {
+        if (!calendarDate) return 'Unknown';
+        
+        const weatherSystem = globalThis.dndWeather?.weatherSystem;
+        if (!weatherSystem?.calendarIntegration?.initialized) return 'Calendar not initialized';
+        
+        try {
+            // Format date based on Simple Calendar configuration
+            return `${calendarDate.monthName || ''} ${calendarDate.day || ''}, ${calendarDate.year || ''} at ${calendarDate.hour || '0'}:${String(calendarDate.minute || '0').padStart(2, '0')}`;
+        } catch (error) {
+            console.error("DND-Weather | Error formatting calendar date:", error);
+            return 'Error formatting date';
+        }
     }
 
     // activateListeners method
@@ -522,190 +627,186 @@ export class WeatherDialog extends Application {
         // Do the same for terrain and elevation
     }
 
-    async _onGenerateWeather(event) {
-        event.preventDefault();
-        console.log("DND-Weather | Generate weather clicked");
-        
-        const weatherSystem = globalThis.dndWeather?.weatherSystem;
-        if (!weatherSystem) {
-            ui.notifications.error("Weather system not initialized");
-            return;
-        }
+    // In WeatherDialog.js, update the _onGenerateWeather method
+async _onGenerateWeather(event) {
+    event.preventDefault();
+    console.log("DND-Weather | Generate weather clicked");
     
-        this.state.loading = true;
-        this.state.error = null;
-        await this.render();
-    
-        try {
-            // Update weather system settings with current form values
-            weatherSystem.settings = {
-                month: this.state.selectedMonth,
-                day: this.state.selectedDay,
-                latitude: this.state.latitude,
-                elevation: this.state.elevation,
-                terrain: this.state.terrain
-            };
-            console.log("DND-Weather | Using settings:", weatherSystem.settings);
-    
-            const weatherData = await weatherSystem.generateWeather();
-            console.log("DND-Weather | Generated weather data:", weatherData);
-            
-            if (weatherData && weatherData.length > 0) {
-                this.state.currentWeather = weatherData[0];
-                this.state.lastUpdate = new Date().toLocaleTimeString();
-
-                if (this.state.currentWeather) {
-                    this._addToWeatherHistory(this.state.currentWeather);
-                  }
-
-                  this.state.currentWeather = weatherData[0];
-
-                // Ensure display window exists and update it
-                const display = await this._ensureDisplayWindow();
-                await display.update(this.state.currentWeather);
-
-                // before updating the display window
-                if (this.state.currentWeather) {
-                    console.log("Weather data being sent to display:", {
-                        baseConditions: this.state.currentWeather.baseConditions,
-                        effects: this.state.currentWeather.effects
-                    });
-                }
-                
-                // Create or update display window
-                if (!this.displayWindow) {
-                    this.displayWindow = new WeatherDisplay();
-                    // Set the initial data before first render
-                    this.displayWindow.weatherData = this.state.currentWeather;
-                }
-                // Then render and update
-                await this.displayWindow.render(true);
-                await this.displayWindow.update(this.state.currentWeather);
-                
-                // Save settings after successful generation
-                await this._saveSettings();
-                
-                ui.notifications.info("Weather generated successfully");
-            } else {
-                throw new Error("No weather data generated");
-            }
-        } catch (error) {
-            console.error("DND-Weather | Generate failed:", error);
-            ui.notifications.error(error.message);
-            this.state.error = error.message;
-        } finally {
-            this.state.loading = false;
-            await this.render();
-        }
+    const weatherSystem = globalThis.dndWeather?.weatherSystem;
+    if (!weatherSystem) {
+        ui.notifications.error("Weather system not initialized");
+        return;
     }
 
-    async _onUpdateWeather(event) {
-        if (event) event.preventDefault();
-        console.log("DND-Weather | Update weather clicked");
+    this.state.loading = true;
+    this.state.error = null;
+    await this.render();
+
+    try {
+        // Update weather system settings with current form values
+        weatherSystem.settings = {
+            month: this.state.selectedMonth,
+            day: this.state.selectedDay,
+            latitude: this.state.latitude,
+            elevation: this.state.elevation,
+            terrain: this.state.terrain
+        };
+        console.log("DND-Weather | Using settings:", weatherSystem.settings);
+
+        const weatherData = await weatherSystem.generateWeather();
+        console.log("DND-Weather | Generated weather data:", weatherData);
         
-        const weatherSystem = globalThis.dndWeather?.weatherSystem;
-        if (!weatherSystem) {
-            ui.notifications.error("Weather system not initialized");
-            return;
+        if (weatherData && weatherData.length > 0) {
+            this.state.currentWeather = weatherData[0];
+            this.state.lastUpdate = new Date().toLocaleTimeString();
+
+            this._updateDurationDisplay();
+
+            if (this.state.currentWeather) {
+                this._addToWeatherHistory(this.state.currentWeather);
+            }
+            
+            // Reset weather start time
+            this.weatherStartTime = new Date();
+            
+            // Start duration tracking
+            this._startDurationTracking();
+
+            // Ensure display window exists and update it
+            const display = await this._ensureDisplayWindow();
+            await display.update(this.state.currentWeather);
+            
+            // Save settings after successful generation
+            await this._saveSettings();
+
+            // NEW CODE: Advance game time by 4 hours (minimum per Greyhawk rules)
+            if (weatherSystem.calendarIntegration?.initialized && game.user.isGM) {
+                try {
+                    console.log("DND-Weather | Advancing game time by 4 hours for new weather generation");
+                    await weatherSystem.calendarIntegration.advanceTimeByHours(4);
+                    ui.notifications.info("Time advanced by 4 hours (minimum Greyhawk weather interval)");
+                } catch (error) {
+                    console.error("DND-Weather | Error advancing game time:", error);
+                }
+            }
+            
+            ui.notifications.info("Weather generated successfully");
+        } else {
+            throw new Error("No weather data generated");
         }
-    
-        this.state.loading = true;
-        this.state.error = null;
+    } catch (error) {
+        console.error("DND-Weather | Generate failed:", error);
+        ui.notifications.error(error.message);
+        this.state.error = error.message;
+    } finally {
+        this.state.loading = false;
         await this.render();
-    
-        try {
-            const currentWeather = this.state.currentWeather;
-            if (!currentWeather) {
-                console.log("DND-Weather | No current weather, generating new");
-                const weather = await weatherSystem.generateWeather();
-                this.state.currentWeather = weather[0];
-                this.state.lastUpdate = new Date().toLocaleTimeString();
-                
-                // Make sure to update the display window
-                await this._ensureDisplayWindow();
-                await this.displayWindow.update(this.state.currentWeather);
-                
-                ui.notifications.info("New weather generated");
-                return;
-            }
-    
-            const precipitation = currentWeather.baseConditions.precipitation;
-            console.log("DND-Weather | Current precipitation state:", {
-                type: precipitation.type,
-                chanceContinuing: precipitation.chanceContinuing,
-                duration: precipitation.duration
-            });
-            
-            let updatedWeather;
-            
-            // Check for continuation if there's current precipitation
-            if (precipitation.type !== 'none' && precipitation.chanceContinuing) {
-                console.log("DND-Weather | Checking precipitation continuation for", precipitation.type);
-                
-                const continuationRoll = await rollDice(1, 100)[0];
-                console.log("DND-Weather | Continuation check:", {
-                    roll: continuationRoll,
-                    chance: precipitation.chanceContinuing
-                });
-    
-                if (continuationRoll <= precipitation.chanceContinuing) {
-                    // Roll for type change
-                    const changeRoll = await rollDice(1, 10)[0];
-                    console.log("DND-Weather | Precipitation continues, type change roll:", changeRoll);
-    
-                    updatedWeather = await weatherSystem.updateWeather({
-                        continues: true,
-                        changeRoll: changeRoll,
-                        currentType: precipitation.type
-                    });
-    
-                    if (updatedWeather) {
-                        ui.notifications.info(`Weather continues with ${updatedWeather.baseConditions.precipitation.type}`);
-                    }
-                } else {
-                    console.log("DND-Weather | Precipitation ends, checking for rainbow");
-                    updatedWeather = await weatherSystem.updateWeather({
-                        continues: false,
-                        checkRainbow: true
-                    });
-    
-                    if (updatedWeather) {
-                        ui.notifications.info("Weather system updated - precipitation ended");
-                    }
-                }
-            } else {
-                console.log("DND-Weather | No precipitation to continue, generating new weather");
-                updatedWeather = await weatherSystem.updateWeather();
-                
-                if (updatedWeather) {
-                    ui.notifications.info("Weather updated successfully");
-                }
-            }
-            
-            if (updatedWeather) {
-                // Update state
-                this.state.currentWeather = updatedWeather;
-                this.state.lastUpdate = new Date().toLocaleTimeString();
-                
-                // Add to history
-                this._addToWeatherHistory(updatedWeather);
-                
-                // ALWAYS ensure and update the display window
-                await this._ensureDisplayWindow();
-                await this.displayWindow.update(updatedWeather);
-            } else {
-                throw new Error("No weather data updated");
-            }
-        } catch (error) {
-            console.error("DND-Weather | Update failed:", error);
-            ui.notifications.error(error.message);
-            this.state.error = error.message;
-        } finally {
-            this.state.loading = false;
-            await this.render();
-        }
+    }
+}
+
+    // In WeatherDialog.js, update the _onUpdateWeather method
+async _onUpdateWeather(event) {
+    if (event) event.preventDefault();
+    console.log("DND-Weather | Update weather clicked");
+
+    const weatherSystem = globalThis.dndWeather?.weatherSystem;
+    if (!weatherSystem) {
+        ui.notifications.error("Weather system not initialized");
+        return;
     }
 
+    this.state.loading = true;
+    this.state.error = null;
+    await this.render();
+
+    try {
+        const currentWeather = this.state.currentWeather;
+        if (!currentWeather) {
+            console.log("DND-Weather | No current weather, generating new");
+            const weather = await weatherSystem.generateWeather();
+            this.state.currentWeather = weather[0];
+            this.state.lastUpdate = new Date().toLocaleTimeString();
+
+            // Set the start time when new weather is generated
+            if (!this.weatherStartTime) {
+                this.weatherStartTime = new Date();
+            }
+
+            // Continue with rendering logic...
+            await this._ensureDisplayWindow();
+            await this.displayWindow.update(this.state.currentWeather);
+            ui.notifications.info("New weather generated");
+            
+            // Advance time by minimum 4 hours for new weather
+            if (weatherSystem.calendarIntegration?.initialized && game.user.isGM) {
+                try {
+                    console.log("DND-Weather | Advancing game time by 4 hours for new weather");
+                    await weatherSystem.calendarIntegration.advanceTimeByHours(4);
+                    ui.notifications.info("Time advanced by 4 hours (minimum Greyhawk weather interval)");
+                } catch (error) {
+                    console.error("DND-Weather | Error advancing game time:", error);
+                }
+            }
+            
+            this.state.loading = false;
+            await this.render();
+            return;
+        }
+
+        // Get current precipitation data and duration
+        const precipitation = currentWeather.baseConditions.precipitation;
+        const currentDuration = precipitation?.duration || 0;
+        
+        console.log("DND-Weather | Current precipitation state:", {
+            type: precipitation.type,
+            chanceContinuing: precipitation.chanceContinuing,
+            duration: precipitation.duration
+        });
+
+        // Update the weather
+        const updatedWeather = await weatherSystem.updateWeather();
+        
+        if (updatedWeather) {
+            this.state.currentWeather = updatedWeather;
+            this.state.lastUpdate = new Date().toLocaleTimeString();
+            this._addToWeatherHistory(updatedWeather);
+            
+            // Reset weather start time for the new weather
+            this.weatherStartTime = new Date();
+            
+            // Restart duration tracking
+            this._startDurationTracking();
+
+            await this._ensureDisplayWindow();
+            await this.displayWindow.update(updatedWeather);
+            
+            // NEW CODE: Advance game time by the weather duration or minimum 4 hours
+            if (weatherSystem.calendarIntegration?.initialized && game.user.isGM) {
+                try {
+                    // Use the greater of current duration or 4 hours (Greyhawk minimum)
+                    const hoursToAdvance = Math.max(4, currentDuration);
+                    console.log(`DND-Weather | Advancing game time by ${hoursToAdvance} hours (weather duration)`);
+                    await weatherSystem.calendarIntegration.advanceTimeByHours(hoursToAdvance);
+                    ui.notifications.info(`Time advanced by ${hoursToAdvance} hours`);
+                } catch (error) {
+                    console.error("DND-Weather | Error advancing game time:", error);
+                }
+            }
+            
+            ui.notifications.info("Weather updated successfully");
+        } else {
+            throw new Error("No weather data updated");
+        }
+    } catch (error) {
+        console.error("DND-Weather | Update failed:", error);
+        ui.notifications.error(error.message);
+        this.state.error = error.message;
+    } finally {
+        this.state.loading = false;
+        await this.render();
+    }
+}
+ 
     // Helper method to add to weather history
     _addToWeatherHistory(weather) {
         this.weatherHistory.unshift({...weather}); // Add at beginning
@@ -722,8 +823,16 @@ export class WeatherDialog extends Application {
         game.settings.sheet.render(true);
     }
 
+    // Make sure to clean up when the dialog closes
     async close(options={}) {
         console.log("DND-Weather | Dialog closing");
+        
+        // Clear the duration update interval
+        if (this.durationUpdateInterval) {
+            clearInterval(this.durationUpdateInterval);
+            this.durationUpdateInterval = null;
+        }
+        
         this.state = {
             loading: false,
             error: null,

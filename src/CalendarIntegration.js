@@ -241,4 +241,57 @@ export class CalendarIntegration {
         const [hours, minutes] = timeString.split(':').map(Number);
         return (hours * 60) + minutes;
     }
+
+    /**
+ * Advance game time by a specified duration
+ * @param {number} hours Number of hours to advance
+ * @returns {Object} New date information
+ */
+advanceTimeByHours(hours) {
+    if (!this.initialized) return null;
+    
+    try {
+        // Get current date/time
+        const currentDate = this.simpleCalendar.getCurrentDate();
+        
+        // Calculate new time
+        const totalSeconds = hours * 3600; // Convert hours to seconds
+        
+        // Advance the calendar
+        this.simpleCalendar.changeDate({
+            seconds: totalSeconds
+        });
+        
+        // Return new date information
+        return this.getCurrentDate();
+    } catch (error) {
+        console.error('DnD Weather | Error advancing time:', error);
+        return null;
+    }
+}
+
+/**
+ * Calculate the end time for a weather event
+ * @param {number} durationHours Duration in hours
+ * @returns {Object} End date/time
+ */
+calculateWeatherEndTime(durationHours) {
+    if (!this.initialized) return null;
+    
+    try {
+        // Get current date/time
+        const currentDate = this.simpleCalendar.getCurrentDate();
+        
+        // Calculate new time
+        const totalSeconds = durationHours * 3600; // Convert hours to seconds
+        const currentTimestamp = this.simpleCalendar.dateToTimestamp(currentDate);
+        const endTimestamp = currentTimestamp + totalSeconds;
+        
+        // Convert timestamp back to date
+        return this.simpleCalendar.timestampToDate(endTimestamp);
+    } catch (error) {
+        console.error('DnD Weather | Error calculating end time:', error);
+        return null;
+    }
+}
 }

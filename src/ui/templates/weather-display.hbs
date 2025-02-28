@@ -29,6 +29,52 @@
     </div>
   </div>
 
+  {{!-- Add the Weather Duration Display here --}}
+  <div class="weather-row">
+    <div class="weather-icon">
+      <i class="fas fa-clock"></i> <!-- Optional clock icon -->
+    </div>
+    <div class="weather-duration-section">
+      <h3>Weather Duration</h3>
+      <p id="weatherDuration">
+          {{#if weatherDuration}}
+              Weather event duration: {{weatherDuration}}
+          {{else}}
+              Weather event duration: Not applicable (clear weather)
+          {{/if}}
+      </p>
+  </div>
+  </div>
+
+  {{!-- Add this section to your weather-dialog.hbs template --}}
+  {{!-- ====================== ADD THIS ====================== --}}
+  {{#if weatherTiming}}
+  <div class="weather-timing-section">
+      <h3>Weather Timing</h3>
+      {{#if weatherTiming.start}}
+      <div class="timing-row">
+          <span class="timing-label">Started:</span>
+          <span class="timing-value">{{weatherTiming.start}}</span>
+      </div>
+      {{/if}}
+      
+      {{#if weatherTiming.end}}
+      <div class="timing-row">
+          <span class="timing-label">Expected to end:</span>
+          <span class="timing-value">{{weatherTiming.end}}</span>
+      </div>
+      {{/if}}
+      
+      {{#if weatherTiming.remaining}}
+      <div class="timing-row">
+          <span class="timing-label">Remaining:</span>
+          <span class="timing-value">{{weatherTiming.remaining}}</span>
+      </div>
+      {{/if}}
+  </div>
+  {{/if}}
+  {{!-- ===================================================== --}}
+
   {{!-- Wind Section --}}
   <div class="weather-row">
     <div class="weather-icon">

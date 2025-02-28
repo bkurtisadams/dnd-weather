@@ -79,6 +79,21 @@
     </div>
     {{/if}}
 
+    {{debug weatherDuration}}
+
+    <!-- Weather Duration Section -->
+    <!-- Always show this section -->
+    <div class="weather-duration-section">
+        <h3>Weather Duration</h3>
+        <p id="weatherDuration">
+            {{#if weather.precipitation.duration}}
+                Weather event duration: {{weather.precipitation.duration}} hours
+            {{else}}
+                Weather event duration: Not applicable (clear weather)
+            {{/if}}
+        </p>
+    </div>
+
     <!-- Add to weather-dialog.hbs -->
     {{#if weather.precipitation.continues}}
     <div class="weather-timeline">
