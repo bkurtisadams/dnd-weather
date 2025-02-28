@@ -372,11 +372,12 @@ export class WeatherDialog extends Application {
                         celene: currentWeather.baseConditions.moonPhase?.celene || 'Unknown'
                     },
                     conditions: currentWeather.baseConditions.sky,
-                    weatherHistory: this.weatherHistory,
+                    
                     precipitationTypes: Object.keys(weatherPhenomena),
                     daylight: daylight  // Add new daylight data
                     
                 },
+                weatherHistory: this.weatherHistory,
                 effects: currentWeather.effects,
                 terrain: currentWeather.terrain,
                 elevation: currentWeather.elevation,
@@ -466,19 +467,29 @@ export class WeatherDialog extends Application {
             console.log("DND-Weather | Latitude changed to:", this.state.latitude);
         });
         
-        // Add to WeatherDialog.js in activateListeners method
-        html.find('.collapse-toggle').on('click', function() {
-            const content = $(this).next('.collapsed');
+        // activateListeners method
+        html.find('.collapse-toggle').off('click').on('click', function() {
+            const content = $(this).next();
             content.toggleClass('collapsed');
-            $(this).find('.fa-chevron-down, .fa-chevron-up').toggleClass('fa-chevron-down fa-chevron-up');
-        });
+            const icon = $(this).find('.fas');
+            icon.toggleClass('fa-chevron-down fa-chevron-up');
+        });;
         
         // For the weather history restore buttons
-        html.find('.restore-weather').on('click', async (event) => {
-            const index = event.currentTarget.dataset.index;
+        html.find('.restore-weather').off('click').on('click', async (event) => {
+            const index = Number(event.currentTarget.dataset.index);
+            console.log("DND-Weather | Restoring weather from history index:", index);
+            
             if (this.weatherHistory && this.weatherHistory[index]) {
-            this.state.currentWeather = this.weatherHistory[index];
-            await this.render();
+                this.state.currentWeather = this.weatherHistory[index];
+                this.state.lastUpdate = new Date().toLocaleTimeString();
+                
+                // Update display window
+                await this._ensureDisplayWindow();
+                await this.displayWindow.update(this.state.currentWeather);
+                
+                ui.notifications.info("Restored weather from history");
+                await this.render();
             }
         });
         
