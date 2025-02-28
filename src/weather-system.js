@@ -293,6 +293,8 @@ export class GreyhawkWeatherSystem {
     }
 
     async _determinePrecipitation(roll, temperature) {
+        console.log("DND-Weather | Determining precipitation for roll:", roll, "temp:", temperature);
+        
         // Find matching precipitation type from table
         for (const [type, data] of Object.entries(weatherPhenomena)) {
             if (roll >= data.diceRange[0] && roll <= data.diceRange[1]) {
@@ -300,63 +302,73 @@ export class GreyhawkWeatherSystem {
                 if (data.restrictedTerrain?.includes(this.settings.terrain)) {
                     console.log(`DND-Weather | Weather type ${type} is restricted in ${this.settings.terrain}, rerolling...`);
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
-                }                
+                }
+                
                 // Check temperature requirements
-                if (data.temperature.max && temperature > data.temperature.max) {
+                if (data.temperature.max !== null && temperature > data.temperature.max) {
                     console.log(`DND-Weather | Temperature ${temperature}°F too high for ${type}, rerolling...`);
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
                 }
-                if (data.temperature.min && temperature < data.temperature.min) {
+                if (data.temperature.min !== null && temperature < data.temperature.min) {
                     console.log(`DND-Weather | Temperature ${temperature}°F too low for ${type}, rerolling...`);
+                    return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
+                }
+                
+                // Fix for temperatures near freezing (convert rain to snow)
+                let finalType = type;
+                if (temperature <= 37) {
+                    if (type === 'rainstorm-light') {
+                        console.log(`DND-Weather | Converting rainstorm-light to snowstorm-light due to freezing temperature (${temperature}°F)`);
+                        finalType = 'snowstorm-light';
+                    } else if (type === 'rainstorm-heavy') {
+                        console.log(`DND-Weather | Converting rainstorm-heavy to snowstorm-heavy due to freezing temperature (${temperature}°F)`);
+                        finalType = 'snowstorm-heavy';
+                    } else if (type === 'drizzle') {
+                        console.log(`DND-Weather | Converting drizzle to light snow due to freezing temperature (${temperature}°F)`);
+                        finalType = 'snowstorm-light';
+                    } else if (type === 'thunderstorm') {
+                        console.log(`DND-Weather | Converting thunderstorm to snow with thunder due to freezing temperature (${temperature}°F)`);
+                        finalType = 'snowstorm-heavy';  // With added thunder effect
+                    }
+                }
+                
+                // If we converted the type, get the new data
+                const finalData = finalType !== type ? weatherPhenomena[finalType] : data;
+                if (!finalData) {
+                    console.error(`DND-Weather | Converted type ${finalType} not found in weather phenomena table`);
                     return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
                 }
     
                 // Calculate duration
-                const duration = await this._calculatePrecipitationDuration(data);
-                console.log("DND-Weather | Duration calculation:", {
-                    data: data.precipitation.duration,
-                    calculated: duration
-                });
+                const duration = await this._calculatePrecipitationDuration(finalData);
                 
                 // Roll for amount if present
                 let amount = null;
-                if (data.precipitation.amount) {
-                    const amountMatch = data.precipitation.amount.match(/(\d+)d(\d+)/);
-                    if (amountMatch) {
-                        const [_, count, sides] = amountMatch;
-                        amount = await rollDice(parseInt(count), parseInt(sides))[0];
-                    }
+                if (finalData.precipitation.amount) {
+                    amount = await evalDice(finalData.precipitation.amount);
                 }
     
-                // Handle complex movement/vision structures
-                const movement = typeof data.precipitation.movement === 'object' 
-                    ? data.precipitation.movement 
-                    : { all: data.precipitation.movement || 'Normal' };
-    
-                const vision = typeof data.precipitation.vision === 'object'
-                    ? data.precipitation.vision
-                    : { normal: data.precipitation.vision || 'Normal' };
-    
-                    return {
-                        type,
-                        amount,
-                        duration: duration,  // Use the calculated duration
-                        movement: data.precipitation.movement,
-                        vision: data.precipitation.vision,
-                        infraUltra: data.precipitation.infraUltra,
-                        tracking: data.precipitation.tracking,
-                        chanceLost: data.precipitation.chanceLost,
-                        windSpeed: data.precipitation.windSpeed,
-                        notes: data.notes,
-                        chanceContinuing: data.chanceContinuing || 0,
-                        chanceRainbow: data.chanceRainbow || 0,
-                        continues: false,
-                        previousType: null,
-                        changed: false,
-                        effects: this._getPrecipitationEffects(data)
-                    };
+                return {
+                    type: finalType,
+                    amount,
+                    duration: duration,
+                    movement: finalData.precipitation.movement,
+                    vision: finalData.precipitation.vision,
+                    infraUltra: finalData.precipitation.infraUltra,
+                    tracking: finalData.precipitation.tracking,
+                    chanceLost: finalData.precipitation.chanceLost,
+                    windSpeed: finalData.precipitation.windSpeed,
+                    notes: finalData.notes,
+                    chanceContinuing: finalData.chanceContinuing || 0,
+                    chanceRainbow: finalData.chanceRainbow || 0,
+                    continues: false,
+                    previousType: null,
+                    changed: false,
+                    effects: this._getPrecipitationEffects(finalData)
+                };
             }
         }
+        
         return { 
             type: 'none', 
             amount: null, 
@@ -615,7 +627,24 @@ _getWindEffects(windSpeed) {
 }
 
 _getGreyhawkMonth(date) {
-    // This should be replaced with proper calendar integration
+    // Try to get month from Simple Calendar if it's available
+    if (game.modules.get('simple-calendar')?.active && game.settings.get('dnd-weather', 'useSimpleCalendar')) {
+        try {
+            const simpleCalendar = SimpleCalendar.api.getCurrentCalendar();
+            const currentDate = SimpleCalendar.api.getCurrentDay();
+            // Return month name from simple calendar
+            return currentDate.month.name;
+        } catch (error) {
+            console.error("DND-Weather | Error getting date from Simple Calendar:", error);
+        }
+    }
+    
+    // Fallback to current settings or default mapping
+    if (this.settings.month) {
+        return this.settings.month;
+    }
+    
+    // Last resort mapping from real month to Greyhawk month
     const months = Object.keys(baselineData);
     const monthIndex = date.getMonth();
     return months[monthIndex % months.length];
@@ -771,60 +800,202 @@ _determineLunaPhase() {
     return null; // Return null for non-phase days
 } */
 
-_determineCelenePhase() {
-    const month = this.settings.month;
-    const day = this.settings.day;
-
-    console.log("DND-Weather | Determining Celene phase for:", { month, day });
-
-    // Define phase days for each month
-    const celenePhases = {
-        'Needfest': { 4: 'Full' },
-        'Fireseek': { 19: '3/4' },
-        'Readying': { 11: 'New' },
-        'Coldeven': { 4: '1/4' },
-        'Growfest': { 4: 'Full' },
-        'Planting': { 19: '3/4' },
-        'Flocktime': { 11: 'New' },
-        'Wealsun': { 4: '1/4' },
-        'Richfest': { 4: 'Full' },
-        'Reaping': { 19: '3/4' },
-        'Goodmonth': { 11: 'New' },
-        'Harvester': { 4: '1/4' },
-        'Brewfest': { 4: 'Full' },
-        'Patchwall': { 19: '3/4' },
-        'Ready\'reat': { 11: 'New' },
-        'Sunsebb': { 4: '1/4' }
-    };
-
-    // Get the phase days for this month
-    const monthPhases = celenePhases[month];
-    if (!monthPhases) {
-        console.warn("DND-Weather | No phase data for month:", month);
-        return 'Unknown';
+    _determineCelenePhase() {
+        const month = this.settings.month;
+        const day = this.settings.day;
+    
+        console.log("DND-Weather | Determining Celene phase for:", { month, day });
+    
+        // Define the specific phase days for each month based on the images you shared
+        const phaseData = {
+            // Winter-Spring Group
+            'Needfest': { 
+                days: [4], // Mid-Needfest (festival is 7 days)
+                phases: ['Full']
+            },
+            'Fireseek': { 
+                days: [19], 
+                phases: ['3/4']
+            },
+            'Readying': { 
+                days: [11], 
+                phases: ['New']
+            },
+            'Coldeven': { 
+                days: [4], 
+                phases: ['1/4']
+            },
+            'Growfest': { 
+                days: [4], // Mid-Growfest (festival is 7 days)
+                phases: ['Full']
+            },
+            
+            // Summer-Early Group
+            'Planting': { 
+                days: [19], 
+                phases: ['3/4']
+            },
+            'Flocktime': { 
+                days: [11], 
+                phases: ['New']
+            },
+            'Wealsun': { 
+                days: [4], 
+                phases: ['1/4']
+            },
+            'Richfest': { 
+                days: [4], // Mid-Richfest (festival is 7 days)
+                phases: ['Full']
+            },
+            
+            // Summer-Late Group
+            'Reaping': { 
+                days: [19], 
+                phases: ['3/4']
+            },
+            'Goodmonth': { 
+                days: [11], 
+                phases: ['New']
+            },
+            'Harvester': { 
+                days: [4], 
+                phases: ['1/4']
+            },
+            'Brewfest': { 
+                days: [4], // Mid-Brewfest (festival is 7 days)
+                phases: ['Full']
+            },
+            
+            // Autumn Group
+            'Patchwall': { 
+                days: [19], 
+                phases: ['3/4']
+            },
+            'Ready\'reat': { 
+                days: [11], 
+                phases: ['New']
+            },
+            'Sunsebb': { 
+                days: [4], 
+                phases: ['1/4']
+            }
+        };
+    
+        // Check if we have data for this month
+        if (!phaseData[month]) {
+            console.warn("DND-Weather | No Celene phase data for month:", month);
+            return 'Unknown';
+        }
+    
+        // Check for exact match with a specific phase day
+        const monthData = phaseData[month];
+        const exactDayIndex = monthData.days.indexOf(day);
+        if (exactDayIndex >= 0) {
+            return monthData.phases[exactDayIndex];
+        }
+    
+        // For days between specified phases, determine approximate phase
+        // Main phases in cycle order
+        const phases = ['New', '1/4', 'Full', '3/4'];
+        
+        // Get the next and previous explicit phase days from the current date
+        const daysInMonth = month.endsWith('fest') ? 7 : 28;
+        
+        // Find the nearest day before current day with a defined phase
+        let prevDay = null;
+        let prevPhase = null;
+        for (let d = day - 1; d >= 1; d--) {
+            const phaseIndex = monthData.days.indexOf(d);
+            if (phaseIndex >= 0) {
+                prevDay = d;
+                prevPhase = monthData.phases[phaseIndex];
+                break;
+            }
+        }
+        
+        // Find the nearest day after current day with a defined phase
+        let nextDay = null;
+        let nextPhase = null;
+        for (let d = day + 1; d <= daysInMonth; d++) {
+            const phaseIndex = monthData.days.indexOf(d);
+            if (phaseIndex >= 0) {
+                nextDay = d;
+                nextPhase = monthData.phases[phaseIndex];
+                break;
+            }
+        }
+    
+        // If we don't have a previous or next day, we need to infer based on the cycle
+        if (!prevDay && !nextDay) {
+            console.log("DND-Weather | No reference phases in month, using default");
+            return 'Unknown'; // Fallback
+        }
+        
+        if (!prevDay) {
+            // No previous phase in this month - calculate based on the previous month's last phase
+            // For simplicity, returning a generic phase 
+            console.log("DND-Weather | No previous phase reference found");
+            return this._calculateApproximateCelenePhase(nextPhase, day/nextDay);
+        }
+        
+        if (!nextDay) {
+            // No next phase in this month - calculate based on the next month's first phase
+            // For simplicity, returning a generic phase
+            console.log("DND-Weather | No next phase reference found");
+            return this._calculateApproximateCelenePhase(prevPhase, (day-prevDay)/(daysInMonth-prevDay));
+        }
+        
+        // Both prev and next days are defined - calculate intermediate phase
+        const progress = (day - prevDay) / (nextDay - prevDay);
+        return this._calculateApproximateCelenePhase(prevPhase, progress, nextPhase);
     }
-
-    // Find the closest phase day
-    const phaseDays = Object.keys(monthPhases).map(Number);
-    if (phaseDays.includes(day)) {
-        console.log("DND-Weather | Exact phase found:", monthPhases[day]);
-        return monthPhases[day];
+    
+    // Simple helper to determine approximate phase
+    _calculateApproximateCelenePhase(referencePhase, progress, targetPhase) {
+        const phases = ['New', '1/4', 'Full', '3/4'];
+        
+        // If we have both reference points, calculate more precisely
+        if (targetPhase) {
+            const refIndex = phases.indexOf(referencePhase);
+            let targetIndex = phases.indexOf(targetPhase);
+            
+            // Handle cycle wraparound
+            if (targetIndex < refIndex) {
+                targetIndex += 4;
+            }
+            
+            // Calculate position in cycle
+            const position = refIndex + progress * (targetIndex - refIndex);
+            
+            // If very close to a main phase point, return that phase
+            const nearestIdx = Math.round(position) % 4;
+            if (Math.abs(position - nearestIdx) < 0.15) {
+                return phases[nearestIdx];
+            }
+            
+            // Otherwise return descriptive intermediate phase
+            const isWaxing = (position > refIndex && position < refIndex + 2) || 
+                             (refIndex >= 2 && position < refIndex - 2);
+            
+            if (isWaxing) {
+                return 'Waxing';
+            } else {
+                return 'Waning';
+            }
+        } 
+        // With just one reference point, simply pick a nearby phase
+        else {
+            const refIndex = phases.indexOf(referencePhase);
+            
+            // Progress > 0.5 means we're past halfway to the next phase
+            if (progress > 0.5) {
+                const nextIdx = (refIndex + 1) % 4;
+                return phases[nextIdx];
+            } else {
+                return referencePhase;
+            }
+        }
     }
-
-    // Find the most recent phase
-    const mostRecentDay = Math.max(...phaseDays.filter(d => d <= day));
-    if (mostRecentDay > 0) {
-        console.log("DND-Weather | Using most recent phase:", monthPhases[mostRecentDay]);
-        return monthPhases[mostRecentDay];
-    }
-
-    // If we're before the first phase of this month, use the last phase from previous month
-    console.log("DND-Weather | Using transitional phase");
-    const phases = ['New', '1/4', 'Full', '3/4'];
-    const currentPhaseIndex = phases.indexOf(monthPhases[Math.min(...phaseDays)]);
-    const previousPhase = phases[(currentPhaseIndex - 1 + phases.length) % phases.length];
-    return previousPhase;
-}
     
 
 _calculateIntermediateLunaPhase(day) {
@@ -855,94 +1026,150 @@ _determineLycanthropeActivity(lunaPhase, celenePhase) {
     return lycanthropeActivity.normal;
 }
 
-    async updateWeather(options = {}) {
-        console.log("DND-Weather | Updating weather with options:", options);
-        
-        if (!this.currentWeather?.baseConditions?.precipitation) {
-            console.log("DND-Weather | No current weather, generating new");
-            return this.generateDailyWeather(new Date());
-        }
+async updateWeather(options = {}) {
+    console.log("DND-Weather | Updating weather with options:", options);
     
-        const currentPrecip = this.currentWeather.baseConditions.precipitation;
-        
-        if (currentPrecip.type !== 'none' && !options.checkRainbow) {
-            console.log("DND-Weather | Checking precipitation continuation for:", currentPrecip.type);
-            
-            const continuationRoll = await rollDice(1, 100)[0];
-            console.log("DND-Weather | Continuation roll:", continuationRoll, "needed:", currentPrecip.chanceContinuing);
-    
-            if (continuationRoll <= currentPrecip.chanceContinuing) {
-                const changeRoll = await rollDice(1, 10)[0];
-                console.log("DND-Weather | Type change roll:", changeRoll);
-    
-                // Move up or down table based on roll of 1 or 10
-                let newPrecipType = currentPrecip.type;
-                const types = Object.keys(weatherPhenomena);
-                const currentIndex = types.indexOf(currentPrecip.type.toLowerCase());
-    
-                if (changeRoll === 1 && currentIndex > 0) {
-                    newPrecipType = types[currentIndex - 1];
-                    console.log("DND-Weather | Precipitation type moving up to:", newPrecipType);
-                } else if (changeRoll === 10 && currentIndex < types.length - 1) {
-                    newPrecipType = types[currentIndex + 1];
-                    console.log("DND-Weather | Precipitation type moving down to:", newPrecipType);
-                }
-    
-                // Use helper methods instead of direct object creation
-                const typeRoll = this._getPrecipitationRollForType(newPrecipType);
-                const temperature = this.currentWeather.baseConditions.temperature.high;
-                const newPrecip = await this._determinePrecipitation(typeRoll, temperature);
-                const duration = await this._calculatePrecipitationDuration(weatherPhenomena[newPrecipType]);
-                const wind = await this._determineWindForPrecipitation(newPrecip);
-    
-                return {
-                    ...this.currentWeather,
-                    baseConditions: {
-                        ...this.currentWeather.baseConditions,
-                        precipitation: {
-                            ...newPrecip,
-                            continues: true,
-                            duration,
-                            previousType: currentPrecip.type,
-                            changed: newPrecipType !== currentPrecip.type,
-                            chanceContinuing: weatherPhenomena[newPrecipType].chanceContinuing || 0
-                        },
-                        wind
-                    },
-                    timestamp: new Date().toLocaleString()
-                };
-            }
-        }
-    
-        if (currentPrecip.type !== 'none' && options.checkRainbow) {
-            const rainbowRoll = await rollDice(1, 100)[0];
-            if (rainbowRoll <= currentPrecip.chanceRainbow) {
-                console.log("DND-Weather | Rainbow appears!");
-                const typeRoll = await rollDice(1, 100)[0];
-                let rainbowEffect = {};
-                
-                if (typeRoll <= 89) rainbowEffect = { type: 'single' };
-                else if (typeRoll <= 95) rainbowEffect = { type: 'double', isOmen: true };
-                else if (typeRoll <= 98) rainbowEffect = { type: 'triple', isOmen: true };
-                else if (typeRoll === 99) rainbowEffect = { type: 'bifrost', description: 'Bifrost bridge or clouds in shape of rain deity' };
-                else rainbowEffect = { type: 'deity', description: 'Rain deity or servant in sky' };
-                
-                const newWeather = await this.generateDailyWeather(new Date());
-                return {
-                    ...newWeather,
-                    effects: {
-                        ...newWeather.effects,
-                        special: [...(newWeather.effects.special || []), 
-                            `Rainbow appears: ${rainbowEffect.type}${rainbowEffect.isOmen ? ' (possible omen)' : ''}${rainbowEffect.description ? ` - ${rainbowEffect.description}` : ''}`
-                        ]
-                    }
-                };
-            }
-        }
-    
-        console.log("DND-Weather | Generating new weather");
+    if (!this.currentWeather?.baseConditions?.precipitation) {
+        console.log("DND-Weather | No current weather, generating new");
         return this.generateDailyWeather(new Date());
     }
+
+    const currentPrecip = this.currentWeather.baseConditions.precipitation;
+    
+    if (currentPrecip.type !== 'none' && !options.checkRainbow) {
+        console.log("DND-Weather | Checking precipitation continuation for:", currentPrecip.type);
+        
+        const continuationRoll = await rollDice(1, 100)[0];
+        console.log("DND-Weather | Continuation roll:", continuationRoll, "needed <=", currentPrecip.chanceContinuing);
+
+        if (continuationRoll <= currentPrecip.chanceContinuing) {
+            // Roll for precipitation type change (1 = up table, 10 = down table, 2-9 = same)
+            const changeRoll = await rollDice(1, 10)[0];
+            console.log("DND-Weather | Type change roll:", changeRoll);
+
+            // Get all precipitation types as an ordered array
+            const types = Object.keys(weatherPhenomena);
+            const currentIndex = types.indexOf(currentPrecip.type);
+            
+            if (currentIndex === -1) {
+                console.error("DND-Weather | Current precipitation type not found in table:", currentPrecip.type);
+                return this.generateDailyWeather(new Date());
+            }
+            
+            // Determine new type based on change roll
+            let newTypeIndex = currentIndex;
+            if (changeRoll === 1 && currentIndex > 0) {
+                newTypeIndex = currentIndex - 1;
+                console.log("DND-Weather | Moving up table to:", types[newTypeIndex]);
+            } else if (changeRoll === 10 && currentIndex < types.length - 1) {
+                newTypeIndex = currentIndex + 1;
+                console.log("DND-Weather | Moving down table to:", types[newTypeIndex]);
+            }
+
+            // Get the new precipitation type based on the index
+            let newPrecipType = types[newTypeIndex];
+
+            // Convert rain to snow at near freezing temperatures if needed
+            if (temperature <= 37) {
+                if (newPrecipType === 'rainstorm-light') {
+                    console.log(`DND-Weather | Converting rainstorm-light to snowstorm-light due to freezing temperature (${temperature}°F)`);
+                    newPrecipType = 'snowstorm-light';
+                } else if (newPrecipType === 'rainstorm-heavy') {
+                    console.log(`DND-Weather | Converting rainstorm-heavy to snowstorm-heavy due to freezing temperature (${temperature}°F)`);
+                    newPrecipType = 'snowstorm-heavy';
+                } else if (newPrecipType === 'drizzle') {
+                    console.log(`DND-Weather | Converting drizzle to light snow due to freezing temperature (${temperature}°F)`);
+                    newPrecipType = 'snowstorm-light';
+                } else if (newPrecipType === 'thunderstorm') {
+                    console.log(`DND-Weather | Converting thunderstorm to snow with thunder due to freezing temperature (${temperature}°F)`);
+                    newPrecipType = 'snowstorm-heavy';
+                }
+            }
+
+            // Now get the precipitation data for the final type
+            const newPrecipData = weatherPhenomena[newPrecipType];
+            
+            // Check temperature compatibility for new type
+            const temperature = this.currentWeather.baseConditions.temperature.high;
+            if ((newPrecipData.temperature.max && temperature > newPrecipData.temperature.max) ||
+                (newPrecipData.temperature.min && temperature < newPrecipData.temperature.min)) {
+                console.log(`DND-Weather | Temperature ${temperature}°F incompatible with ${newPrecipType}, ending precipitation`);
+                return this.generateDailyWeather(new Date());
+            }
+            
+            // Calculate new duration
+            const duration = await this._calculatePrecipitationDuration(newPrecipData);
+            
+            // Get new wind speed from precipitation data
+            const windSpeed = await evalDice(newPrecipData.precipitation.windSpeed);
+            const windDirection = this.currentWeather.baseConditions.wind.direction;
+            
+            // Create updated weather object
+            return {
+                ...this.currentWeather,
+                baseConditions: {
+                    ...this.currentWeather.baseConditions,
+                    precipitation: {
+                        type: newPrecipType,
+                        amount: newPrecipData.precipitation.amount ? await evalDice(newPrecipData.precipitation.amount) : null,
+                        duration: duration,
+                        movement: newPrecipData.precipitation.movement,
+                        vision: newPrecipData.precipitation.vision,
+                        infraUltra: newPrecipData.precipitation.infraUltra,
+                        tracking: newPrecipData.precipitation.tracking,
+                        chanceLost: newPrecipData.precipitation.chanceLost,
+                        windSpeed: newPrecipData.precipitation.windSpeed,
+                        notes: newPrecipData.notes,
+                        chanceContinuing: newPrecipData.chanceContinuing || 0,
+                        chanceRainbow: newPrecipData.chanceRainbow || 0,
+                        continues: true,
+                        previousType: currentPrecip.type,
+                        changed: newPrecipType !== currentPrecip.type,
+                        effects: this._getPrecipitationEffects(newPrecipData)
+                    },
+                    wind: {
+                        speed: windSpeed,
+                        direction: windDirection,
+                        effects: this._getWindEffects(windSpeed)
+                    }
+                },
+                timestamp: new Date().toLocaleString()
+            };
+        }
+    }
+
+    // Check for rainbow if ending precipitation
+    if (currentPrecip.type !== 'none' && options.checkRainbow) {
+        const rainbowRoll = await rollDice(1, 100)[0];
+        console.log("DND-Weather | Rainbow check roll:", rainbowRoll, "needed <=", currentPrecip.chanceRainbow);
+        
+        if (rainbowRoll <= currentPrecip.chanceRainbow) {
+            console.log("DND-Weather | Rainbow appears!");
+            const typeRoll = await rollDice(1, 100)[0];
+            let rainbowEffect = {};
+            
+            if (typeRoll <= 89) rainbowEffect = { type: 'single' };
+            else if (typeRoll <= 95) rainbowEffect = { type: 'double', isOmen: true };
+            else if (typeRoll <= 98) rainbowEffect = { type: 'triple', isOmen: true };
+            else if (typeRoll === 99) rainbowEffect = { type: 'bifrost', description: 'Bifrost bridge or clouds in shape of rain deity' };
+            else rainbowEffect = { type: 'deity', description: 'Rain deity or servant in sky' };
+            
+            const newWeather = await this.generateDailyWeather(new Date());
+            return {
+                ...newWeather,
+                effects: {
+                    ...newWeather.effects,
+                    special: [...(newWeather.effects.special || []), 
+                        `Rainbow appears: ${rainbowEffect.type}${rainbowEffect.isOmen ? ' (possible omen)' : ''}${rainbowEffect.description ? ` - ${rainbowEffect.description}` : ''}`
+                    ]
+                }
+            };
+        }
+    }
+
+    console.log("DND-Weather | Precipitation ended or no continuation, generating new weather");
+    return this.generateDailyWeather(new Date());
+}
 
 // Helper method to get the correct roll value for a precipitation type
 _getPrecipitationRollForType(type) {

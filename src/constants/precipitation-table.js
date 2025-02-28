@@ -307,7 +307,7 @@ export const weatherPhenomena = {
         },
         chanceContinuing: 20,
         chanceRainbow: 10,
-        restrictedTerrain: ["Desert", "plains"],
+        restrictedTerrain: ["Desert", "plains", "mountains"],
         precipitation: {
             amount: "d6/day", // Will show as "X inches per day"
             duration: "1/2d6 days",

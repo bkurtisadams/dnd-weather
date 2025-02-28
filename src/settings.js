@@ -2,6 +2,16 @@ import { WeatherDialog } from './ui/components/WeatherDialog.js';
 
 // System settings 
 export const registerSettings = () => {
+  // Add to registerSettings function
+    game.settings.register('dnd-weather', 'useSimpleCalendar', {
+      name: "Use Simple Calendar",
+      hint: "Get current date from Simple Calendar module if available",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false
+    });
+
     // Register module settings
     game.settings.register('dnd-weather', 'latitude', {
       name: game.i18n.localize('DND-WEATHER.settings.latitude.name'),
@@ -48,6 +58,23 @@ export const registerSettings = () => {
         ocean: 'DND-WEATHER.terrain.ocean'
       }
     });
+
+    // Add to registerSettings function
+    game.settings.register('dnd-weather', 'debugMode', {
+      name: "Debug Mode",
+      hint: "Enable additional logging for debugging",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false
+    });
+
+    // Create debug logger utility
+    function debugLog(...args) {
+      if (game.settings.get('dnd-weather', 'debugMode')) {
+          console.log("DND-Weather [DEBUG] |", ...args);
+      }
+    }
   
     // Register UI hooks
     Hooks.on('getSceneControlButtons', (controls) => {
