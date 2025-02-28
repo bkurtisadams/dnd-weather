@@ -380,33 +380,81 @@ export class GreyhawkWeatherSystem {
         return this.currentWeather;
     }
 
-    // Add other necessary methods...
-    // Additional helper methods for GreyhawkWeatherSystem class
     /**
-     * Determine wind conditions when no precipitation
-     * @param {number} baseSpeed - Base wind speed from d20-1 roll
-     * @param {Object} terrainEffect - Terrain modifiers
-     * @returns {Object} Wind conditions
-     */
-    async _determineWind(baseSpeed, terrainEffect) {
-        console.log("DND-Weather | Determining wind for speed:", baseSpeed);
+ * Determine wind conditions when no precipitation
+ * @param {number} baseSpeed - Base wind speed from d20-1 roll
+ * @param {Object} terrainEffect - Terrain modifiers
+ * @returns {Object} Wind conditions
+ */
+async _determineWind(baseSpeed, terrainEffect) {
+    console.log("DND-Weather | Determining wind for speed:", baseSpeed);
+    
+    let adjustedSpeed = baseSpeed;
+    const terrainKey = this.settings.terrain;
+    
+    // Handle case where terrainEffect wasn't found by the caller
+    if (!terrainEffect) {
+        // Try to find terrain effect with case-insensitive match
+        terrainEffect = Object.entries(terrainEffects).find(([key]) => 
+            key.toLowerCase() === terrainKey.toLowerCase()
+        )?.[1];
         
-        // Apply terrain wind modifier
-        const adjustedSpeed = baseSpeed + (terrainEffect?.windSpeedAdjustment || 0);
-        console.log("DND-Weather | Adjusted wind speed:", adjustedSpeed);
-        
-        // Get wind direction
-        const direction = await this._determineWindDirection();
-        
-        // Get effects based on wind speed
-        const effects = this._getWindEffects(adjustedSpeed);
-        
-        return {
-            speed: Math.max(0, adjustedSpeed),
-            direction,
-            effects
-        };
+        if (terrainEffect) {
+            console.log(`DND-Weather | Found terrain effect for "${terrainKey}" using case-insensitive match`);
+        } else {
+            console.log(`DND-Weather | No terrain effect found for "${terrainKey}"`);
+            // Continue with default values
+        }
+    } else {
+        console.log(`DND-Weather | Using terrain effect for "${terrainKey}"`);
     }
+    
+    // Apply terrain wind modifier
+    if (terrainEffect) {
+        // Special handling for Mountains - adjust based on elevation
+        if (terrainKey.toLowerCase() === "mountains") {
+            if (typeof terrainEffect.windSpeedAdjustment === 'object' && 
+                terrainEffect.windSpeedAdjustment.base !== undefined && 
+                terrainEffect.windSpeedAdjustment.per !== undefined) {
+                
+                const elevationAdj = Math.floor(this.settings.elevation / 
+                    terrainEffect.windSpeedAdjustment.per) * 
+                    terrainEffect.windSpeedAdjustment.base;
+                
+                adjustedSpeed += elevationAdj;
+                console.log(`DND-Weather | Mountain wind adjustment (${this.settings.elevation}ft elevation): +${elevationAdj} mph`);
+            }
+        } 
+        // Special handling for Rough terrain - randomly choose +5 or -5
+        else if (terrainKey.toLowerCase().includes("rough") || terrainKey.toLowerCase().includes("hills")) {
+            if (terrainEffect.windSpeedAdjustment === "±5") {
+                const diceRoll = await rollDice(1, 2)[0];
+                const variation = diceRoll === 1 ? 5 : -5;
+                adjustedSpeed += variation;
+                console.log(`DND-Weather | Rough terrain wind variation: ${variation > 0 ? '+' : ''}${variation} mph`);
+            }
+        }
+        // Standard numeric adjustment for other terrains
+        else if (typeof terrainEffect.windSpeedAdjustment === 'number') {
+            adjustedSpeed += terrainEffect.windSpeedAdjustment;
+            console.log(`DND-Weather | Terrain wind adjustment: ${terrainEffect.windSpeedAdjustment > 0 ? '+' : ''}${terrainEffect.windSpeedAdjustment} mph`);
+        }
+    }
+    
+    console.log("DND-Weather | Adjusted wind speed:", adjustedSpeed);
+    
+    // Get wind direction
+    const direction = await this._determineWindDirection();
+    
+    // Get effects based on wind speed
+    const effects = this._getWindEffects(adjustedSpeed);
+    
+    return {
+        speed: Math.max(0, adjustedSpeed),
+        direction,
+        effects
+    };
+}
 
     /**
      * Determine wind direction based on season and prevailing winds

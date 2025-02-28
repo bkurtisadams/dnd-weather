@@ -34,7 +34,7 @@ export function applyWindChill(temp, windSpeed, windChillTable) {
  */
 export function calculateLatitudeAdjustment(latitude) {
     // Base calibration is at 40° latitude
-    const baseLat = 40;
+    const baseLat = 35;
     // 2°F adjustment per degree of latitude difference
     return (baseLat - latitude) * 2;
 }
