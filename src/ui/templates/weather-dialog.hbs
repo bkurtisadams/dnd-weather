@@ -79,28 +79,22 @@
     </div>
     {{/if}}
 
-    {{debug weatherDuration}}
+    {{debug weather.weatherDuration}}
     {{debug weather.precipitation.duration}}
 
     <!-- Weather Duration Section -->
     <!-- Always show this section -->
     <div class="weather-duration-section">
-        <h3>Weather Duration</h3>
-        <p id="weatherDuration">
-            {{#if weather.precipitation.duration}}
-                {{#if weather.precipitation.duration}}
-                    Weather event duration: {{formatDuration weather.precipitation.duration}}
-                    {{#if weather.weatherTiming.remaining}}
-                        ({{weather.weatherTiming.remaining}} remaining)
-                    {{/if}}
-                {{else}}
-                    Weather event duration: Not applicable (clear weather)
-                {{/if}}
-            {{else}}
-                Weather event duration: Not applicable (clear weather)
-            {{/if}}
-        </p>
+    <h3>Weather Duration</h3>
+    <p id="weatherDuration">
+        {{#if weather.weatherDuration}}
+        Weather event duration: {{weather.weatherDuration}}
+        {{else}}
+        Weather event duration: Not applicable (clear weather)
+        {{/if}}
+    </p>
     </div>
+
 
     <!-- Add to weather-dialog.hbs -->
     {{#if weather.precipitation.continues}}
@@ -203,13 +197,16 @@
     </div>
     {{/if}}
 
+    <!-- Add this debug section to weather-dialog.hbs for troubleshooting -->
     {{#if debugMode}}
     <div class="debug-info" style="margin-top: 10px; font-size: 0.8em; color: #666;">
         Available Months: {{#each months}}{{this}}, {{/each}}<br>
         Selected Month: {{selectedMonth}}<br>
         Latitude: {{latitude}}<br>
         Terrain: {{terrain}}<br>
-        Elevation: {{elevation}}
+        Elevation: {{elevation}}<br>
+        Precipitation Duration: {{weather.precipitation.duration}}<br>
+        Weather Object: {{debug weather}}
     </div>
     {{/if}}
   </div>

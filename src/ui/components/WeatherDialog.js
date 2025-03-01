@@ -34,14 +34,23 @@ Handlebars.registerHelper('weatherIcon', function(condition, precipitation) {
     return 'fa-cloud';
   });
   
+// Check/replace the formatDuration helper in WeatherDialog.js
 Handlebars.registerHelper('formatDuration', function(hours) {
-if (hours >= 24) {
-    const days = Math.floor(hours / 24);
-    const remainingHours = hours % 24;
-    return `${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
-}
-return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-});
+    console.log("DND-Weather | Formatting duration:", hours);
+    
+    if (!hours || isNaN(hours)) {
+        console.log("DND-Weather | Invalid duration value:", hours);
+        return "unknown";
+    }
+    
+    if (hours >= 24) {
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+        return `${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
+    }
+    
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+});;
 
 Handlebars.registerHelper('debug', function(value) {
     console.log("DND-Weather | Template Debug:", value);
@@ -125,63 +134,41 @@ export class WeatherDialog extends Application {
         }
     
     // method to update duration
-    // Replace the _updateDurationDisplay method in WeatherDialog.js
-    // Replace the _updateDurationDisplay method in WeatherDialog.js with this version
-_updateDurationDisplay() {
-    console.log("DND-Weather | Updating duration display");
-    
-    // Find the duration element
-    const durationElement = this.element.find('#weatherDuration');
-    
-    if (!durationElement.length) {
-        console.error("DND-Weather | Duration element not found in DOM");
-        return;
-    }
-    
-    // Get the current weather data
-    const currentWeather = this.state.currentWeather;
-    if (!currentWeather || !currentWeather.baseConditions) {
-        durationElement.text("Weather event duration: Not available");
-        return;
-    }
-    
-    const precipitation = currentWeather.baseConditions.precipitation;
-    
-    // Debug what we have
-    console.log("DND-Weather | Current precipitation data:", precipitation);
-    
-    if (!precipitation || precipitation.type === 'none' || !precipitation.duration) {
-        durationElement.text("Weather event duration: Not applicable (clear weather)");
-        return;
-    }
-    
-    // Format duration
-    const duration = precipitation.duration;
-    const formattedDuration = `${duration} ${duration === 1 ? 'hour' : 'hours'}`;
-    
-    // Check for remaining time if we have calendar integration
-    if (currentWeather.timing && currentWeather.timing.end) {
-        const weatherSystem = globalThis.dndWeather?.weatherSystem;
-        if (weatherSystem?.calendarIntegration?.initialized) {
-            try {
-                const currentDate = weatherSystem.calendarIntegration.getCurrentDate();
-                const currentTimestamp = weatherSystem.calendarIntegration.dateToTimestamp(currentDate);
-                const endTimestamp = weatherSystem.calendarIntegration.dateToTimestamp(currentWeather.timing.end);
-                
-                const remainingSeconds = Math.max(0, endTimestamp - currentTimestamp);
-                const remainingHours = Math.floor(remainingSeconds / 3600);
-                const remainingMinutes = Math.floor((remainingSeconds % 3600) / 60);
-                
-                durationElement.text(`Weather event duration: ${formattedDuration} (${remainingHours}h ${remainingMinutes}m remaining)`);
-                return;
-            } catch (error) {
-                console.error("DND-Weather | Error calculating remaining time:", error);
-            }
+    _updateDurationDisplay() {
+        console.log("DND-Weather | Updating duration display");
+        
+        // Find the duration element
+        const durationElement = this.element.find('#weatherDuration');
+        
+        if (!durationElement.length) {
+            console.error("DND-Weather | Duration element not found in DOM");
+            return;
         }
+        
+        // Get the precipitation duration directly from the current weather
+        const precipitation = this.state.currentWeather?.baseConditions?.precipitation;
+        
+        console.log("DND-Weather | Duration update - precipitation data:", precipitation);
+        
+        let text;
+        if (precipitation && precipitation.type !== 'none' && precipitation.duration) {
+            // Format the duration
+            const duration = precipitation.duration;
+            if (duration >= 24) {
+                const days = Math.floor(duration / 24);
+                const remainingHours = duration % 24;
+                text = `Weather event duration: ${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
+            } else {
+                text = `Weather event duration: ${duration} ${duration === 1 ? 'hour' : 'hours'}`;
+            }
+        } else {
+            // No precipitation or clear weather
+            text = "Weather event duration: Not applicable (clear weather)";
+        }
+        
+        console.log("DND-Weather | Setting duration text:", text);
+        durationElement.text(text);
     }
-    
-    durationElement.text(`Weather event duration: ${formattedDuration}`);
-}
 
     // Add method to ensure display window
     async _ensureDisplayWindow() {
@@ -535,7 +522,11 @@ _updateDurationDisplay() {
                     windChill: currentWeather.baseConditions.temperature.windChill,
                     wind: currentWeather.baseConditions.wind.speed,
                     windDirection: currentWeather.baseConditions.wind.direction,
-                    precipitation: precipitation,
+                    precipitation: {
+                        ...precipitation,
+                        // Make sure duration is directly accessible and not hidden in nested objects
+                        duration: currentWeather.baseConditions.precipitation.duration 
+                    },
                     moonPhase: {
                         luna: currentWeather.baseConditions.moonPhase?.luna || 'Unknown',
                         celene: currentWeather.baseConditions.moonPhase?.celene || 'Unknown'

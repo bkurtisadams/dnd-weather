@@ -27,31 +27,22 @@ export class WeatherDisplay extends Application {
                 loading: false
             };
         }
-
+    
         const baseConditions = this.weatherData.baseConditions;
         
-        // Structure the data to match the template
+        // Structure the data to match the template and include weatherDuration
         return {
             weather: {
-                // Sky conditions
                 conditions: baseConditions.sky,
-                
-                // Temperature data
                 temperature: baseConditions.temperature.high,
                 temperatureLow: baseConditions.temperature.low,
                 windChill: baseConditions.temperature.windChill,
-                
-                // Wind data
                 wind: baseConditions.wind.speed,
                 windDirection: baseConditions.wind.direction,
-                
-                // Precipitation data
                 precipitation: baseConditions.precipitation,
-                
-                // Moon phases
+                // Include weatherDuration if available:
+                weatherDuration: this.weatherData.weatherDuration || baseConditions.precipitation.duration,
                 moonPhase: baseConditions.moonPhase,
-                
-                // Daylight data
                 daylight: baseConditions.daylight
             },
             effects: this.weatherData.effects || {},
@@ -59,6 +50,7 @@ export class WeatherDisplay extends Application {
             loading: false
         };
     }
+    
 
     async update(weatherData) {
         console.log("Weather Display updating with:", weatherData);

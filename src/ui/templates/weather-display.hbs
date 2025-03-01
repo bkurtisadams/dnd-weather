@@ -35,15 +35,16 @@
       <i class="fas fa-clock"></i> <!-- Optional clock icon -->
     </div>
     <div class="weather-duration-section">
-      <h3>Weather Duration</h3>
-      <p id="weatherDuration">
-          {{#if weatherDuration}}
-              Weather event duration: {{weatherDuration}}
-          {{else}}
-              Weather event duration: Not applicable (clear weather)
-          {{/if}}
-      </p>
-  </div>
+        <h3>Weather Duration</h3>
+        <p id="weatherDuration">
+            {{#if weather.weatherDuration}}
+                Weather event duration: {{weather.weatherDuration}}
+            {{else}}
+                Weather event duration: Not applicable (clear weather)
+            {{/if}}
+        </p>
+    </div>
+
   </div>
 
   {{!-- Add this section to your weather-dialog.hbs template --}}
