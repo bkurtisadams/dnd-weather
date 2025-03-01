@@ -974,6 +974,10 @@ async _createOverrideWeather(precipType, duration, isContinuation, previousType)
     event.preventDefault();
     console.log("DND-Weather | Generate report clicked");
     
+    // Check for Simple Calendar directly
+    const simpleCalendarActive = !!window.SimpleCalendar;
+    console.log("DND-Weather | Simple Calendar available:", simpleCalendarActive);
+    
     // Create a dialog to configure the report
     const dialog = new Dialog({
         title: "Generate Weather Report",
@@ -999,8 +1003,8 @@ async _createOverrideWeather(precipType, duration, isContinuation, previousType)
                 </div>
                 <div class="form-group">
                     <label>Use Simple Calendar Dates:</label>
-                    <input type="checkbox" name="useCalendar" ${game.modules.get('simple-calendar')?.active ? 'checked' : 'disabled'}>
-                    ${!game.modules.get('simple-calendar')?.active ? '<span class="notes">(Simple Calendar not active)</span>' : ''}
+                    <input type="checkbox" name="useCalendar" ${simpleCalendarActive ? '' : 'disabled'}>
+                    ${!simpleCalendarActive ? '<span class="notes">(Simple Calendar not available)</span>' : ''}
                 </div>
                 <div class="form-group">
                     <label>Include Moon Phases:</label>
@@ -1045,13 +1049,16 @@ async _createOverrideWeather(precipType, duration, isContinuation, previousType)
     dialog.render(true);
 }
 
-// Update the _generateWeatherReport method to handle the new fields
+// Update the _generateWeatherReport method to verify calendar integration
 async _generateWeatherReport(html) {
     const days = parseInt(html.find('[name="days"]').val()) || 7;
     const month = html.find('[name="month"]').val();
     const startDay = parseInt(html.find('[name="day"]').val()) || 1;
     const locationName = html.find('[name="locationName"]').val() || this.state.terrain;
-    const useCalendar = html.find('[name="useCalendar"]').prop("checked") && game.modules.get('simple-calendar')?.active;
+    
+    // Check for Simple Calendar
+    const useCalendar = html.find('[name="useCalendar"]').prop("checked") && !!window.SimpleCalendar;
+    
     const includeMoons = html.find('[name="includeMoons"]').prop("checked");
     const includeTemp = html.find('[name="includeTemp"]').prop("checked");
     const includeWind = html.find('[name="includeWind"]').prop("checked");
@@ -1059,6 +1066,7 @@ async _generateWeatherReport(html) {
     const format = html.find('[name="format"]').val();
     
     console.log(`DND-Weather | Generating ${days} day report for "${locationName}" starting from ${month} ${startDay}`);
+    console.log(`DND-Weather | Using Simple Calendar: ${useCalendar}`);
     
     // Set the loading state
     this.state.loading = true;
@@ -1085,49 +1093,11 @@ async _generateWeatherReport(html) {
         };
         
         // Set up start/end date tracking
-        let startDateStr = `${month} ${startDay}`;
+        let startDateStr = useCalendar 
+            ? this._formatSimpleCalendarDate(month, startDay)
+            : `${month} ${startDay}`;
+            
         let endDateStr = "";
-        
-        // If using Simple Calendar, get the proper date strings
-        if (useCalendar && weatherSystem.calendarIntegration?.initialized) {
-            try {
-                // Set up the calendar date
-                const calDate = weatherSystem.calendarIntegration.getCurrentDate();
-                calDate.month = weatherSystem.calendarIntegration.getMonthIndex(month);
-                calDate.day = startDay;
-                
-                // Get formatted start date
-                startDateStr = weatherSystem.calendarIntegration.formatDate(calDate);
-                
-                // Calculate end date
-                const endDate = {...calDate};
-                let daysToAdd = days - 1; // Adjust since we're starting on day 1
-                
-                // Add days to the end date
-                while (daysToAdd > 0) {
-                    endDate.day++;
-                    // Check for month rollover
-                    const daysInMonth = weatherSystem.calendarIntegration.getDaysInMonth(endDate.month);
-                    if (endDate.day > daysInMonth) {
-                        endDate.day = 1;
-                        endDate.month++;
-                        // Check for year rollover
-                        if (endDate.month >= weatherSystem.calendarIntegration.getMonthsInYear()) {
-                            endDate.month = 0;
-                            endDate.year++;
-                        }
-                    }
-                    daysToAdd--;
-                }
-                
-                // Get formatted end date
-                endDateStr = weatherSystem.calendarIntegration.formatDate(endDate);
-            } catch (error) {
-                console.error("DND-Weather | Error with calendar dates:", error);
-                // Fall back to manual date calculation
-                useCalendar = false;
-            }
-        }
         
         // Generate weather for each day
         const weatherData = [];
@@ -1159,10 +1129,11 @@ async _generateWeatherReport(html) {
             }
         }
         
-        // If we didn't calculate end date with Simple Calendar
-        if (!endDateStr) {
-            endDateStr = `${currentMonth} ${currentDay - 1}`;
-        }
+        // Calculate end date based on last generated day
+        const lastDay = weatherData[weatherData.length - 1];
+        endDateStr = useCalendar
+            ? this._formatSimpleCalendarDate(lastDay.month, lastDay.day)
+            : `${lastDay.month} ${lastDay.day}`;
         
         // Restore original settings
         weatherSystem.settings = originalSettings;
@@ -1196,6 +1167,46 @@ async _generateWeatherReport(html) {
     }
 }
 
+// Create a helper method to format dates using Simple Calendar
+_formatSimpleCalendarDate(monthName, day) {
+    try {
+        if (!window.SimpleCalendar || !window.SimpleCalendar.api) {
+            return `${monthName} ${day}`;
+        }
+        
+        // Get current calendar
+        const currentCalendar = window.SimpleCalendar.api.getCurrentCalendar();
+        
+        // Get current date to use as a template
+        const currentDate = window.SimpleCalendar.api.getCurrentDate();
+        
+        // Find month in Simple Calendar that matches our month name
+        const allMonths = window.SimpleCalendar.api.getAllMonths(currentCalendar.id);
+        const matchingMonth = allMonths.find(m => 
+            m.name.toLowerCase() === monthName.toLowerCase() ||
+            (m.abbreviation && m.abbreviation.toLowerCase() === monthName.toLowerCase())
+        );
+        
+        if (!matchingMonth) {
+            console.warn(`DND-Weather | Month not found in Simple Calendar: ${monthName}`);
+            return `${monthName} ${day}`;
+        }
+        
+        // Create a new date using the current date as template but with our month and day
+        const newDate = { 
+            ...currentDate,
+            month: matchingMonth.order,
+            day: day
+        };
+        
+        // Format date
+        return window.SimpleCalendar.api.formatDate(newDate);
+    } catch (error) {
+        console.error("DND-Weather | Error formatting Simple Calendar date:", error);
+        return `${monthName} ${day}`;
+    }
+}
+
 // Update the _formatDetailedReport method to include location name and date range
 _formatDetailedReport(weatherData, options) {
     // Create detailed report with day-by-day breakdown
@@ -1209,18 +1220,10 @@ _formatDetailedReport(weatherData, options) {
         const weather = day.weather;
         const baseConditions = weather.baseConditions;
         
-        // Format day date - use calendar format if requested
-        let dayDate = `${day.month} ${day.day}`;
-        if (options.useCalendar && globalThis.dndWeather?.weatherSystem?.calendarIntegration?.initialized) {
-            try {
-                const calDate = globalThis.dndWeather.weatherSystem.calendarIntegration.getCurrentDate();
-                calDate.month = globalThis.dndWeather.weatherSystem.calendarIntegration.getMonthIndex(day.month);
-                calDate.day = day.day;
-                dayDate = globalThis.dndWeather.weatherSystem.calendarIntegration.formatDate(calDate);
-            } catch (error) {
-                console.error("DND-Weather | Error formatting calendar date:", error);
-            }
-        }
+        // Format day date using our helper if needed
+        let dayDate = options.useCalendar
+            ? this._formatSimpleCalendarDate(day.month, day.day)
+            : `${day.month} ${day.day}`;
         
         content += `<div class="weather-day">
             <h3>${dayDate}</h3>
@@ -1334,18 +1337,10 @@ _formatCompactReport(weatherData, options) {
         const weather = day.weather;
         const baseConditions = weather.baseConditions;
         
-        // Format day date - use calendar format if requested
-        let dayDate = `${day.month} ${day.day}`;
-        if (options.useCalendar && globalThis.dndWeather?.weatherSystem?.calendarIntegration?.initialized) {
-            try {
-                const calDate = globalThis.dndWeather.weatherSystem.calendarIntegration.getCurrentDate();
-                calDate.month = globalThis.dndWeather.weatherSystem.calendarIntegration.getMonthIndex(day.month);
-                calDate.day = day.day;
-                dayDate = globalThis.dndWeather.weatherSystem.calendarIntegration.formatDate(calDate, {showWeekday: false});
-            } catch (error) {
-                console.error("DND-Weather | Error formatting calendar date:", error);
-            }
-        }
+        // Format day date using our helper if needed
+        let dayDate = options.useCalendar
+            ? this._formatSimpleCalendarDate(day.month, day.day)
+            : `${day.month} ${day.day}`;
         
         content += `<tr>
             <td>${dayDate}</td>
@@ -1570,9 +1565,23 @@ async _shareTodaysWeather() {
 // Helper method for Simple Calendar integration
 _getCalendarIntegration() {
     const weatherSystem = globalThis.dndWeather?.weatherSystem;
-    if (!weatherSystem || !weatherSystem.calendarIntegration || !weatherSystem.calendarIntegration.initialized) {
+    if (!weatherSystem) {
+        console.log("DND-Weather | Weather system not found");
         return null;
     }
+    
+    if (!weatherSystem.calendarIntegration) {
+        console.log("DND-Weather | Calendar integration not found");
+        return null;
+    }
+    
+    if (!weatherSystem.calendarIntegration.initialized) {
+        console.log("DND-Weather | Calendar integration not initialized");
+        return null;
+    }
+    
+    console.log("DND-Weather | Calendar integration available");
     return weatherSystem.calendarIntegration;
 }
+
 }
