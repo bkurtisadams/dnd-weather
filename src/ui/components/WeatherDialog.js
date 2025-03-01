@@ -120,30 +120,62 @@ export class WeatherDialog extends Application {
     
     // method to update duration
     // Replace the _updateDurationDisplay method in WeatherDialog.js
-    _updateDurationDisplay() {
-        console.log("DND-Weather | Updating duration display");
-        
-        // Find the duration element
-        const durationElement = this.element.find('#weatherDuration');
-        
-        if (durationElement.length) {
-            // Get the precipitation duration directly from the current weather
-            const precipitation = this.state.currentWeather?.baseConditions?.precipitation;
-            let text;
-            
-            if (precipitation && precipitation.type !== 'none' && precipitation.duration) {
-                // Format it the same way as in getData
-                const duration = precipitation.duration;
-                text = `Weather event duration: ${duration} ${duration === 1 ? 'hour' : 'hours'}`;
-            } else {
-                // No precipitation or clear weather
-                text = "Weather event duration: Not applicable (clear weather)";
+    // Replace the _updateDurationDisplay method in WeatherDialog.js with this version
+_updateDurationDisplay() {
+    console.log("DND-Weather | Updating duration display");
+    
+    // Find the duration element
+    const durationElement = this.element.find('#weatherDuration');
+    
+    if (!durationElement.length) {
+        console.error("DND-Weather | Duration element not found in DOM");
+        return;
+    }
+    
+    // Get the current weather data
+    const currentWeather = this.state.currentWeather;
+    if (!currentWeather || !currentWeather.baseConditions) {
+        durationElement.text("Weather event duration: Not available");
+        return;
+    }
+    
+    const precipitation = currentWeather.baseConditions.precipitation;
+    
+    // Debug what we have
+    console.log("DND-Weather | Current precipitation data:", precipitation);
+    
+    if (!precipitation || precipitation.type === 'none' || !precipitation.duration) {
+        durationElement.text("Weather event duration: Not applicable (clear weather)");
+        return;
+    }
+    
+    // Format duration
+    const duration = precipitation.duration;
+    const formattedDuration = `${duration} ${duration === 1 ? 'hour' : 'hours'}`;
+    
+    // Check for remaining time if we have calendar integration
+    if (currentWeather.timing && currentWeather.timing.end) {
+        const weatherSystem = globalThis.dndWeather?.weatherSystem;
+        if (weatherSystem?.calendarIntegration?.initialized) {
+            try {
+                const currentDate = weatherSystem.calendarIntegration.getCurrentDate();
+                const currentTimestamp = weatherSystem.calendarIntegration.dateToTimestamp(currentDate);
+                const endTimestamp = weatherSystem.calendarIntegration.dateToTimestamp(currentWeather.timing.end);
+                
+                const remainingSeconds = Math.max(0, endTimestamp - currentTimestamp);
+                const remainingHours = Math.floor(remainingSeconds / 3600);
+                const remainingMinutes = Math.floor((remainingSeconds % 3600) / 60);
+                
+                durationElement.text(`Weather event duration: ${formattedDuration} (${remainingHours}h ${remainingMinutes}m remaining)`);
+                return;
+            } catch (error) {
+                console.error("DND-Weather | Error calculating remaining time:", error);
             }
-            
-            console.log("DND-Weather | Setting duration text:", text);
-            durationElement.text(text);
         }
     }
+    
+    durationElement.text(`Weather event duration: ${formattedDuration}`);
+}
 
     // Add method to ensure display window
     async _ensureDisplayWindow() {
@@ -436,15 +468,51 @@ export class WeatherDialog extends Application {
                 }
             }
 
+            // Calculate weather duration
             let weatherDuration = null;
             if (this.state.currentWeather?.baseConditions?.precipitation?.duration) {
-                // Use the actual weather event duration from precipitation
                 const duration = this.state.currentWeather.baseConditions.precipitation.duration;
                 weatherDuration = `${duration} ${duration === 1 ? 'hour' : 'hours'}`;
                 console.log("DND-Weather | Setting weather duration:", weatherDuration);
             }
 
-            // Return combined data
+            console.log("DND-Weather | Current Weather:", currentWeather);
+            console.log("DND-Weather | Weather Duration:", weatherDuration);
+
+            // Now log the return object step-by-step
+            const returnData = {
+                weather: {
+                    temperature: currentWeather?.baseConditions?.temperature?.high || 'N/A',
+                    temperatureLow: currentWeather?.baseConditions?.temperature?.low || 'N/A',
+                    windChill: currentWeather?.baseConditions?.temperature?.windChill || 'N/A',
+                    wind: currentWeather?.baseConditions?.wind?.speed || 'N/A',
+                    windDirection: currentWeather?.baseConditions?.wind?.direction || 'N/A',
+                    precipitation: precipitation,
+                    moonPhase: {
+                        luna: currentWeather?.baseConditions?.moonPhase?.luna || 'Unknown',
+                        celene: currentWeather?.baseConditions?.moonPhase?.celene || 'Unknown'
+                    },
+                    conditions: currentWeather?.baseConditions?.sky || 'N/A',
+                    precipitationTypes: Object.keys(weatherPhenomena),
+                    weatherTiming: weatherTiming,
+                    daylight: daylight,
+                    weatherDuration: weatherDuration // Pass weatherDuration here
+                },
+                weatherHistory: this.weatherHistory || 'N/A',
+                effects: currentWeather?.effects || 'N/A',
+                terrain: currentWeather?.terrain || 'N/A',
+                elevation: currentWeather?.elevation || 'N/A',
+                isGM: game?.user?.isGM || false,
+                loading: this.state?.loading || false,
+                error: this.state?.error || 'N/A',
+                lastUpdate: this.state?.lastUpdate || currentWeather?.timestamp || 'N/A',
+                ...formData
+            };
+
+            // Now log the return data
+            console.log("DND-Weather | Final return data:", returnData);
+
+            // Return combined data including weatherDuration
             return {
                 weather: {
                     temperature: currentWeather.baseConditions.temperature.high,
@@ -460,10 +528,9 @@ export class WeatherDialog extends Application {
                     conditions: currentWeather.baseConditions.sky,
                     
                     precipitationTypes: Object.keys(weatherPhenomena),
-                    // Add the new timing property
                     weatherTiming: weatherTiming,
-                    daylight: daylight  // Add new daylight data
-                    
+                    daylight: daylight,  // Add new daylight data
+                    weatherDuration: weatherDuration // Pass weatherDuration here
                 },
                 weatherHistory: this.weatherHistory,
                 effects: currentWeather.effects,
@@ -473,7 +540,6 @@ export class WeatherDialog extends Application {
                 loading: this.state.loading,
                 error: this.state.error,
                 lastUpdate: this.state.lastUpdate || currentWeather.timestamp,
-                weatherDuration: weatherDuration,
                 ...formData
             };
         } catch (error) {

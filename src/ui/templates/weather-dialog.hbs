@@ -80,14 +80,15 @@
     {{/if}}
 
     {{debug weatherDuration}}
+    {{debug weather.precipitation.duration}}
 
     <!-- Weather Duration Section -->
     <!-- Always show this section -->
     <div class="weather-duration-section">
         <h3>Weather Duration</h3>
         <p id="weatherDuration">
-            {{#if weather.precipitation.duration}}
-                Weather event duration: {{weather.precipitation.duration}} hours
+            {{#if weatherDuration}}
+                Weather event duration: {{weatherDuration}}
             {{else}}
                 Weather event duration: Not applicable (clear weather)
             {{/if}}
