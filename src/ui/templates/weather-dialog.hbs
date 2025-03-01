@@ -87,8 +87,15 @@
     <div class="weather-duration-section">
         <h3>Weather Duration</h3>
         <p id="weatherDuration">
-            {{#if weatherDuration}}
-                Weather event duration: {{weatherDuration}}
+            {{#if weather.precipitation.duration}}
+                {{#if weather.precipitation.duration}}
+                    Weather event duration: {{formatDuration weather.precipitation.duration}}
+                    {{#if weather.weatherTiming.remaining}}
+                        ({{weather.weatherTiming.remaining}} remaining)
+                    {{/if}}
+                {{else}}
+                    Weather event duration: Not applicable (clear weather)
+                {{/if}}
             {{else}}
                 Weather event duration: Not applicable (clear weather)
             {{/if}}

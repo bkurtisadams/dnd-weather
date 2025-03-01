@@ -104,19 +104,25 @@ export class WeatherDialog extends Application {
         this._onUpdateWeather = this._onUpdateWeather.bind(this);
         this._onOpenSettings = this._onOpenSettings.bind(this);
         this._updateDurationDisplay = this._updateDurationDisplay.bind(this);
+        this._startDurationTracking = this._startDurationTracking.bind(this);
     }
 
         // Update _startDurationTracking method
         _startDurationTracking() {
-        // Clear any existing interval
-        if (this.durationUpdateInterval) {
-            clearInterval(this.durationUpdateInterval);
-            this.durationUpdateInterval = null;
+            // Clear any existing interval
+            if (this.durationUpdateInterval) {
+                clearInterval(this.durationUpdateInterval);
+                this.durationUpdateInterval = null;
+            }
+            
+            // Update once immediately
+            this._updateDurationDisplay();
+            
+            // Set up the interval for regular updates - every minute
+            this.durationUpdateInterval = setInterval(() => {
+                this._updateDurationDisplay();
+            }, 60000); // Update every minute
         }
-        
-        // Don't start a new interval, just update once
-        this._updateDurationDisplay();
-    }
     
     // method to update duration
     // Replace the _updateDurationDisplay method in WeatherDialog.js
@@ -436,8 +442,12 @@ _updateDurationDisplay() {
             // Add timing information if available
             let weatherTiming = {};
     
+            // ensure weatherTiming includes remaining time:
             if (this.state.currentWeather?.timing) {
                 const timing = this.state.currentWeather.timing;
+                
+                // Make sure weatherTiming is initialized
+                weatherTiming = weatherTiming || {};
                 
                 if (timing.start) {
                     weatherTiming.start = this._formatCalendarDate(timing.start);
@@ -451,15 +461,20 @@ _updateDurationDisplay() {
                         const weatherSystem = globalThis.dndWeather?.weatherSystem;
                         if (weatherSystem?.calendarIntegration?.initialized) {
                             try {
-                                const currentDate = weatherSystem.calendarIntegration.simpleCalendar.getCurrentDate();
-                                const currentTimestamp = weatherSystem.calendarIntegration.simpleCalendar.dateToTimestamp(currentDate);
-                                const endTimestamp = weatherSystem.calendarIntegration.simpleCalendar.dateToTimestamp(timing.end);
+                                // Get current date and convert to timestamp
+                                const currentDate = weatherSystem.calendarIntegration.getCurrentDate();
+                                const currentTimestamp = weatherSystem.calendarIntegration.dateToTimestamp(currentDate);
                                 
+                                // Get end timestamp
+                                const endTimestamp = weatherSystem.calendarIntegration.dateToTimestamp(timing.end);
+                                
+                                // Calculate remaining time
                                 const remainingSeconds = Math.max(0, endTimestamp - currentTimestamp);
                                 const remainingHours = Math.floor(remainingSeconds / 3600);
                                 const remainingMinutes = Math.floor((remainingSeconds % 3600) / 60);
                                 
                                 weatherTiming.remaining = `${remainingHours}h ${remainingMinutes}m`;
+                                console.log("DND-Weather | Calculated remaining time:", weatherTiming.remaining);
                             } catch (error) {
                                 console.error("DND-Weather | Error calculating remaining time:", error);
                             }

@@ -410,23 +410,28 @@ _updateDurationDisplay() {
             const moonPhase = await this._determineMoonPhases();
             console.log("DND-Weather | Calculated moon phases:", moonPhase);
 
+            // Define timing data if calendar integration is available
+            let timing = {};
             if (this.calendarIntegration?.initialized) {
                 try {
-                    // Define weatherData object locally
-                    const weatherTiming = {};
+                    // Get current date as start
+                    const currentDate = this.calendarIntegration.getCurrentDate();
+                    this.currentWeatherStart = currentDate;
+                    timing.start = currentDate;
                     
-                    this.currentWeatherStart = this.calendarIntegration.getCurrentDate();
+                    // Calculate end time based on precipitation duration
                     if (precipitation.duration) {
-                        this.currentWeatherEnd = this.calendarIntegration.calculateWeatherEndTime(precipitation.duration);
+                        const endDate = this.calendarIntegration.calculateWeatherEndTime(precipitation.duration);
+                        this.currentWeatherEnd = endDate;
+                        timing.end = endDate;
+                        
+                        console.log("DND-Weather | Weather event scheduled to end at:", endDate);
                     } else {
-                        this.currentWeatherEnd = this.calendarIntegration.calculateWeatherEndTime(6);
+                        // Default duration of 4 hours for non-precipitation weather (Greyhawk minimum)
+                        const endDate = this.calendarIntegration.calculateWeatherEndTime(4);
+                        this.currentWeatherEnd = endDate;
+                        timing.end = endDate;
                     }
-                    
-                    // Store timing data
-                    weatherTiming.start = this.currentWeatherStart;
-                    weatherTiming.end = this.currentWeatherEnd;
-                    
-                    // Return this timing data at the end of the function in the main return object
                 } catch (error) {
                     console.error("DND-Weather | Error setting weather timing:", error);
                 }
@@ -477,7 +482,8 @@ _updateDurationDisplay() {
                 },
                 terrain: this.settings.terrain,
                 elevation: this.settings.elevation,
-                timestamp: new Date().toLocaleString()
+                timestamp: new Date().toLocaleString(),
+                timing: Object.keys(timing).length > 0 ? timing : undefined
             };
     
         } catch (error) {
