@@ -49,76 +49,118 @@ export class GreyhawkWeatherSystem {
  * Initialize calendar integration
  * Should be called after Foundry is ready
  */
+    // Update the initializeCalendar method
+// Update the initializeCalendar method
 async initializeCalendar() {
     try {
-        // Defensive checks for game object
-        if (!game) {
-            console.warn("DND-Weather | Game object not available");
+        console.log("DND-Weather | Beginning calendar initialization");
+        
+        if (!game || !game.modules) {
+            console.warn("DND-Weather | Game context not available for calendar integration");
             return false;
         }
         
-        if (!game.modules) {
-            console.warn("DND-Weather | Game modules collection not available");
+        // Check for both possible module IDs
+        const simpleCalendarModule = game.modules.get('foundryvtt-simple-calendar') || 
+                                    game.modules.get('simple-calendar');
+        
+        if (!simpleCalendarModule || !simpleCalendarModule.active) {
+            console.warn(`DND-Weather | Simple Calendar module not found or not active (checked IDs: 'foundryvtt-simple-calendar', 'simple-calendar')`);
             return false;
         }
         
-        // Check if Simple Calendar is active
-        const simpleCalendarModule = game.modules.get('simple-calendar');
-        if (!simpleCalendarModule) {
-            console.warn("DND-Weather | Simple Calendar module not found");
-            return false;
-        }
+        console.log(`DND-Weather | Simple Calendar module found and active: ${simpleCalendarModule.id}`);
         
-        const isSimpleCalendarActive = simpleCalendarModule.active;
-        if (!isSimpleCalendarActive) {
-            console.log("DND-Weather | Simple Calendar module not active, skipping integration");
-            return false;
-        }
-        
-        // Wait for simple-calendar to be ready
-        if (!window.SimpleCalendar) {
-            console.log("DND-Weather | Waiting for Simple Calendar to initialize...");
-            // Wait up to 10 seconds for Simple Calendar to load
-            for (let i = 0; i < 10; i++) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                if (window.SimpleCalendar) break;
-            }
-            
-            if (!window.SimpleCalendar) {
-                console.warn("DND-Weather | Simple Calendar not found after 10 seconds");
-                return false;
-            }
-        }
-        
-        console.log("DND-Weather | Simple Calendar found, initializing integration");
-        
-        // Check if CalendarIntegration class is available
-        if (typeof CalendarIntegration !== 'function') {
-            console.error("DND-Weather | CalendarIntegration class not found");
-            return false;
-        }
-        
-        try {
-            this.calendarIntegration = new CalendarIntegration();
-            const success = await this.calendarIntegration.initialize();
-            
-            if (success) {
-                console.log("DND-Weather | Calendar integration initialized successfully");
-                this._setupCalendarListeners();
-                return true;
+        return new Promise((resolve) => {
+            // Wait for Simple Calendar API to be available
+            if (window.SimpleCalendar) {
+                console.log("DND-Weather | window.SimpleCalendar found");
+                if (window.SimpleCalendar.Hooks?.Ready) {
+                    console.log("DND-Weather | Waiting for SimpleCalendar ready hook");
+                    
+                    Hooks.once(window.SimpleCalendar.Hooks.Ready, () => {
+                        console.log("DND-Weather | SimpleCalendar ready hook fired");
+                        this._initializeWithCalendarAPI(window.SimpleCalendar, resolve);
+                    });
+                } else {
+                    // If the Ready hook isn't available, try to initialize directly
+                    console.log("DND-Weather | SimpleCalendar.Hooks.Ready not found, trying to initialize directly");
+                    this._initializeWithCalendarAPI(window.SimpleCalendar, resolve);
+                }
             } else {
-                console.warn("DND-Weather | Failed to initialize calendar integration");
-                return false;
+                console.warn("DND-Weather | window.SimpleCalendar not found, checking for initialization");
+                
+                // Check if SimpleCalendar might be initialized later
+                const checkInterval = setInterval(() => {
+                    if (window.SimpleCalendar) {
+                        console.log("DND-Weather | window.SimpleCalendar found after waiting");
+                        clearInterval(checkInterval);
+                        this._initializeWithCalendarAPI(window.SimpleCalendar, resolve);
+                    }
+                }, 1000);
+                
+                // Set a timeout to abandon the wait
+                setTimeout(() => {
+                    clearInterval(checkInterval);
+                    if (!this.calendarIntegration) {
+                        console.warn("DND-Weather | SimpleCalendar API never became available (timeout)");
+                        resolve(false);
+                    }
+                }, 10000);
             }
-        } catch (error) {
-            console.error("DND-Weather | Error creating CalendarIntegration instance:", error);
-            return false;
-        }
+        });
     } catch (error) {
         console.error("DND-Weather | Error initializing calendar:", error);
         return false;
     }
 }
+
+// Add the _initializeWithCalendarAPI method
+async _initializeWithCalendarAPI(api, resolvePromise) {
+    try {
+        console.log("DND-Weather | Initializing with SimpleCalendar API");
+        
+        // Store API reference
+        this.calendarAPI = api;
+        
+        if (typeof CalendarIntegration !== 'function') {
+            console.error("DND-Weather | CalendarIntegration class not found - check your imports");
+            resolvePromise(false);
+            return;
+        }
+        
+        // Initialize the calendar integration
+        try {
+            this.calendarIntegration = new CalendarIntegration(api);
+            const success = await this.calendarIntegration.initialize();
+            
+            if (success) {
+                console.log("DND-Weather | Calendar integration initialized successfully");
+                
+                // Register for date change events using Foundry's hook system
+                const hookName = api.Hooks?.DateTimeChanged || 'simple-calendar.dateChanged';
+                console.log(`DND-Weather | Registering for hook: ${hookName}`);
+                
+                Hooks.on(hookName, (newDate) => {
+                    console.log("DND-Weather | Calendar date changed:", newDate);
+                    this._checkWeatherExpiration(newDate);
+                });
+                
+                resolvePromise(true);
+            } else {
+                console.warn("DND-Weather | Failed to initialize calendar integration");
+                resolvePromise(false);
+            }
+        } catch (error) {
+            console.error("DND-Weather | Error in CalendarIntegration:", error);
+            resolvePromise(false);
+        }
+    } catch (error) {
+        console.error("DND-Weather | Error in _initializeWithCalendarAPI:", error);
+        resolvePromise(false);
+    }
+}
+
     
 // Add method to setup calendar listeners
 _setupCalendarListeners() {
@@ -168,13 +210,17 @@ _updateDurationDisplay() {
         if (!this.calendarIntegration || !this.currentWeatherEnd) return;
         
         try {
-            // Convert dates to timestamps for comparison
-            const currentTimestamp = this.calendarIntegration.simpleCalendar.dateToTimestamp(currentDate);
-            const endTimestamp = this.calendarIntegration.simpleCalendar.dateToTimestamp(this.currentWeatherEnd);
+            // Make sure we have the methods we need
+            if (typeof this.calendarIntegration.dateToTimestamp !== 'function') {
+                console.error("DND-Weather | dateToTimestamp method not available");
+                return;
+            }
+            
+            const currentTimestamp = this.calendarIntegration.dateToTimestamp(currentDate);
+            const endTimestamp = this.calendarIntegration.dateToTimestamp(this.currentWeatherEnd);
             
             if (currentTimestamp >= endTimestamp) {
                 console.log("DND-Weather | Weather event has expired, generating new weather");
-                // Only GM should update the weather
                 if (game.user.isGM) {
                     this.updateWeather({
                         checkRainbow: true
@@ -366,22 +412,21 @@ _updateDurationDisplay() {
 
             if (this.calendarIntegration?.initialized) {
                 try {
-                    this.currentWeatherStart = this.calendarIntegration.simpleCalendar.getCurrentDate();
+                    // Define weatherData object locally
+                    const weatherTiming = {};
                     
-                    // Calculate end time if there's precipitation with duration
+                    this.currentWeatherStart = this.calendarIntegration.getCurrentDate();
                     if (precipitation.duration) {
                         this.currentWeatherEnd = this.calendarIntegration.calculateWeatherEndTime(precipitation.duration);
-                        console.log("DND-Weather | Weather event scheduled to end at:", this.currentWeatherEnd);
                     } else {
-                        // For non-precipitation weather, set a default duration (e.g., 6 hours)
                         this.currentWeatherEnd = this.calendarIntegration.calculateWeatherEndTime(6);
                     }
                     
-                    // Add timing info to weather data
-                    weatherData.timing = {
-                        start: this.currentWeatherStart,
-                        end: this.currentWeatherEnd
-                    };
+                    // Store timing data
+                    weatherTiming.start = this.currentWeatherStart;
+                    weatherTiming.end = this.currentWeatherEnd;
+                    
+                    // Return this timing data at the end of the function in the main return object
                 } catch (error) {
                     console.error("DND-Weather | Error setting weather timing:", error);
                 }
@@ -788,9 +833,9 @@ _getGreyhawkMonth(date) {
     // Try to get month from Simple Calendar if it's available
     if (game.modules.get('simple-calendar')?.active && game.settings.get('dnd-weather', 'useSimpleCalendar')) {
         try {
-            const simpleCalendar = SimpleCalendar.api.getCurrentCalendar();
-            const currentDate = SimpleCalendar.api.getCurrentDay();
-            // Return month name from simple calendar
+            // Update to use the correct API methods
+            const currentDate = SimpleCalendar.api.currentDateTime();
+            // Get the month name from the current date
             return currentDate.month.name;
         } catch (error) {
             console.error("DND-Weather | Error getting date from Simple Calendar:", error);
@@ -1265,7 +1310,8 @@ async updateWeather(options = {}) {
             // Set new start/end times
             if (this.calendarIntegration?.initialized) {
                 try {
-                    this.currentWeatherStart = this.calendarIntegration.simpleCalendar.getCurrentDate();
+                    // Use currentDateTime() instead of getCurrentDate()
+                    this.currentWeatherStart = this.calendarIntegration.simpleCalendar.currentDateTime();
                     
                     // Calculate new end time based on new precipitation duration
                     this.currentWeatherEnd = this.calendarIntegration.calculateWeatherEndTime(duration);

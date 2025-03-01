@@ -1,11 +1,7 @@
-// Simple Calendar integration 
-/**
- * Handles integration with Simple Calendar module and provides
- * calendar-related utilities for the weather system
- */
+// Updated CalendarIntegration.js
 export class CalendarIntegration {
-    constructor() {
-        this.simpleCalendar = null;
+    constructor(simpleCalendar) {
+        this.simpleCalendar = simpleCalendar?.api || null;
         this.initialized = false;
     }
 
@@ -15,22 +11,22 @@ export class CalendarIntegration {
      */
     async initialize() {
         try {
-            // Wait for Simple Calendar to be ready
-            await this._waitForSimpleCalendar();
-            
-            // Get Simple Calendar API
-            this.simpleCalendar = SimpleCalendar.api;
-            
             if (!this.simpleCalendar) {
-                console.error('DnD Weather | Simple Calendar API not found');
+                console.error('DnD Weather | Simple Calendar API not provided to constructor');
                 return false;
             }
 
-            // Register for calendar update events
-            this.simpleCalendar.addEventListener(
-                SimpleCalendar.Hooks.DateTimeChanged,
-                this._handleDateChange.bind(this)
-            );
+            // Log available methods for debugging
+            console.log('DnD Weather | Simple Calendar API methods:', 
+                Object.getOwnPropertyNames(this.simpleCalendar)
+                    .filter(p => typeof this.simpleCalendar[p] === 'function')
+                    .join(', '));
+            
+            // Check if we have the necessary methods
+            if (!this.hasRequiredMethods()) {
+                console.error('DnD Weather | Simple Calendar API is missing required methods');
+                return false;
+            }
 
             this.initialized = true;
             return true;
@@ -41,46 +37,72 @@ export class CalendarIntegration {
     }
 
     /**
+     * Check if the API has all required methods
+     * @returns {boolean} Whether all required methods are available
+     */
+    hasRequiredMethods() {
+        const requiredMethods = [
+            'getCurrentDate',
+            'dateToTimestamp',
+            'timestampToDate'
+        ];
+        
+        for (const method of requiredMethods) {
+            if (typeof this.simpleCalendar[method] !== 'function') {
+                console.error(`DnD Weather | Simple Calendar API missing method: ${method}`);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    /**
      * Get the current date
      * @returns {Object} Current date details
      */
     getCurrentDate() {
         if (!this.initialized) return null;
 
-        const currentDate = this.simpleCalendar.getCurrentDay();
-        return this._formatDate(currentDate);
+        try {
+            const currentDate = this.simpleCalendar.getCurrentDate();
+            return currentDate;
+        } catch (error) {
+            console.error('DnD Weather | Error getting current date:', error);
+            return null;
+        }
     }
 
     /**
-     * Get the number of days between two dates
-     * @param {Object} date1 First date
-     * @param {Object} date2 Second date
-     * @returns {number} Number of days between dates
+     * Convert date to timestamp
+     * @param {Object} date Date object
+     * @returns {number} Timestamp
      */
-    getDaysBetweenDates(date1, date2) {
+    dateToTimestamp(date) {
         if (!this.initialized) return 0;
-
-        const timestamp1 = this.simpleCalendar.dateToTimestamp(this._toSimpleCalendarDate(date1));
-        const timestamp2 = this.simpleCalendar.dateToTimestamp(this._toSimpleCalendarDate(date2));
-
-        return Math.floor((timestamp2 - timestamp1) / (this.simpleCalendar.const.SECONDS_PER_DAY));
+        
+        try {
+            return this.simpleCalendar.dateToTimestamp(date);
+        } catch (error) {
+            console.error('DnD Weather | Error converting date to timestamp:', error);
+            return 0;
+        }
     }
 
     /**
-     * Add days to a date
-     * @param {Object} date Starting date
-     * @param {number} days Number of days to add
-     * @returns {Object} Resulting date
+     * Convert timestamp to date
+     * @param {number} timestamp Timestamp
+     * @returns {Object} Date object
      */
-    addDays(date, days) {
-        if (!this.initialized) return date;
-
-        const scDate = this._toSimpleCalendarDate(date);
-        const timestamp = this.simpleCalendar.dateToTimestamp(scDate);
-        const newTimestamp = timestamp + (days * this.simpleCalendar.const.SECONDS_PER_DAY);
-        const newDate = this.simpleCalendar.timestampToDate(newTimestamp);
-
-        return this._formatDate(newDate);
+    timestampToDate(timestamp) {
+        if (!this.initialized) return null;
+        
+        try {
+            return this.simpleCalendar.timestampToDate(timestamp);
+        } catch (error) {
+            console.error('DnD Weather | Error converting timestamp to date:', error);
+            return null;
+        }
     }
 
     /**
@@ -90,208 +112,67 @@ export class CalendarIntegration {
     getCurrentSeason() {
         if (!this.initialized) return 'spring';
 
-        const currentDate = this.simpleCalendar.getCurrentDay();
-        return this._determineSeason(currentDate);
+        try {
+            const currentDate = this.getCurrentDate();
+            
+            // Try to get season from API if available
+            if (typeof this.simpleCalendar.getSeason === 'function') {
+                const season = this.simpleCalendar.getSeason(currentDate);
+                return season.toLowerCase();
+            }
+            
+            // Fallback to simple month-based seasons
+            return this._getSeasonByMonth(currentDate);
+        } catch (error) {
+            console.error('DnD Weather | Error getting current season:', error);
+            return 'spring';
+        }
     }
 
     /**
-     * Get the season for a specific date
-     * @param {Object} date Date to check
+     * Simple fallback method to determine season by month
+     * @param {Object} date Date object
      * @returns {string} Season name
      */
-    getSeason(date) {
-        if (!this.initialized) return 'spring';
-
-        const scDate = this._toSimpleCalendarDate(date);
-        return this._determineSeason(scDate);
-    }
-
-    /**
-     * Check if current date is a holiday
-     * @returns {Object|null} Holiday details if current date is a holiday
-     */
-    checkForHoliday() {
-        if (!this.initialized) return null;
-
-        const currentDate = this.simpleCalendar.getCurrentDay();
-        const notes = this.simpleCalendar.getNotes(currentDate);
-
-        for (const note of notes) {
-            if (note.categories.some(cat => cat.name.toLowerCase() === 'holiday')) {
-                return {
-                    name: note.title,
-                    description: note.content,
-                    type: 'holiday'
-                };
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Get sunrise and sunset times for current date
-     * @returns {Object} Sunrise and sunset times
-     */
-    getDaylightHours() {
-        if (!this.initialized) return { sunrise: '6:00', sunset: '18:00' };
-
-        const currentDate = this.simpleCalendar.getCurrentDay();
-        return this._calculateDaylightHours(currentDate);
-    }
-
-    // Private helper methods
-    async _waitForSimpleCalendar() {
-        // Wait for up to 30 seconds for Simple Calendar to be ready
-        for (let i = 0; i < 30; i++) {
-            if (window.SimpleCalendar) return;
-            await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-        throw new Error('Simple Calendar not found after 30 seconds');
-    }
-
-    _handleDateChange(data) {
-        // Emit our own event for weather system components
-        const event = new CustomEvent('weatherDateChanged', {
-            detail: {
-                date: this._formatDate(data.date),
-                diff: data.diff
-            }
-        });
-        document.dispatchEvent(event);
-    }
-
-    _formatDate(scDate) {
-        return {
-            year: scDate.year,
-            month: scDate.month,
-            day: scDate.day,
-            weekday: scDate.weekday,
-            season: this._determineSeason(scDate)
-        };
-    }
-
-    _toSimpleCalendarDate(date) {
-        return {
-            year: date.year,
-            month: date.month,
-            day: date.day,
-            hour: 12, // Default to noon for consistent day/night calculations
-            minute: 0,
-            second: 0
-        };
-    }
-
-    _determineSeason(date) {
-        // Get configured seasons from Simple Calendar
-        const seasons = this.simpleCalendar.seasonsConfig;
+    _getSeasonByMonth(date) {
+        // Implement a simple mapping of months to seasons based on your calendar
+        // This is a fallback method for when the API doesn't provide season info
+        const monthIndex = date.month || 0;
         
-        // Find current season based on date
-        for (const season of seasons) {
-            if (this.simpleCalendar.dateInSeason(date, season)) {
-                return season.name.toLowerCase();
-            }
-        }
-
-        // Default to spring if no season found
+        if (monthIndex >= 0 && monthIndex <= 2) return 'winter';
+        if (monthIndex >= 3 && monthIndex <= 5) return 'spring';
+        if (monthIndex >= 6 && monthIndex <= 8) return 'summer';
+        if (monthIndex >= 9 && monthIndex <= 11) return 'autumn';
+        
         return 'spring';
     }
 
-    _calculateDaylightHours(date) {
-        const seasonData = {
-            spring: { sunrise: '6:00', sunset: '18:00' },
-            summer: { sunrise: '5:00', sunset: '19:00' },
-            autumn: { sunrise: '6:00', sunset: '18:00' },
-            winter: { sunrise: '7:00', sunset: '17:00' }
-        };
-
-        const season = this._determineSeason(date);
-        return seasonData[season] || seasonData.spring;
-    }
-
     /**
-     * Get latitude for the current campaign setting
-     * For Greyhawk, this is roughly equivalent to Earth's temperate zones
-     * @returns {number} Approximate latitude
+     * Calculate the end time for a weather event
+     * @param {number} durationHours Duration in hours
+     * @returns {Object} End date/time
      */
-    getLatitude() {
-        // Default to roughly temperate zone latitude
-        return 45;
-    }
-
-    /**
-     * Check if the current date is during daytime
-     * @returns {boolean} Whether it's currently daytime
-     */
-    isDaytime() {
-        if (!this.initialized) return true;
-
-        const currentTime = this.simpleCalendar.getCurrentTime();
-        const daylight = this.getDaylightHours();
-
-        // Convert times to minutes for comparison
-        const currentMinutes = this._timeToMinutes(currentTime);
-        const sunriseMinutes = this._timeToMinutes(daylight.sunrise);
-        const sunsetMinutes = this._timeToMinutes(daylight.sunset);
-
-        return currentMinutes >= sunriseMinutes && currentMinutes < sunsetMinutes;
-    }
-
-    _timeToMinutes(timeString) {
-        const [hours, minutes] = timeString.split(':').map(Number);
-        return (hours * 60) + minutes;
-    }
-
-    /**
- * Advance game time by a specified duration
- * @param {number} hours Number of hours to advance
- * @returns {Object} New date information
- */
-advanceTimeByHours(hours) {
-    if (!this.initialized) return null;
-    
-    try {
-        // Get current date/time
-        const currentDate = this.simpleCalendar.getCurrentDate();
+    calculateWeatherEndTime(durationHours) {
+        if (!this.initialized) return null;
         
-        // Calculate new time
-        const totalSeconds = hours * 3600; // Convert hours to seconds
-        
-        // Advance the calendar
-        this.simpleCalendar.changeDate({
-            seconds: totalSeconds
-        });
-        
-        // Return new date information
-        return this.getCurrentDate();
-    } catch (error) {
-        console.error('DnD Weather | Error advancing time:', error);
-        return null;
+        try {
+            // Get current date/time
+            const currentDate = this.getCurrentDate();
+            
+            // Calculate seconds from hours
+            const totalSeconds = durationHours * 3600;
+            
+            // Get current timestamp
+            const currentTimestamp = this.dateToTimestamp(currentDate);
+            
+            // Add duration to timestamp
+            const endTimestamp = currentTimestamp + totalSeconds;
+            
+            // Convert back to date
+            return this.timestampToDate(endTimestamp);
+        } catch (error) {
+            console.error('DnD Weather | Error calculating end time:', error);
+            return null;
+        }
     }
-}
-
-/**
- * Calculate the end time for a weather event
- * @param {number} durationHours Duration in hours
- * @returns {Object} End date/time
- */
-calculateWeatherEndTime(durationHours) {
-    if (!this.initialized) return null;
-    
-    try {
-        // Get current date/time
-        const currentDate = this.simpleCalendar.getCurrentDate();
-        
-        // Calculate new time
-        const totalSeconds = durationHours * 3600; // Convert hours to seconds
-        const currentTimestamp = this.simpleCalendar.dateToTimestamp(currentDate);
-        const endTimestamp = currentTimestamp + totalSeconds;
-        
-        // Convert timestamp back to date
-        return this.simpleCalendar.timestampToDate(endTimestamp);
-    } catch (error) {
-        console.error('DnD Weather | Error calculating end time:', error);
-        return null;
-    }
-}
 }
