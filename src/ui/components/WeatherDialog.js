@@ -99,9 +99,9 @@ export class WeatherDialog extends Application {
             error: null,
             lastUpdate: null,
             currentWeather: null,
-            // Add new state properties
-            selectedMonth: this.months[0] || 'Fireseek', // Default to first month or Fireseek
-            selectedDay: 1, // initialize selectedDay
+            // Load saved month and day from settings
+            selectedMonth: game.settings.get('dnd-weather', 'selectedMonth'),
+            selectedDay: game.settings.get('dnd-weather', 'selectedDay'),
             ...this.state,
             latitude: game.settings.get('dnd-weather', 'latitude'),
             terrain: game.settings.get('dnd-weather', 'terrain'),
@@ -581,10 +581,13 @@ export class WeatherDialog extends Application {
     }
 
     // save settings
+    // Updated method
     async _saveSettings() {
         await game.settings.set('dnd-weather', 'latitude', this.state.latitude);
         await game.settings.set('dnd-weather', 'terrain', this.state.terrain);
         await game.settings.set('dnd-weather', 'elevation', this.state.elevation);
+        await game.settings.set('dnd-weather', 'selectedMonth', this.state.selectedMonth);
+        await game.settings.set('dnd-weather', 'selectedDay', this.state.selectedDay);
     }
 
     _getErrorData(errorMessage) {
@@ -636,15 +639,17 @@ export class WeatherDialog extends Application {
         html.find('.settings').off('click').on('click', this._onOpenSettings.bind(this));
         html.find('.refresh-weather').off('click').on('click', () => this.render());
 
-        // Add input listeners
-        html.find('select[name="month"]').on('change', (event) => {
+        // Add month input listener
+        html.find('select[name="month"]').on('change', async (event) => {
             this.state.selectedMonth = event.target.value;
+            await game.settings.set('dnd-weather', 'selectedMonth', this.state.selectedMonth);
             console.log("DND-Weather | Month changed to:", this.state.selectedMonth);
         });
 
         // Add day input listener
-        html.find('input[name="day"]').on('change', (event) => {
+        html.find('input[name="day"]').on('change', async (event) => {
             this.state.selectedDay = Number(event.target.value);
+            await game.settings.set('dnd-weather', 'selectedDay', this.state.selectedDay);
             console.log("DND-Weather | Day changed to:", this.state.selectedDay);
         });
 

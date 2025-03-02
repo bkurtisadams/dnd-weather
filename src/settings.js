@@ -27,6 +27,25 @@ export const registerSettings = () => {
       }
     });
 
+    // Add to your settings registration code
+    game.settings.register('dnd-weather', 'selectedMonth', {
+      name: "Selected Month",
+      hint: "The last selected month for weather generation",
+      scope: "world",
+      config: false,
+      type: String,
+      default: "Fireseek"
+    });
+
+    game.settings.register('dnd-weather', 'selectedDay', {
+      name: "Selected Day",
+      hint: "The last selected day for weather generation",
+      scope: "world",
+      config: false,
+      type: Number,
+      default: 1
+    });
+    
     game.settings.register('dnd-weather', 'lastLocationName', {
       name: "Last Used Location Name",
       hint: "Stores the last location name used for weather reports",
