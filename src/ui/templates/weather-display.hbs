@@ -273,38 +273,38 @@
   {{/if}}
 
   {{!-- Weather History Section - Always visible --}}
-  <div class="weather-row">
-    <div class="weather-icon">
-      <i class="fas fa-history"></i>
-    </div>
-    <div class="weather-data">
-      <h3>Weather History</h3>
-      {{#if weatherHistory.length}}
-        <div class="weather-history-list">
-          {{#each weatherHistory as |history index|}}
-            {{#if (lt index 5)}} {{!-- Only show first 5 entries --}}
-            <div class="history-item">
-              <div class="history-time">{{history.timestamp}}</div>
-              <div class="history-details">
-                {{history.baseConditions.sky}}
-                {{#unless (eq history.baseConditions.precipitation.type "none")}}
-                  - {{history.baseConditions.precipitation.type}}
-                {{/unless}}
-              </div>
-              {{#if ../isGM}}
-                <button type="button" class="restore-weather" data-index="{{index}}">
-                  <i class="fas fa-undo"></i>
-                </button>
-              {{/if}}
-            </div>
-            {{/if}}
-          {{/each}}
-        </div>
-      {{else}}
-        <div class="empty-history">No weather history yet.</div>
-      {{/if}}
-    </div>
+<div class="weather-row">
+  <div class="weather-icon">
+    <i class="fas fa-history"></i>
   </div>
+  <div class="weather-data">
+    <h3>Weather History</h3>
+    {{#if weatherHistory.length}}
+      <div class="weather-history-list">
+        {{#each weatherHistory as |history index|}}
+          {{#if (lt index 5)}}
+          <div class="history-item">
+            <div class="history-time">{{history.timestamp}}</div>
+            <div class="history-details">
+              {{history.baseConditions.sky}}
+              {{#unless (eq history.baseConditions.precipitation.type "none")}}
+                - {{history.baseConditions.precipitation.type}}
+              {{/unless}}
+            </div>
+            {{#if ../isGM}}
+              <button type="button" class="restore-weather" data-index="{{index}}">
+                <i class="fas fa-undo"></i>
+              </button>
+            {{/if}}
+          </div>
+          {{/if}}
+        {{/each}}
+      </div>
+    {{else}}
+      <div class="empty-history">No weather history yet.</div>
+    {{/if}}
+  </div>
+</div>
 
   {{!-- Special Weather Section --}}
   <div class="weather-section">
