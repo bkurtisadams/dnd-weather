@@ -96,28 +96,6 @@
     </div>
 
     <!-- Add to weather-dialog.hbs -->
-    <div class="weather-history-section">
-    <button type="button" class="collapse-toggle">
-        <i class="fas fa-history"></i> Weather History
-        <i class="fas fa-chevron-down"></i>
-    </button>
-    <div class="weather-history-content collapsed">
-        <ul class="weather-history-list">
-        {{#each weatherHistory}}
-        <li class="weather-history-item">
-            <span class="history-time">{{this.timestamp}}</span>
-            <span class="history-condition">{{this.baseConditions.sky}}</span>
-            <span class="history-precipitation">{{this.baseConditions.precipitation.type}}</span>
-            <button type="button" class="restore-weather" data-index="{{@index}}">
-            <i class="fas fa-undo"></i>
-            </button>
-        </li>
-        {{/each}}
-        </ul>
-    </div>
-    </div>
-
-    <!-- Add to weather-dialog.hbs -->
     {{#if isGM}}
     <div class="weather-override-section">
     <button type="button" class="collapse-toggle">

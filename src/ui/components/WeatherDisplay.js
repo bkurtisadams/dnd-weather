@@ -14,8 +14,7 @@ export class WeatherDisplay extends Application {
         });
     }
 
-    // Update getData() in WeatherDisplay.js
-    // In WeatherDisplay.js - ensure precipitation properties are properly passed
+    // added history to getData() method
     getData() {
         console.log("Weather Display getData called with weatherData:", this.weatherData);
         
@@ -55,31 +54,25 @@ export class WeatherDisplay extends Application {
                 daylight: baseConditions.daylight
             },
             weatherTiming: this.weatherData.timing || null,
+            weatherHistory: this.weatherData.history || [], // Add this line to receive history data
             effects: this.weatherData.effects || {},
             isGM: game.user.isGM,
             loading: false
         };
     }
-    
 
-    // In WeatherDisplay.js
+    // Also update the update method to accept history
     async update(weatherData) {
         console.log("Weather Display updating with:", weatherData);
-        
-        // Add comprehensive logging for precipitation properties
+        // Add specific logging for precipitation continuation properties
         if (weatherData?.baseConditions?.precipitation) {
-        const precip = weatherData.baseConditions.precipitation;
-        console.log("DND-Weather | Full Precipitation Data:", {
-            type: precip.type,
-            continues: precip.continues,
-            previousType: precip.previousType,
-            changed: precip.changed,
-            duration: precip.duration,
-            movement: precip.movement,
-            vision: precip.vision
-        });
+            console.log("DND-Weather | Continuation Properties:", {
+                continues: weatherData.baseConditions.precipitation.continues,
+                previousType: weatherData.baseConditions.precipitation.previousType,
+                changed: weatherData.baseConditions.precipitation.changed,
+                type: weatherData.baseConditions.precipitation.type
+            });
         }
-        
         this.weatherData = weatherData;
         await this.render(true);
     }
@@ -128,6 +121,18 @@ export class WeatherDisplay extends Application {
             }
             
             return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+        });
+
+        // Add listener for restore weather buttons
+        html.find('.restore-weather').on('click', async (event) => {
+            const index = Number(event.currentTarget.dataset.index);
+            console.log("DND-Weather | Restore weather requested for index:", index);
+            
+            // Trigger an event that WeatherDialog can listen for
+            const restoreEvent = new CustomEvent('dnd-weather-restore', {
+                detail: { index: index }
+            });
+            document.dispatchEvent(restoreEvent);
         });
     }
 }

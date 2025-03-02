@@ -114,23 +114,27 @@ export class WeatherDialog extends Application {
         this._onOpenSettings = this._onOpenSettings.bind(this);
         this._updateDurationDisplay = this._updateDurationDisplay.bind(this);
         this._startDurationTracking = this._startDurationTracking.bind(this);
+        document.addEventListener('dnd-weather-restore', (event) => {
+            const index = event.detail.index;
+            this._restoreWeatherFromHistory(index);
+        });
     }
 
-        // Update _startDurationTracking method
-        _startDurationTracking() {
-            // Clear any existing interval
-            if (this.durationUpdateInterval) {
-                clearInterval(this.durationUpdateInterval);
-                this.durationUpdateInterval = null;
-            }
-            
-            // Update once immediately
+    // Update _startDurationTracking method
+    _startDurationTracking() {
+        // Clear any existing interval
+        if (this.durationUpdateInterval) {
+            clearInterval(this.durationUpdateInterval);
+            this.durationUpdateInterval = null;
+        }
+        
+        // Update once immediately
+        this._updateDurationDisplay();
+        
+        // Set up the interval for regular updates - every minute
+        this.durationUpdateInterval = setInterval(() => {
             this._updateDurationDisplay();
-            
-            // Set up the interval for regular updates - every minute
-            this.durationUpdateInterval = setInterval(() => {
-                this._updateDurationDisplay();
-            }, 60000); // Update every minute
+        }, 60000); // Update every minute
         }
     
     // method to update duration
@@ -196,12 +200,35 @@ export class WeatherDialog extends Application {
         durationElement.text(text);
     }
 
+    async _restoreWeatherFromHistory(index) {
+        console.log("DND-Weather | Restoring weather from history index:", index);
+        
+        if (this.weatherHistory && this.weatherHistory[index]) {
+            this.state.currentWeather = this.weatherHistory[index];
+            this.state.lastUpdate = new Date().toLocaleTimeString();
+            
+            // Update display window
+            await this._ensureDisplayWindow();
+            const displayData = {
+                ...this.state.currentWeather,
+                history: this.weatherHistory
+            };
+            await this.displayWindow.update(displayData);
+            
+            ui.notifications.info("Restored weather from history");
+        }
+    }
+
     // Add method to ensure display window
     async _ensureDisplayWindow() {
         if (!this.displayWindow || !this.displayWindow.rendered) {
             this.displayWindow = new WeatherDisplay();
             // Set the initial data before first render
-            this.displayWindow.weatherData = this.state.currentWeather;
+            const initialData = {
+                ...this.state.currentWeather,
+                history: this.weatherHistory
+            };
+            this.displayWindow.weatherData = initialData;
             await this.displayWindow.render(true);
         }
         return this.displayWindow;
@@ -210,7 +237,12 @@ export class WeatherDialog extends Application {
     // Add method to refresh display
     async _refreshDisplay() {
         if (this.state.currentWeather && this.displayWindow) {
-            await this.displayWindow.update(this.state.currentWeather);
+            // Add weather history to the weather data
+            const weatherDataWithHistory = {
+                ...this.state.currentWeather,
+                history: this.weatherHistory // Add the history data
+            };
+            await this.displayWindow.update(weatherDataWithHistory);
         }
     }
 
@@ -690,8 +722,15 @@ export class WeatherDialog extends Application {
                 this.state.lastUpdate = new Date().toLocaleTimeString();
                 
                 // Update display window
+                //await this._ensureDisplayWindow();
+                //await this.displayWindow.update(this.state.currentWeather);
                 await this._ensureDisplayWindow();
-                await this.displayWindow.update(this.state.currentWeather);
+                // Include history data
+                const displayData = {
+                    ...this.state.currentWeather,
+                    history: this.weatherHistory
+                };
+                await this.displayWindow.update(displayData);
                 
                 ui.notifications.info("Restored weather from history");
                 await this.render();
@@ -721,8 +760,16 @@ export class WeatherDialog extends Application {
             const weather = await this._createOverrideWeather(precipType, duration, isContinuation, previousType);
             
             // Update current weather
-            this.state.currentWeather = weather;
-            this.state.lastUpdate = new Date().toLocaleTimeString();
+            //this.state.currentWeather = weather;
+            //this.state.lastUpdate = new Date().toLocaleTimeString();
+            if (this.displayWindow) {
+                // Include history data
+                const displayData = {
+                    ...weather,
+                    history: this.weatherHistory
+                };
+                await this.displayWindow.update(displayData);
+            }
             
             // Update display
             if (this.displayWindow) {
@@ -779,8 +826,15 @@ async _onGenerateWeather(event) {
             this._startDurationTracking();
 
             // Ensure display window exists and update it
+            //const display = await this._ensureDisplayWindow();
+            //await display.update(this.state.currentWeather);
             const display = await this._ensureDisplayWindow();
-            await display.update(this.state.currentWeather);
+            // Include history data
+            const displayData = {
+                ...this.state.currentWeather,
+                history: this.weatherHistory
+            };
+            await display.update(displayData);
             
             // Save settings after successful generation
             await this._saveSettings();
@@ -883,8 +937,15 @@ async _onUpdateWeather(event) {
             // Restart duration tracking
             this._startDurationTracking();
 
+            //await this._ensureDisplayWindow();
+            //await this.displayWindow.update(updatedWeather);
             await this._ensureDisplayWindow();
-            await this.displayWindow.update(updatedWeather);
+            // Include history data
+            const displayData = {
+                ...this.state.currentWeather,
+                history: this.weatherHistory
+            };
+            await this.displayWindow.update(displayData);
             
             // NEW CODE: Advance game time by the weather duration or minimum 4 hours
             if (weatherSystem.calendarIntegration?.initialized && game.user.isGM) {
@@ -1933,8 +1994,13 @@ async _testContinuityDisplay() {
     this.state.lastUpdate = new Date().toLocaleTimeString();
     
     // Update display window
-    await this._ensureDisplayWindow();
-    await this.displayWindow.update(modifiedWeather);
+    //await this._ensureDisplayWindow();
+    //await this.displayWindow.update(modifiedWeather);
+    const displayData = {
+        ...modifiedWeather,
+        history: this.weatherHistory
+    };
+    await this.displayWindow.update(displayData);
     
     ui.notifications.info("Weather continuity test applied");
     await this.render();

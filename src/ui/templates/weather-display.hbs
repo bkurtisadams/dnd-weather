@@ -181,6 +181,32 @@
                   </div>
                   {{/if}}
 
+                   {{!-- Weather History Section --}}
+                  <div class="weather-row">
+                    <div class="weather-icon">
+                      <i class="fas fa-history"></i>
+                    </div>
+                    <div class="weather-data">
+                      <h3>Weather History</h3>
+                      <div class="weather-history-list">
+                        {{#each weatherHistory}}
+                        <div class="history-item">
+                          <div class="history-time">{{this.timestamp}}</div>
+                          <div class="history-details">
+                            <span class="history-condition">{{this.baseConditions.sky}}</span>
+                            <span class="history-precipitation">{{this.baseConditions.precipitation.type}}</span>
+                          </div>
+                          {{#if ../isGM}}
+                          <button type="button" class="restore-weather" data-index="{{@index}}">
+                            <i class="fas fa-undo"></i>
+                          </button>
+                          {{/if}}
+                        </div>
+                        {{/each}}
+                      </div>
+                    </div>
+                  </div> 
+
                   <div class="effects-section">
                       <h4>Effects</h4>
                       
