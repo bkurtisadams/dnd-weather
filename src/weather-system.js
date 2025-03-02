@@ -1246,7 +1246,7 @@ _determineLycanthropeActivity(lunaPhase, celenePhase) {
     return lycanthropeActivity.normal;
 }
 
-// In weather-system.js, modify the updateWeather method
+// In weather-system.js, modify the updateWeather method to ensure continuation properties are set
 async updateWeather(options = {}) {
     const currentDuration = this.currentWeather?.baseConditions?.precipitation?.duration || 0;
     console.log("DND-Weather | Updating weather with options:", options);
@@ -1377,41 +1377,47 @@ async updateWeather(options = {}) {
                 };
             }
             
+            // THIS IS THE KEY PART: Explicitly log that we're setting continuation properties
+            console.log("DND-Weather | Setting weather continuation properties:", {
+                continues: true,
+                previousType: currentPrecip.type,
+                changed: newPrecipType !== currentPrecip.type
+            });
+            
+            this.currentWeather = updatedWeather;
             return updatedWeather;
         }
     }
 
-    // Check for rainbow if ending precipitation
-    if (currentPrecip.type !== 'none' && options.checkRainbow) {
-        const rainbowRoll = await rollDice(1, 100)[0];
-        console.log("DND-Weather | Rainbow check roll:", rainbowRoll, "needed <=", currentPrecip.chanceRainbow);
-        
-        if (rainbowRoll <= currentPrecip.chanceRainbow) {
-            console.log("DND-Weather | Rainbow appears!");
-            const typeRoll = await rollDice(1, 100)[0];
-            let rainbowEffect = {};
-            
-            if (typeRoll <= 89) rainbowEffect = { type: 'single' };
-            else if (typeRoll <= 95) rainbowEffect = { type: 'double', isOmen: true };
-            else if (typeRoll <= 98) rainbowEffect = { type: 'triple', isOmen: true };
-            else if (typeRoll === 99) rainbowEffect = { type: 'bifrost', description: 'Bifrost bridge or clouds in shape of rain deity' };
-            else rainbowEffect = { type: 'deity', description: 'Rain deity or servant in sky' };
-            
-            const newWeather = await this.generateDailyWeather(new Date());
-            return {
-                ...newWeather,
-                effects: {
-                    ...newWeather.effects,
-                    special: [...(newWeather.effects.special || []), 
-                        `Rainbow appears: ${rainbowEffect.type}${rainbowEffect.isOmen ? ' (possible omen)' : ''}${rainbowEffect.description ? ` - ${rainbowEffect.description}` : ''}`
-                    ]
-                }
-            };
-        }
-    }
-
+    // Weather is not continuing - generate new weather
     console.log("DND-Weather | Precipitation ended or no continuation, generating new weather");
-    return this.generateDailyWeather(new Date());
+    
+    // Store current weather before generating new weather (for potential continuation marking)
+    const previousWeather = this.currentWeather;
+    const newWeather = await this.generateDailyWeather(new Date());
+    
+    // If the previous weather had precipitation and the new weather also has precipitation,
+    // we should still mark it as a continuation (though changed)
+    if (previousWeather?.baseConditions?.precipitation?.type !== 'none' &&
+        newWeather.baseConditions.precipitation.type !== 'none') {
+        
+        console.log("DND-Weather | Both previous and new weather have precipitation, marking as continuation");
+        
+        // Mark the new weather as a continuation, but with a changed type
+        newWeather.baseConditions.precipitation.continues = true;
+        newWeather.baseConditions.precipitation.previousType = previousWeather.baseConditions.precipitation.type;
+        newWeather.baseConditions.precipitation.changed = true;
+        
+        console.log("DND-Weather | Setting continuation properties for new precipitation:", {
+            continues: true,
+            previousType: previousWeather.baseConditions.precipitation.type,
+            changed: true
+        });
+    }
+    
+    // Update current weather and return
+    this.currentWeather = newWeather;
+    return newWeather;
 }
 
 // Helper method to get the correct roll value for a precipitation type

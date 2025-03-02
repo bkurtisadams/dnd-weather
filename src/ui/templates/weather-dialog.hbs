@@ -95,28 +95,6 @@
     </p>
     </div>
 
-
-    <!-- Add to weather-dialog.hbs -->
-    {{#if weather.precipitation.continues}}
-    <div class="weather-timeline">
-    <div class="timeline-point previous">
-        <span class="time-label">Previous</span>
-        <span class="weather-type">{{weather.precipitation.previousType}}</span>
-    </div>
-    <div class="timeline-connector {{#if weather.precipitation.changed}}changed{{/if}}">
-        <i class="fas fa-long-arrow-alt-right"></i>
-    </div>
-    <div class="timeline-point current">
-        <span class="time-label">Current</span>
-        <span class="weather-type">{{weather.precipitation.type}}</span>
-    </div>
-    <div class="timeline-duration">
-        <i class="fas fa-clock"></i>
-        {{formatDuration weather.precipitation.duration}}
-    </div>
-    </div>
-    {{/if}}
-
     <!-- Add to weather-dialog.hbs -->
     <div class="weather-history-section">
     <button type="button" class="collapse-toggle">
@@ -196,6 +174,13 @@
     <button type="button" class="share-weather" {{#if loading}}disabled{{/if}}>
         Share Today's Weather
     </button>
+
+    {{!-- Test Continuity Display Button --}}
+    {{#if isGM}}
+    <button type="button" class="test-continuity" style="margin-top: 5px; background-color: #553355;">
+        Test Continuity Display
+    </button>
+    {{/if}}
 
     {{!-- Debug info section --}}
     {{#if error}}

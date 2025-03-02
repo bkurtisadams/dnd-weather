@@ -653,37 +653,34 @@ export class WeatherDialog extends Application {
             console.log("DND-Weather | Day changed to:", this.state.selectedDay);
         });
 
-        html.find('input[name="latitude"]').on('change', (event) => {
-            this.state.latitude = Number(event.target.value);
-            console.log("DND-Weather | Latitude changed to:", this.state.latitude);
-        });
-
-        html.find('select[name="terrain"]').on('change', (event) => {
-            this.state.terrain = event.target.value;
-            console.log("DND-Weather | Terrain changed to:", this.state.terrain);
-        });
-
-        html.find('input[name="elevation"]').on('change', (event) => {
-            this.state.elevation = Number(event.target.value);
-            console.log("DND-Weather | Elevation changed to:", this.state.elevation);
-        });
-
-        // save latitude settings
+        // Other input listeners
         html.find('input[name="latitude"]').on('change', async (event) => {
             this.state.latitude = Number(event.target.value);
             await this._saveSettings();
             console.log("DND-Weather | Latitude changed to:", this.state.latitude);
         });
+
+        html.find('select[name="terrain"]').on('change', async (event) => {
+            this.state.terrain = event.target.value;
+            await this._saveSettings();
+            console.log("DND-Weather | Terrain changed to:", this.state.terrain);
+        });
+
+        html.find('input[name="elevation"]').on('change', async (event) => {
+            this.state.elevation = Number(event.target.value);
+            await this._saveSettings();
+            console.log("DND-Weather | Elevation changed to:", this.state.elevation);
+        });
         
-        // activateListeners method
+        // Collapsible sections
         html.find('.collapse-toggle').off('click').on('click', function() {
             const content = $(this).next();
             content.toggleClass('collapsed');
             const icon = $(this).find('.fas');
             icon.toggleClass('fa-chevron-down fa-chevron-up');
-        });;
+        });
         
-        // For the weather history restore buttons
+        // Weather history restore buttons
         html.find('.restore-weather').off('click').on('click', async (event) => {
             const index = Number(event.currentTarget.dataset.index);
             console.log("DND-Weather | Restoring weather from history index:", index);
@@ -701,11 +698,14 @@ export class WeatherDialog extends Application {
             }
         });
 
-        // for weather report
+        // Weather report and sharing
         html.find('.generate-report').off('click').on('click', this._onGenerateReport.bind(this));
         html.find('.share-weather').off('click').on('click', this._shareTodaysWeather.bind(this));
         
-        // For the weather override
+        // listen for test continuity button
+        html.find('.test-continuity').off('click').on('click', this._testContinuityDisplay.bind(this));
+        
+        // Weather override controls
         html.find('#override-continuation').on('change', function() {
             const isChecked = $(this).prop('checked');
             $('.conditional-field').toggleClass('visible', isChecked);
@@ -726,12 +726,11 @@ export class WeatherDialog extends Application {
             
             // Update display
             if (this.displayWindow) {
-            await this.displayWindow.update(weather);
+                await this.displayWindow.update(weather);
             }
             
             await this.render();
         });
-        // Do the same for terrain and elevation
     }
 
     // In WeatherDialog.js, update the _onGenerateWeather method
@@ -1904,4 +1903,88 @@ _getCorrectCalendarId(monthName) {
     return monthIdMap[monthName] || null;
 }
 
+// test continuing weather method
+async _testContinuityDisplay() {
+    console.log("DND-Weather | Testing weather continuity display");
+    
+    // Make sure we have current weather
+    if (!this.state.currentWeather) {
+      ui.notifications.warn("No current weather to modify for testing");
+      return;
+    }
+    
+    // Create a copy of the current weather with continuation properties added
+    const modifiedWeather = foundry.utils.deepClone(this.state.currentWeather);
+    
+    // Set the continuation properties explicitly
+    modifiedWeather.baseConditions.precipitation.continues = true;
+    modifiedWeather.baseConditions.precipitation.previousType = "drizzle"; // Set a different type to test the "changed" indicator
+    modifiedWeather.baseConditions.precipitation.changed = true;
+    
+    console.log("DND-Weather | Set test continuity properties:", {
+      continues: true,
+      previousType: "drizzle",
+      changed: true,
+      currentType: modifiedWeather.baseConditions.precipitation.type
+    });
+    
+    // Update the current weather state
+    this.state.currentWeather = modifiedWeather;
+    this.state.lastUpdate = new Date().toLocaleTimeString();
+    
+    // Update display window
+    await this._ensureDisplayWindow();
+    await this.displayWindow.update(modifiedWeather);
+    
+    ui.notifications.info("Weather continuity test applied");
+    await this.render();
+  }
+
+  // Add this to the WeatherDialog class
+async _manuallyTestWeatherContinuation() {
+    // Create a precipitation entry with continuation data
+    const testWeather = {
+      baseConditions: {
+        precipitation: {
+          type: "rainstorm-heavy",
+          duration: 6,
+          continues: true,
+          previousType: "rainstorm-light",
+          changed: true
+        },
+        sky: "Cloudy",
+        temperature: {
+          high: 42,
+          low: 32
+        },
+        wind: {
+          speed: 15,
+          direction: "North"
+        },
+        moonPhase: {
+          luna: "Full",
+          celene: "New"
+        },
+        daylight: {
+          sunrise: "6:00 AM",
+          sunset: "6:00 PM"
+        }
+      },
+      effects: {
+        special: ["Reduced visibility due to rain"]
+      }
+    };
+    
+    // Update the weather display with this test data
+    if (this.displayWindow) {
+      await this.displayWindow.update(testWeather);
+      ui.notifications.info("Test weather continuation sent to display");
+    } else {
+      this.displayWindow = new WeatherDisplay();
+      this.displayWindow.weatherData = testWeather;
+      await this.displayWindow.render(true);
+      ui.notifications.info("Test weather display opened with continuation data");
+    }
+  }
 }
+

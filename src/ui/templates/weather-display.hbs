@@ -243,6 +243,35 @@
       </div>
   </div>
 
+  {{!-- Weather Continuation Timeline --}}
+  {{#if weather.precipitation.continues}}
+  <div class="weather-row">
+    <div class="weather-icon">
+      <i class="fas fa-sync-alt"></i>
+    </div>
+    <div class="weather-data">
+      <h3>Weather Transition</h3>
+      <div class="weather-timeline" style="display: flex; align-items: center; margin-top: 5px; padding: 5px; background: rgba(0,0,0,0.1); border-radius: 5px;">
+        <div class="timeline-point previous" style="text-align: center; padding: 0 5px;">
+          <span class="time-label" style="display: block; font-size: 0.8em; color: #AAA;">Previous</span>
+          <span class="weather-type" style="font-weight: bold;">{{weather.precipitation.previousType}}</span>
+        </div>
+        <div class="timeline-connector {{#if weather.precipitation.changed}}changed{{/if}}" style="margin: 0 10px; color: {{#if weather.precipitation.changed}}#FFA500{{else}}#AAA{{/if}};">
+          <i class="fas fa-long-arrow-alt-right"></i>
+        </div>
+        <div class="timeline-point current" style="text-align: center; padding: 0 5px;">
+          <span class="time-label" style="display: block; font-size: 0.8em; color: #AAA;">Current</span>
+          <span class="weather-type" style="font-weight: bold;">{{weather.precipitation.type}}</span>
+        </div>
+        <div class="timeline-duration" style="margin-left: auto; display: flex; align-items: center; padding: 5px;">
+          <i class="fas fa-clock" style="margin-right: 5px;"></i>
+          <span>{{formatDuration weather.precipitation.duration}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
   {{!-- Special Weather Section --}}
   <div class="weather-section">
       <h3 class="weather-header">Effects</h3>

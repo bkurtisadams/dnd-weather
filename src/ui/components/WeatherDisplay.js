@@ -14,6 +14,8 @@ export class WeatherDisplay extends Application {
         });
     }
 
+    // Update getData() in WeatherDisplay.js
+    // In WeatherDisplay.js - ensure precipitation properties are properly passed
     getData() {
         console.log("Weather Display getData called with weatherData:", this.weatherData);
         
@@ -27,7 +29,7 @@ export class WeatherDisplay extends Application {
                 loading: false
             };
         }
-    
+
         const baseConditions = this.weatherData.baseConditions;
         
         // Structure the data to match the template and include weatherDuration
@@ -39,12 +41,20 @@ export class WeatherDisplay extends Application {
                 windChill: baseConditions.temperature.windChill,
                 wind: baseConditions.wind.speed,
                 windDirection: baseConditions.wind.direction,
-                precipitation: baseConditions.precipitation,
+                precipitation: {
+                    ...baseConditions.precipitation,
+                    // Make sure these specific properties are explicitly extracted and set
+                    continues: baseConditions.precipitation.continues || false,
+                    previousType: baseConditions.precipitation.previousType || null,
+                    changed: baseConditions.precipitation.changed || false,
+                    duration: baseConditions.precipitation.duration || 0
+                },
                 // Include weatherDuration if available:
                 weatherDuration: this.weatherData.weatherDuration || baseConditions.precipitation.duration,
                 moonPhase: baseConditions.moonPhase,
                 daylight: baseConditions.daylight
             },
+            weatherTiming: this.weatherData.timing || null,
             effects: this.weatherData.effects || {},
             isGM: game.user.isGM,
             loading: false
@@ -52,12 +62,29 @@ export class WeatherDisplay extends Application {
     }
     
 
+    // In WeatherDisplay.js
     async update(weatherData) {
         console.log("Weather Display updating with:", weatherData);
+        
+        // Add comprehensive logging for precipitation properties
+        if (weatherData?.baseConditions?.precipitation) {
+        const precip = weatherData.baseConditions.precipitation;
+        console.log("DND-Weather | Full Precipitation Data:", {
+            type: precip.type,
+            continues: precip.continues,
+            previousType: precip.previousType,
+            changed: precip.changed,
+            duration: precip.duration,
+            movement: precip.movement,
+            vision: precip.vision
+        });
+        }
+        
         this.weatherData = weatherData;
         await this.render(true);
     }
 
+    // Add to WeatherDisplay.js - activateListeners method
     activateListeners(html) {
         super.activateListeners(html);
         
@@ -84,6 +111,23 @@ export class WeatherDisplay extends Application {
 
         Handlebars.registerHelper('mod', function(a, b) {
             return a % b;
+        });
+        
+        // Add the formatDuration helper for continuing weather
+        Handlebars.registerHelper('formatDuration', function(hours) {
+            console.log("DND-Weather | Formatting duration in display:", hours);
+            
+            if (!hours || isNaN(hours)) {
+                return "unknown";
+            }
+            
+            if (hours >= 24) {
+                const days = Math.floor(hours / 24);
+                const remainingHours = hours % 24;
+                return `${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
+            }
+            
+            return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
         });
     }
 }
