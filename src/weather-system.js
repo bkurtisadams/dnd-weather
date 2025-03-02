@@ -634,18 +634,29 @@ async _determineWind(baseSpeed, terrainEffect) {
     if (terrainEffect) {
         // Special handling for Mountains - adjust based on elevation
         if (terrainKey.toLowerCase() === "mountains") {
-            if (typeof terrainEffect.windSpeedAdjustment === 'object' && 
-                terrainEffect.windSpeedAdjustment.base !== undefined && 
+            if (typeof terrainEffect.windSpeedAdjustment === 'object' &&
+                terrainEffect.windSpeedAdjustment.base !== undefined &&
                 terrainEffect.windSpeedAdjustment.per !== undefined) {
                 
-                const elevationAdj = Math.floor(this.settings.elevation / 
-                    terrainEffect.windSpeedAdjustment.per) * 
-                    terrainEffect.windSpeedAdjustment.base;
+                // Check if realistic mountain winds setting is enabled
+                const useRealisticWinds = game.settings.get('dnd-weather', 'realisticMountainWinds');
                 
-                adjustedSpeed += elevationAdj;
-                console.log(`DND-Weather | Mountain wind adjustment (${this.settings.elevation}ft elevation): +${elevationAdj} mph`);
+                if (useRealisticWinds) {
+                    // More realistic calculation: +5 mph per 3000ft
+                    const elevationAdj = Math.floor(this.settings.elevation / 3000) * 5;
+                    adjustedSpeed += elevationAdj;
+                    console.log(`DND-Weather | Realistic mountain wind adjustment (${this.settings.elevation}ft elevation): +${elevationAdj} mph`);
+                } else {
+                    // Original calculation from the module
+                    const elevationAdj = Math.floor(this.settings.elevation /
+                        terrainEffect.windSpeedAdjustment.per) *
+                        terrainEffect.windSpeedAdjustment.base;
+                    
+                    adjustedSpeed += elevationAdj;
+                    console.log(`DND-Weather | Mountain wind adjustment (${this.settings.elevation}ft elevation): +${elevationAdj} mph`);
+                }
             }
-        } 
+        }
         // Special handling for Rough terrain - randomly choose +5 or -5
         else if (terrainKey.toLowerCase().includes("rough") || terrainKey.toLowerCase().includes("hills")) {
             if (terrainEffect.windSpeedAdjustment === "±5") {

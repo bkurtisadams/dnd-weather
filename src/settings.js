@@ -35,6 +35,22 @@ export const registerSettings = () => {
       type: String,
       default: ""
   });
+
+    // In settings.js file, add this setting:
+    game.settings.register('dnd-weather', 'realisticMountainWinds', {
+      name: "Realistic Mountain Wind Speeds",
+      hint: "When enabled, reduces wind speed adjustments for mountains to more realistic levels. When disabled, uses the original higher wind speeds.",
+      scope: "world",
+      config: true,
+      type: Boolean,
+      default: false,
+      onChange: value => {
+          // Refresh current weather if it exists
+          if (globalThis.dndWeather?.weatherSystem) {
+              ui.notifications.info("Mountain wind calculation updated. Generate new weather to see changes.");
+          }
+      }
+    });
   
     game.settings.register('dnd-weather', 'elevation', {
       name: game.i18n.localize('DND-WEATHER.settings.elevation.name'),
