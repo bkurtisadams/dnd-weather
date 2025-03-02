@@ -1425,22 +1425,22 @@ _formatDetailedReport(weatherData, options) {
 
 // Update the _formatCompactReport method to include location name and date range
 _formatCompactReport(weatherData, options) {
-    // Create compact report as a table
+    // Improve compact report with abbreviations and symbols
     let content = `<div class="dnd-weather-report-compact">
         <h2>Weather Report: ${options.locationName}</h2>
-        <p class="date-range"><strong>Period:</strong> ${options.startDate} to ${options.endDate}</p>
+        <p class="date-range"><strong>Period:</strong> ${this._abbreviateMonth(options.startDate)} to ${this._abbreviateMonth(options.endDate)}</p>
         <p><strong>Location:</strong> ${this.state.terrain} (Elevation: ${this.state.elevation}ft, Latitude: ${this.state.latitude}°)</p>
         <table class="weather-table">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Sky</th>
-                    <th>Precipitation</th>`;
+                    <th style="width: 70px;">Date</th>
+                    <th style="width: 50px;">Sky</th>
+                    <th style="width: 70px;">Precip</th>`;
                     
-    if (options.includeTemp) content += `<th>Temp (High/Low)</th>`;
-    if (options.includeWind) content += `<th>Wind</th>`;
-    if (options.includeMoons) content += `<th>Moons</th>`;
-    if (options.includeEffects) content += `<th>Notable Effects</th>`;
+    if (options.includeTemp) content += `<th style="width: 70px;">Temp H/L</th>`;
+    if (options.includeWind) content += `<th style="width: 70px;">Wind</th>`;
+    if (options.includeMoons) content += `<th style="width: 60px;">Moons</th>`;
+    if (options.includeEffects) content += `<th style="width: 80px;">Effects</th>`;
     
     content += `</tr></thead><tbody>`;
     
@@ -1448,39 +1448,44 @@ _formatCompactReport(weatherData, options) {
         const weather = day.weather;
         const baseConditions = weather.baseConditions;
         
-        // Format day date using our helper if needed
-        let dayDate = options.useCalendar
-            ? this._formatSimpleCalendarDate(day.month, day.day)
-            : `${day.month} ${day.day}`;
+        // Format day date with abbreviated month
+        const abbreviatedDate = `${this._abbreviateMonth(day.month)} ${day.day}`;
         
         content += `<tr>
-            <td>${dayDate}</td>
-            <td>${baseConditions.sky}</td>
-            <td>${baseConditions.precipitation.type !== 'none' ? baseConditions.precipitation.type : 'None'}</td>`;
+            <td style="text-align: left;">${abbreviatedDate}</td>
+            <td style="text-align: center;" title="${baseConditions.sky}">${this._getSkySymbol(baseConditions.sky)}</td>
+            <td style="text-align: center;" title="${baseConditions.precipitation.type !== 'none' ? baseConditions.precipitation.type : 'None'}">${this._getPrecipitationSymbol(baseConditions.precipitation.type)}</td>`;
             
         if (options.includeTemp) {
-            content += `<td>${baseConditions.temperature.high}°F/${baseConditions.temperature.low}°F</td>`;
+            content += `<td style="text-align: center;" title="High: ${baseConditions.temperature.high}°F, Low: ${baseConditions.temperature.low}°F">${baseConditions.temperature.high}/${baseConditions.temperature.low}</td>`;
         }
         
         if (options.includeWind) {
-            content += `<td>${baseConditions.wind.speed} mph (${baseConditions.wind.direction})</td>`;
+            content += `<td style="text-align: center;" title="${baseConditions.wind.speed} mph from the ${baseConditions.wind.direction}">${baseConditions.wind.speed} ${this._getWindDirectionSymbol(baseConditions.wind.direction)}</td>`;
         }
         
         if (options.includeMoons) {
-            content += `<td>L: ${baseConditions.moonPhase.luna.substring(0,1)}, C: ${baseConditions.moonPhase.celene.substring(0,1)}</td>`;
+            // Use moon symbols
+            const lunaSymbol = this._getMoonSymbol(baseConditions.moonPhase.luna);
+            const celeneSymbol = this._getMoonSymbol(baseConditions.moonPhase.celene);
+            
+            content += `<td style="text-align: center;" title="Luna: ${baseConditions.moonPhase.luna}, Celene: ${baseConditions.moonPhase.celene}">L:${lunaSymbol} C:${celeneSymbol}</td>`;
         }
         
         if (options.includeEffects) {
             const allEffects = [];
             
-            if (weather.effects.special && weather.effects.special.length) {
+            if (weather.effects && weather.effects.special && weather.effects.special.length) {
                 allEffects.push(...weather.effects.special);
-            } else if (weather.effects.temperature && weather.effects.temperature.length) {
+            } else if (weather.effects && weather.effects.temperature && weather.effects.temperature.length) {
                 // Only include temperature effects if no special effects
                 allEffects.push(...weather.effects.temperature);
             }
             
-            content += `<td>${allEffects.length ? allEffects[0] : '-'}</td>`;
+            const effectText = allEffects.length ? allEffects[0] : '-';
+            const shortEffect = this._shortenEffect(effectText);
+            
+            content += `<td style="text-align: left;" title="${effectText}">${shortEffect}</td>`;
         }
         
         content += `</tr>`;
@@ -1490,9 +1495,105 @@ _formatCompactReport(weatherData, options) {
     return content;
 }
 
+// Helper to abbreviate month names
+_abbreviateMonth(dateString) {
+    if (!dateString) return '';
+    
+    // Handle various date formats
+    let monthName;
+    if (dateString.includes(' ')) {
+        // Extract first part as month name
+        monthName = dateString.split(' ')[0];
+    } else {
+        return dateString; // Can't abbreviate if not in expected format
+    }
+    
+    // Special case for Ready'reat
+    if (monthName === "Ready'reat") return "Red";
+    
+    // Standard 3-letter abbreviation
+    return monthName.substring(0, 3);
+}
+
+// Helper to get weather symbols
+_getSkySymbol(skyCondition) {
+    switch(skyCondition) {
+        case 'Clear': return '<i class="fas fa-sun" style="color: #FFD700;"></i>';
+        case 'Partly Cloudy': return '<i class="fas fa-cloud-sun" style="color: #E0E0E0;"></i>';
+        case 'Cloudy': return '<i class="fas fa-cloud" style="color: #A0A0A0;"></i>';
+        default: return skyCondition;
+    }
+}
+
+// Helper to get precipitation symbols
+_getPrecipitationSymbol(precipType) {
+    if (!precipType || precipType === 'none') return '-';
+    
+    if (precipType.includes('snow')) return '<i class="fas fa-snowflake" style="color: #E0FFFF;"></i>';
+    if (precipType.includes('rain')) return '<i class="fas fa-cloud-rain" style="color: #87CEEB;"></i>';
+    if (precipType.includes('thunder')) return '<i class="fas fa-bolt" style="color: #FFD700;"></i>';
+    if (precipType.includes('drizzle')) return '<i class="fas fa-tint" style="color: #87CEEB;"></i>';
+    if (precipType.includes('hail')) return '<i class="fas fa-cloud-meatball" style="color: #E0E0E0;"></i>';
+    if (precipType.includes('fog')) return '<i class="fas fa-smog" style="color: #C0C0C0;"></i>';
+    
+    return precipType.substring(0, 4);
+}
+
+// Helper to get wind direction symbols
+_getWindDirectionSymbol(direction) {
+    switch(direction) {
+        case 'North': return '↑';
+        case 'Northeast': return '↗';
+        case 'East': return '→';
+        case 'Southeast': return '↘';
+        case 'South': return '↓';
+        case 'Southwest': return '↙';
+        case 'West': return '←';
+        case 'Northwest': return '↖';
+        default: return direction.substring(0, 1);
+    }
+}
+
+// Helper to get moon phase symbols
+_getMoonSymbol(phase) {
+    switch(phase) {
+        case 'New': return '🌑';
+        case '1/4': return '🌓';
+        case 'Full': return '🌕';
+        case '3/4': return '🌗';
+        case 'Waxing': return '🌔';
+        case 'Waning': return '🌖';
+        case 'Waxing Crescent': return '🌒';
+        case 'Waxing Gibbous': return '🌔';
+        case 'Waning Gibbous': return '🌖';
+        case 'Waning Crescent': return '🌘';
+        default: return phase.substring(0, 1);
+    }
+}
+
+// Helper to shorten effect text
+_shortenEffect(effectText) {
+    if (!effectText || effectText === '-') return '-';
+    
+    // Handle common effects
+    if (effectText.includes('Freezing conditions')) return 'Freezing';
+    if (effectText.includes('Hot conditions')) return 'Hot';
+    if (effectText.includes('Extreme heat')) return 'Ex. Heat';
+    if (effectText.includes('Extreme cold')) return 'Ex. Cold';
+    if (effectText.includes('Visibility')) return 'Low Vis';
+    if (effectText.includes('Movement')) return 'Slow Mvt';
+    
+    // Generic shortening - first 8 chars + ellipsis
+    if (effectText.length > 10) {
+        return effectText.substring(0, 8) + '...';
+    }
+    
+    return effectText;
+}
+
 // Update the _sendWeatherReport method with improved styling
 _sendWeatherReport(content) {
-    // Add styling to the content
+    // Add styling to the content with improved compact view
     const styledContent = `
         <style>
             .dnd-weather-report, .dnd-weather-report-compact {
@@ -1514,34 +1615,37 @@ _sendWeatherReport(content) {
                 margin: 5px 0;
                 font-style: italic;
             }
-            .dnd-weather-report h3 {
-                color: #aaddff;
-                margin: 5px 0;
-            }
-            .weather-day {
-                margin-bottom: 10px;
-            }
-            .weather-effects ul {
-                margin: 5px 0 5px 20px;
-            }
-            .wind-chill {
-                color: #aaaaff;
-            }
             .weather-table {
                 width: 100%;
                 border-collapse: collapse;
+                table-layout: fixed;
+                font-size: 0.9em;
             }
             .weather-table th {
                 background: #444;
-                padding: 5px;
-                text-align: left;
+                padding: 4px;
+                text-align: center;
+                border: 1px solid #555;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }
             .weather-table td {
-                padding: 5px;
-                border-bottom: 1px solid #555;
+                padding: 4px;
+                border: 1px solid #555;
+                vertical-align: middle;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
             }
             .weather-table tr:nth-child(even) {
                 background: rgba(50, 50, 50, 0.5);
+            }
+            .weather-table tr:hover {
+                background: rgba(60, 60, 70, 0.7);
+            }
+            /* Add tooltip styling */
+            .weather-table td[title] {
+                cursor: help;
+                border-bottom: 1px dotted #888;
             }
         </style>
         ${content}
