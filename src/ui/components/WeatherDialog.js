@@ -154,12 +154,38 @@ export class WeatherDialog extends Application {
         if (precipitation && precipitation.type !== 'none' && precipitation.duration) {
             // Format the duration
             const duration = precipitation.duration;
+            
+            // Add remaining time calculation if timing data is available
+            let remainingTime = "";
+            if (this.state.currentWeather?.timing?.end) {
+                const calendar = this._getCalendarIntegration();
+                if (calendar) {
+                    try {
+                        const currentDate = calendar.getCurrentDate();
+                        const endDate = this.state.currentWeather.timing.end;
+                        
+                        const currentTimestamp = calendar.dateToTimestamp(currentDate);
+                        const endTimestamp = calendar.dateToTimestamp(endDate);
+                        
+                        const remainingSeconds = Math.max(0, endTimestamp - currentTimestamp);
+                        if (remainingSeconds > 0) {
+                            const remainingHours = Math.floor(remainingSeconds / 3600);
+                            const remainingMinutes = Math.floor((remainingSeconds % 3600) / 60);
+                            remainingTime = ` (${remainingHours}h ${remainingMinutes}m remaining)`;
+                        }
+                    } catch (error) {
+                        console.error("DND-Weather | Error calculating remaining time:", error);
+                    }
+                }
+            }
+            
+            // Format total duration
             if (duration >= 24) {
                 const days = Math.floor(duration / 24);
                 const remainingHours = duration % 24;
-                text = `Weather event duration: ${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
+                text = `Weather event duration: ${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}${remainingTime}`;
             } else {
-                text = `Weather event duration: ${duration} ${duration === 1 ? 'hour' : 'hours'}`;
+                text = `Weather event duration: ${duration} ${duration === 1 ? 'hour' : 'hours'}${remainingTime}`;
             }
         } else {
             // No precipitation or clear weather
@@ -977,6 +1003,10 @@ async _createOverrideWeather(precipType, duration, isContinuation, previousType)
     // Check for Simple Calendar directly
     const simpleCalendarActive = !!window.SimpleCalendar;
     console.log("DND-Weather | Simple Calendar available:", simpleCalendarActive);
+
+    // Get saved location name or default to terrain type
+    const savedLocationName = game.settings.get('dnd-weather', 'lastLocationName') || this.state.terrain;
+    console.log("DND-Weather | Using saved location name:", savedLocationName);
     
     // Create a dialog to configure the report
     const dialog = new Dialog({
@@ -985,7 +1015,7 @@ async _createOverrideWeather(precipType, duration, isContinuation, previousType)
             <form>
                 <div class="form-group">
                     <label>Location Name:</label>
-                    <input type="text" name="locationName" value="${this.state.terrain}" placeholder="e.g., Hommlet, Greyhawk City">
+                    <input type="text" name="locationName" value="${savedLocationName}" placeholder="e.g., Hommlet, Greyhawk City">
                 </div>
                 <div class="form-group">
                     <label>Number of Days:</label>
@@ -1055,6 +1085,16 @@ async _generateWeatherReport(html) {
     const month = html.find('[name="month"]').val();
     const startDay = parseInt(html.find('[name="day"]').val()) || 1;
     const locationName = html.find('[name="locationName"]').val() || this.state.terrain;
+    
+    console.log("DND-Weather | Location name for report:", locationName);
+
+    // Save the location name for future use
+    try {
+        await game.settings.set('dnd-weather', 'lastLocationName', locationName);
+        console.log("DND-Weather | Saved location name:", locationName);
+    } catch (error) {
+        console.warn("DND-Weather | Could not save location name:", error);
+    }
     
     // Check for Simple Calendar
     const useCalendar = html.find('[name="useCalendar"]').prop("checked") && !!window.SimpleCalendar;
@@ -1131,9 +1171,17 @@ async _generateWeatherReport(html) {
         
         // Calculate end date based on last generated day
         const lastDay = weatherData[weatherData.length - 1];
-        endDateStr = useCalendar
-            ? this._formatSimpleCalendarDate(lastDay.month, lastDay.day)
-            : `${lastDay.month} ${lastDay.day}`;
+        if (useCalendar) {  // Changed from options.useCalendar to useCalendar
+            try {
+                endDateStr = this._formatSimpleCalendarDate(lastDay.month, lastDay.day);
+                console.log("DND-Weather | Calculated end date:", endDateStr);
+            } catch (error) {
+                console.error("DND-Weather | Error formatting end date:", error);
+                endDateStr = `${lastDay.month} ${lastDay.day}`;
+            }
+        } else {
+            endDateStr = `${lastDay.month} ${lastDay.day}`;
+        }
         
         // Restore original settings
         weatherSystem.settings = originalSettings;
@@ -1167,55 +1215,118 @@ async _generateWeatherReport(html) {
     }
 }
 
-// Create a helper method to format dates using Simple Calendar
+// Updated helper to map between your module and Simple Calendar
 _formatSimpleCalendarDate(monthName, day) {
     try {
         if (!window.SimpleCalendar || !window.SimpleCalendar.api) {
+            console.warn("DND-Weather | Simple Calendar API not available");
             return `${monthName} ${day}`;
         }
         
-        // Get current calendar
-        const currentCalendar = window.SimpleCalendar.api.getCurrentCalendar();
+        // Get all months from Simple Calendar
+        const scMonths = window.SimpleCalendar.api.getAllMonths();
+        console.log("DND-Weather | Available SC months:", scMonths.map(m => m.name));
+        console.log("DND-Weather | Simple Calendar months full details:", scMonths);
         
-        // Get current date to use as a template
-        const currentDate = window.SimpleCalendar.api.getCurrentDate();
+        // Use our mapping helper to ensure proper matching
+        const mappedMonthName = this._mapGreyhawkToSimpleCalendarMonth(monthName);
         
-        // Find month in Simple Calendar that matches our month name
-        const allMonths = window.SimpleCalendar.api.getAllMonths(currentCalendar.id);
-        const matchingMonth = allMonths.find(m => 
-            m.name.toLowerCase() === monthName.toLowerCase() ||
-            (m.abbreviation && m.abbreviation.toLowerCase() === monthName.toLowerCase())
-        );
+        // Find matching month by name (case-insensitive and trim)
+        const matchingMonth = scMonths.find(m => 
+            m.name.toLowerCase().trim() === mappedMonthName.toLowerCase().trim());
+        
+        console.log("DND-Weather | Trying to match month:", monthName,
+                    "Found:", matchingMonth ? matchingMonth.name : "None");
+        
+        if (matchingMonth) {
+            console.log("DND-Weather | Matched month details:", {
+                id: matchingMonth.id,
+                name: matchingMonth.name,
+                numericRepresentation: matchingMonth.numericRepresentation
+            });
+        }
         
         if (!matchingMonth) {
             console.warn(`DND-Weather | Month not found in Simple Calendar: ${monthName}`);
+            // Fall back to Greyhawk format if not found
             return `${monthName} ${day}`;
         }
         
-        // Create a new date using the current date as template but with our month and day
-        const newDate = { 
-            ...currentDate,
-            month: matchingMonth.order,
-            day: day
-        };
+        // Get current date as a template
+        const currentDate = window.SimpleCalendar.api.currentDateTime();
         
-        // Format date
-        return window.SimpleCalendar.api.formatDate(newDate);
+        // Try getting a date directly from the calendar API if available
+        try {
+            // See if there's a method to get the date string directly
+            if (typeof window.SimpleCalendar.api.getDateString === 'function') {
+                const dateString = window.SimpleCalendar.api.getDateString({
+                    year: currentDate.year,
+                    month: matchingMonth.numericRepresentation || matchingMonth.id,
+                    day: parseInt(day, 10)
+                });
+                console.log("DND-Weather | Got date string directly:", dateString);
+                if (dateString) {
+                    return dateString;
+                }
+            }
+        } catch (directError) {
+            console.warn("DND-Weather | Direct date string retrieval failed:", directError);
+        }
+        
+        // Format manually using the Greyhawk month name (since the SC formatting isn't working)
+        const formattedDate = `${monthName} ${day}, ${currentDate.year}`;
+        console.log("DND-Weather | Formatted manually:", formattedDate);
+        
+        return formattedDate;
+        
     } catch (error) {
         console.error("DND-Weather | Error formatting Simple Calendar date:", error);
         return `${monthName} ${day}`;
     }
 }
 
-// Update the _formatDetailedReport method to include location name and date range
+// Helper method to map Greyhawk months to Simple Calendar months
+_mapGreyhawkToSimpleCalendarMonth(greyhawkMonth) {
+    // Get month names from each calendar
+    const monthNameMap = {
+        // Use exact Greyhawk names as keys, Simple Calendar names as values
+        'Needfest': 'Needfest',
+        'Fireseek': 'Fireseek',
+        'Readying': 'Readying',
+        'Coldeven': 'Coldeven',
+        'Growfest': 'Growfest',
+        'Planting': 'Planting',
+        'Flocktime': 'Flocktime',
+        'Wealsun': 'Wealsun',
+        'Richfest': 'Richfest',
+        'Reaping': 'Reaping',
+        'Goodmonth': 'Goodmonth',
+        'Harvester': 'Harvester',
+        'Brewfest': 'Brewfest',
+        'Patchwall': 'Patchwall',
+        "Ready'reat": "Ready'reat",
+        'Sunsebb': 'Sunsebb'
+    };
+    
+    // Try to get the mapped name, fall back to original
+    return monthNameMap[greyhawkMonth] || greyhawkMonth;
+}
+
+// Updated the _formatDetailedReport method to include location name and date range
 _formatDetailedReport(weatherData, options) {
     // Create detailed report with day-by-day breakdown
     let content = `<div class="dnd-weather-report">
         <h2>Weather Report: ${options.locationName}</h2>
         <p class="date-range"><strong>Period:</strong> ${options.startDate} to ${options.endDate}</p>
-        <p><strong>Location:</strong> ${this.state.terrain} (Elevation: ${this.state.elevation}ft, Latitude: ${this.state.latitude}°)</p>
-        <hr/>`;
+        <p><strong>Location:</strong> ${this.state.terrain} (Elevation: ${this.state.elevation}ft, Latitude: ${this.state.latitude}°)</p>`;
     
+    // Add a calendar legend if using Simple Calendar
+    if (options.useCalendar) {
+        content += `<p class="calendar-note">Calendar: Greyhawk (Simple Calendar integration)</p>`;
+    }
+    
+    content += `<hr/>`;
+
     weatherData.forEach(day => {
         const weather = day.weather;
         const baseConditions = weather.baseConditions;
@@ -1582,6 +1693,18 @@ _getCalendarIntegration() {
     
     console.log("DND-Weather | Calendar integration available");
     return weatherSystem.calendarIntegration;
+}
+
+_getCorrectCalendarId(monthName) {
+    // Manual mapping of Greyhawk months to known Simple Calendar IDs
+    // These will need to be adjusted based on your actual Simple Calendar setup
+    const monthIdMap = {
+        // This would be populated based on the actual IDs in your Simple Calendar
+        // Inspect the actual ID values by looking at your logs
+        // 'Coldeven': '...',
+    };
+    
+    return monthIdMap[monthName] || null;
 }
 
 }

@@ -26,6 +26,15 @@ export const registerSettings = () => {
         step: 1
       }
     });
+
+    game.settings.register('dnd-weather', 'lastLocationName', {
+      name: "Last Used Location Name",
+      hint: "Stores the last location name used for weather reports",
+      scope: "world",
+      config: false,
+      type: String,
+      default: ""
+  });
   
     game.settings.register('dnd-weather', 'elevation', {
       name: game.i18n.localize('DND-WEATHER.settings.elevation.name'),
