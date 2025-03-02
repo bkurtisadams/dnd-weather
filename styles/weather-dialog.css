@@ -638,3 +638,294 @@
   color: #888;
   padding: 5px;
 }
+
+/* Compact Weather Display Styles */
+
+/* Base styles for compact weather display */
+.weather-display {
+  max-width: 400px;
+  font-size: 0.95em;
+}
+
+/* Compact rows with reduced spacing */
+.weather-display .weather-row.compact {
+  margin-bottom: 4px;
+  padding: 2px 4px;
+  border-bottom: 1px solid rgba(120, 120, 120, 0.15);
+}
+
+.weather-display .weather-row.compact:last-child {
+  border-bottom: none;
+}
+
+/* Icon column */
+.weather-display .weather-icon {
+  width: 20px;
+  display: inline-block;
+  vertical-align: top;
+  padding-top: 3px;
+}
+
+/* Data column */
+.weather-display .weather-data {
+  display: inline-block;
+  width: calc(100% - 24px);
+  vertical-align: top;
+}
+
+/* Headers - reduced size and spacing */
+.weather-display .weather-data h3 {
+  font-size: 0.95em;
+  margin: 0 0 2px 0;
+  padding-bottom: 1px;
+  border-bottom: 1px solid rgba(120, 120, 120, 0.2);
+}
+
+.weather-display .weather-data h4 {
+  font-size: 0.9em;
+  margin: 0 0 2px 0;
+  color: #444;
+}
+
+.weather-display .weather-data h5 {
+  font-size: 0.85em;
+  margin: 0;
+  color: #555;
+}
+
+/* Weather summary */
+.weather-display .weather-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+.weather-display .weather-summary .wind-chill {
+  font-size: 0.85em;
+  color: #666;
+  font-style: italic;
+}
+
+/* Dual info columns */
+.weather-display .weather-dual-info {
+  display: flex;
+  justify-content: space-between;
+}
+
+.weather-display .info-column {
+  width: 48%;
+}
+
+.weather-display .info-column p {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+/* Timing grid */
+.weather-display .timing-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 8px;
+  font-size: 0.85em;
+}
+
+.weather-display .timing-label {
+  font-weight: bold;
+}
+
+/* Precipitation section */
+.weather-display .precip-details.compact {
+  font-size: 0.9em;
+}
+
+.weather-display .precip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.weather-display .precip-type {
+  font-weight: bold;
+}
+
+.weather-display .none-text {
+  font-style: italic;
+  margin: 0;
+}
+
+/* Effects grid */
+.weather-display .effects-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1px 8px;
+  font-size: 0.85em;
+  margin: 3px 0;
+}
+
+.weather-display .effect-label {
+  font-weight: bold;
+  color: #555;
+}
+
+/* Continuing weather section */
+.weather-display .continuing-weather.compact {
+  margin-top: 3px;
+  padding: 3px 5px;
+  background: rgba(60, 60, 70, 0.1);
+  border-left: 2px solid #4299e1;
+  border-radius: 3px;
+  font-size: 0.85em;
+}
+
+.weather-display .continuing-weather.compact.transition {
+  border-left-color: #ed8936;
+}
+
+.weather-display .continuing-weather.compact h5 {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+}
+
+.weather-display .continuing-weather.compact .duration-value {
+  margin-left: auto;
+  font-style: italic;
+}
+
+/* Precipitation notes */
+.weather-display .precip-notes.compact {
+  font-size: 0.85em;
+  font-style: italic;
+  color: #666;
+  margin-top: 3px;
+  padding: 2px 4px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+/* Moon and sun grid */
+.weather-display .astro-grid {
+  display: flex;
+  justify-content: space-between;
+}
+
+.weather-display .moon-column,
+.weather-display .sun-column {
+  width: 48%;
+}
+
+/* Moon phase styling */
+.weather-display .moon-phases,
+.weather-display .daylight-times {
+  font-size: 0.85em;
+}
+
+.weather-display .moon-item,
+.weather-display .time-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+
+.weather-display .moon-label {
+  min-width: 45px;
+  font-weight: bold;
+}
+
+.weather-display .moon-phase {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Moon icons */
+.weather-display .moon-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  text-align: center;
+}
+
+/* Weather history section */
+.weather-display .weather-history-list.compact {
+  max-height: 70px;
+  overflow-y: auto;
+  border: 1px solid rgba(120, 120, 120, 0.2);
+  border-radius: 3px;
+  margin-top: 2px;
+}
+
+.weather-display .history-item {
+  display: flex;
+  align-items: center;
+  padding: 2px 5px;
+  border-bottom: 1px solid rgba(120, 120, 120, 0.1);
+  font-size: 0.85em;
+}
+
+.weather-display .history-item:last-child {
+  border-bottom: none;
+}
+
+.weather-display .history-time {
+  width: 90px;
+  font-size: 0.85em;
+  color: #666;
+}
+
+.weather-display .history-details {
+  flex-grow: 1;
+}
+
+.weather-display .restore-weather {
+  width: 18px;
+  height: 18px;
+  padding: 1px;
+  margin-left: 5px;
+  background: rgba(60, 60, 70, 0.1);
+  border: 1px solid rgba(120, 120, 120, 0.2);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.weather-display .restore-weather:hover {
+  background: rgba(60, 60, 70, 0.2);
+}
+
+.weather-display .empty-history {
+  font-style: italic;
+  color: #888;
+  padding: 3px;
+  font-size: 0.85em;
+}
+
+/* Special effects section */
+.weather-display .special-effects-list {
+  font-size: 0.85em;
+}
+
+.weather-display .special-effect {
+  margin-bottom: 2px;
+}
+
+/* Moon icon helper classes */
+.fa-moon-new, .fa-moon-full, .fa-moon-waxing-crescent,
+.fa-moon-waxing-gibbous, .fa-moon-waning-gibbous,
+.fa-moon-waning-crescent, .fa-moon-first-quarter,
+.fa-moon-last-quarter {
+  font-family: 'Font Awesome 5 Free';
+  font-weight: 900;
+}
+
+.fa-moon-new:before { content: "\f186"; opacity: 0.2; }
+.fa-moon-full:before { content: "\f186"; }
+.fa-moon-waxing-crescent:before { content: "\f6dc"; }
+.fa-moon-first-quarter:before { content: "\f6de"; }
+.fa-moon-waxing-gibbous:before { content: "\f6dd"; }
+.fa-moon-waning-gibbous:before { content: "\f6df"; }
+.fa-moon-last-quarter:before { content: "\f6e0"; }
+.fa-moon-waning-crescent:before { content: "\f6e1"; }

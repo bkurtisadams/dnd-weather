@@ -1,4 +1,71 @@
 // src/ui/components/WeatherDisplay.js - Update these methods
+// Register required Handlebars helpers
+Handlebars.registerHelper('isObject', function(value) {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
+});
+
+Handlebars.registerHelper('eq', function(a, b) {
+    return a === b;
+});
+
+Handlebars.registerHelper('neq', function(a, b) {
+    return a !== b;
+});
+
+Handlebars.registerHelper('lt', function(a, b) {
+    return a < b;
+});
+
+Handlebars.registerHelper('gt', function(a, b) {
+    return a > b;
+});
+
+Handlebars.registerHelper('floor', function(value) {
+    return Math.floor(value);
+});
+
+Handlebars.registerHelper('divide', function(a, b) {
+    return a / b;
+});
+
+Handlebars.registerHelper('mod', function(a, b) {
+    return a % b;
+});
+
+Handlebars.registerHelper('getMoonIcon', function(phaseName) {
+    // Normalize phase name to lowercase and trim
+    const phase = phaseName.toLowerCase().trim();
+    
+    // Map phase names to Font Awesome classes
+    if (phase.includes('new')) return 'fa-moon-new';
+    if (phase.includes('full')) return 'fa-moon-full';
+    if (phase.includes('waxing') && phase.includes('crescent')) return 'fa-moon-waxing-crescent';
+    if (phase.includes('first quarter')) return 'fa-moon-first-quarter';
+    if (phase.includes('waxing') && phase.includes('gibbous')) return 'fa-moon-waxing-gibbous';
+    if (phase.includes('waning') && phase.includes('gibbous')) return 'fa-moon-waning-gibbous';
+    if (phase.includes('last quarter')) return 'fa-moon-last-quarter';
+    if (phase.includes('waning') && phase.includes('crescent')) return 'fa-moon-waning-crescent';
+    
+    // Default to full moon if no match
+    return 'fa-moon';
+  });
+
+// Add the formatDuration helper for continuing weather
+Handlebars.registerHelper('formatDuration', function(hours) {
+    console.log("DND-Weather | Formatting duration in display:", hours);
+    
+    if (!hours || isNaN(hours)) {
+        return "unknown";
+    }
+    
+    if (hours >= 24) {
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+        return `${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
+    }
+    
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+});
 
 export class WeatherDisplay extends Application {
     static get defaultOptions() {
@@ -81,56 +148,6 @@ export class WeatherDisplay extends Application {
     activateListeners(html) {
         super.activateListeners(html);
         
-        // Register required Handlebars helpers
-        Handlebars.registerHelper('isObject', function(value) {
-            return typeof value === 'object' && value !== null && !Array.isArray(value);
-        });
-
-        Handlebars.registerHelper('eq', function(a, b) {
-            return a === b;
-        });
-
-        Handlebars.registerHelper('neq', function(a, b) {
-            return a !== b;
-        });
-
-        Handlebars.registerHelper('lt', function(a, b) {
-            return a < b;
-        });
-
-        Handlebars.registerHelper('gt', function(a, b) {
-            return a > b;
-        });
-
-        Handlebars.registerHelper('floor', function(value) {
-            return Math.floor(value);
-        });
-
-        Handlebars.registerHelper('divide', function(a, b) {
-            return a / b;
-        });
-
-        Handlebars.registerHelper('mod', function(a, b) {
-            return a % b;
-        });
-
-        // Add the formatDuration helper for continuing weather
-        Handlebars.registerHelper('formatDuration', function(hours) {
-            console.log("DND-Weather | Formatting duration in display:", hours);
-            
-            if (!hours || isNaN(hours)) {
-                return "unknown";
-            }
-            
-            if (hours >= 24) {
-                const days = Math.floor(hours / 24);
-                const remainingHours = hours % 24;
-                return `${days} ${days === 1 ? 'day' : 'days'}${remainingHours > 0 ? `, ${remainingHours} ${remainingHours === 1 ? 'hour' : 'hours'}` : ''}`;
-            }
-            
-            return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
-        });
-
         // Add listener for restore weather buttons with event delegation
         html.on('click', '.restore-weather', async (event) => {
             const index = Number(event.currentTarget.dataset.index);
