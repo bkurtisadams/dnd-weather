@@ -90,6 +90,14 @@ export class WeatherDisplay extends Application {
             return a === b;
         });
 
+        Handlebars.registerHelper('neq', function(a, b) {
+            return a !== b;
+        });
+
+        Handlebars.registerHelper('lt', function(a, b) {
+            return a < b;
+        });
+
         Handlebars.registerHelper('gt', function(a, b) {
             return a > b;
         });
@@ -105,7 +113,7 @@ export class WeatherDisplay extends Application {
         Handlebars.registerHelper('mod', function(a, b) {
             return a % b;
         });
-        
+
         // Add the formatDuration helper for continuing weather
         Handlebars.registerHelper('formatDuration', function(hours) {
             console.log("DND-Weather | Formatting duration in display:", hours);
@@ -123,8 +131,8 @@ export class WeatherDisplay extends Application {
             return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
         });
 
-        // Add listener for restore weather buttons
-        html.find('.restore-weather').on('click', async (event) => {
+        // Add listener for restore weather buttons with event delegation
+        html.on('click', '.restore-weather', async (event) => {
             const index = Number(event.currentTarget.dataset.index);
             console.log("DND-Weather | Restore weather requested for index:", index);
             
@@ -134,5 +142,11 @@ export class WeatherDisplay extends Application {
             });
             document.dispatchEvent(restoreEvent);
         });
+
+        // Also log when history is available to help with debugging
+        if (this.weatherData?.history) {
+            console.log("DND-Weather | Weather history available in display:", 
+                this.weatherData.history.length, "entries");
+        }
     }
 }

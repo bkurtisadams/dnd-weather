@@ -413,3 +413,163 @@
   border: 1px solid #e2e8f0;
   border-radius: 4px;
 }
+
+/* Add this to your module's CSS file or within a <style> tag in the template */
+.weather-current {
+  max-width: 400px; /* Reduce width */
+}
+
+.weather-header {
+  font-size: 1.1em; /* Smaller headers */
+  margin: 5px 0;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(120, 120, 120, 0.5);
+}
+
+.weather-row {
+  margin-bottom: 8px; /* Reduce vertical spacing */
+  padding: 4px;
+}
+
+.weather-icon {
+  width: 24px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.weather-data {
+  display: inline-block;
+  width: calc(100% - 30px);
+  vertical-align: top;
+}
+
+.weather-data h3 {
+  font-size: 1em;
+  margin: 0 0 4px 0;
+}
+
+/* Make the history items more compact */
+.weather-history-list {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  font-size: 0.9em;
+  padding: 3px;
+  border-bottom: 1px solid rgba(120, 120, 120, 0.3);
+}
+
+.history-time {
+  font-size: 0.8em;
+  width: 120px;
+}
+
+.history-details {
+  flex-grow: 1;
+}
+
+.restore-weather {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+}
+
+/* Create a two-column layout for some data */
+.compact-columns {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.compact-column {
+  width: 50%;
+}
+
+/* Make continuation display more compact */
+.continuing-weather {
+  margin-top: 5px;
+  padding: 5px;
+  background: rgba(60, 60, 70, 0.2);
+  border-radius: 3px;
+}
+
+.continuation-header h4 {
+  font-size: 0.9em;
+  margin: 0 0 3px 0;
+}
+
+/* Make the movement effects display more compact */
+.effect-group {
+  margin-bottom: 4px;
+  font-size: 0.9em;
+}
+
+.effect-group .effect-label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+/* Make timeline more compact */
+.weather-timeline {
+  display: flex;
+  align-items: center;
+  font-size: 0.9em;
+  margin-top: 3px;
+  padding: 4px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 3px;
+}
+
+/* Weather History in Weather Display */
+.weather-display .weather-history-list {
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid rgba(120, 120, 120, 0.3);
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+.weather-display .history-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid rgba(120, 120, 120, 0.2);
+  font-size: 0.9em;
+}
+
+.weather-display .history-item:last-child {
+  border-bottom: none;
+}
+
+.weather-display .history-time {
+  width: 110px;
+  font-size: 0.8em;
+  color: #666;
+}
+
+.weather-display .history-details {
+  flex-grow: 1;
+}
+
+.weather-display .restore-weather {
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  margin-left: 5px;
+  background: rgba(60, 60, 70, 0.1);
+  border: 1px solid rgba(120, 120, 120, 0.3);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.weather-display .restore-weather:hover {
+  background: rgba(60, 60, 70, 0.2);
+}
+
+.weather-display .empty-history {
+  font-style: italic;
+  color: #888;
+  padding: 5px;
+}

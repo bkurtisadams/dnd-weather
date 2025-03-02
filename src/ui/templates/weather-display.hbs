@@ -181,32 +181,6 @@
                   </div>
                   {{/if}}
 
-                   {{!-- Weather History Section --}}
-                  <div class="weather-row">
-                    <div class="weather-icon">
-                      <i class="fas fa-history"></i>
-                    </div>
-                    <div class="weather-data">
-                      <h3>Weather History</h3>
-                      <div class="weather-history-list">
-                        {{#each weatherHistory}}
-                        <div class="history-item">
-                          <div class="history-time">{{this.timestamp}}</div>
-                          <div class="history-details">
-                            <span class="history-condition">{{this.baseConditions.sky}}</span>
-                            <span class="history-precipitation">{{this.baseConditions.precipitation.type}}</span>
-                          </div>
-                          {{#if ../isGM}}
-                          <button type="button" class="restore-weather" data-index="{{@index}}">
-                            <i class="fas fa-undo"></i>
-                          </button>
-                          {{/if}}
-                        </div>
-                        {{/each}}
-                      </div>
-                    </div>
-                  </div> 
-
                   <div class="effects-section">
                       <h4>Effects</h4>
                       
@@ -298,6 +272,40 @@
   </div>
   {{/if}}
 
+  {{!-- Weather History Section - Always visible --}}
+  <div class="weather-row">
+    <div class="weather-icon">
+      <i class="fas fa-history"></i>
+    </div>
+    <div class="weather-data">
+      <h3>Weather History</h3>
+      {{#if weatherHistory.length}}
+        <div class="weather-history-list">
+          {{#each weatherHistory as |history index|}}
+            {{#if (lt index 5)}} {{!-- Only show first 5 entries --}}
+            <div class="history-item">
+              <div class="history-time">{{history.timestamp}}</div>
+              <div class="history-details">
+                {{history.baseConditions.sky}}
+                {{#unless (eq history.baseConditions.precipitation.type "none")}}
+                  - {{history.baseConditions.precipitation.type}}
+                {{/unless}}
+              </div>
+              {{#if ../isGM}}
+                <button type="button" class="restore-weather" data-index="{{index}}">
+                  <i class="fas fa-undo"></i>
+                </button>
+              {{/if}}
+            </div>
+            {{/if}}
+          {{/each}}
+        </div>
+      {{else}}
+        <div class="empty-history">No weather history yet.</div>
+      {{/if}}
+    </div>
+  </div>
+
   {{!-- Special Weather Section --}}
   <div class="weather-section">
       <h3 class="weather-header">Effects</h3>
@@ -313,90 +321,46 @@
   </div>
 
   {{!-- Moon Phase Section --}}
-  <div class="weather-row">
-    <div class="weather-icon">
-      <i class="fas fa-moon"></i>
-    </div>
-    <div class="weather-data">
-      <h3>Moon Phases</h3>
-      <div class="moon-details">
-        <div class="moon-row">
-          <span class="moon-label">Luna:</span>
-          <div class="moon-info">
-            {{#if weather.moonPhase.luna}}
-              <svg class="moon-icon" viewBox="0 0 100 100" width="24" height="24">
-                {{#if (eq weather.moonPhase.luna "New")}}
-                  <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                {{else if (eq weather.moonPhase.luna "1/4")}}
-                  <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                  <path d="M50,2 A48,48 0 0,1 50,98 A48,48 0 0,0 50,2" fill="white"/>
-                {{else if (eq weather.moonPhase.luna "Full")}}
-                  <circle cx="50" cy="50" r="48" fill="white" stroke="gray"/>
-                {{else if (eq weather.moonPhase.luna "3/4")}}
-                  <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                  <path d="M50,2 A48,48 0 0,0 50,98 A48,48 0 0,1 50,2" fill="white"/>
-                {{else if (eq weather.moonPhase.luna "Waxing Crescent")}}
-                  <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                  <path d="M50,2 A48,48 0 0,1 50,98 A24,48 0 0,0 50,2" fill="white"/>
-                {{else if (eq weather.moonPhase.luna "Waxing Gibbous")}}
-                  <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                  <path d="M50,2 A48,48 0 0,1 50,98 A72,48 0 0,0 50,2" fill="white"/>
-                {{else if (eq weather.moonPhase.luna "Waning Gibbous")}}
-                  <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                  <path d="M50,2 A48,48 0 0,0 50,98 A72,48 0 0,1 50,2" fill="white"/>
-                {{else if (eq weather.moonPhase.luna "Waning Crescent")}}
-                  <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                  <path d="M50,2 A48,48 0 0,0 50,98 A24,48 0 0,1 50,2" fill="white"/>
-                {{/if}}
-              </svg>
-            {{/if}}
-            <span>{{weather.moonPhase.luna}}</span>
+  {{!-- For the daylight and moon phases section, use two columns --}}
+  <div class="compact-columns">
+    <div class="compact-column">
+      {{!-- Moon Phases Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-moon"></i>
+        </div>
+        <div class="weather-data">
+          <h3>Moon Phases</h3>
+          <div class="moon-details">
+            <div class="moon-row">
+              <span class="moon-label">Luna:</span>
+              <span>{{weather.moonPhase.luna}}</span>
+            </div>
+            <div class="moon-row">
+              <span class="moon-label">Celene:</span>
+              <span>{{weather.moonPhase.celene}}</span>
+            </div>
           </div>
         </div>
-        <div class="moon-row">
-          <span class="moon-label">Celene:</span>
-          <div class="moon-info">
-            {{#if weather.moonPhase.celene}}
-                <svg class="moon-icon" viewBox="0 0 100 100" width="24" height="24">
-                    {{#if (eq weather.moonPhase.celene "New")}}
-                        <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                    {{else if (eq weather.moonPhase.celene "1/4")}}
-                        <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                        <path d="M50,2 A48,48 0 0,1 50,98 A48,48 0 0,0 50,2" fill="white"/>
-                    {{else if (eq weather.moonPhase.celene "Full")}}
-                        <circle cx="50" cy="50" r="48" fill="white" stroke="gray"/>
-                    {{else if (eq weather.moonPhase.celene "3/4")}}
-                        <circle cx="50" cy="50" r="48" fill="black" stroke="gray"/>
-                        <path d="M50,2 A48,48 0 0,0 50,98 A48,48 0 0,1 50,2" fill="white"/>
-                    {{else}}
-                        <circle cx="50" cy="50" r="48" fill="gray" stroke="darkgray"/>
-                    {{/if}}
-                </svg>
-            {{/if}}
-            <span>{{weather.moonPhase.celene}}</span>
+      </div>
+    </div>
+    <div class="compact-column">
+      {{!-- Sunrise/Sunset Section --}}
+      <div class="weather-row">
+        <div class="weather-icon">
+          <i class="fas fa-sun"></i>
+        </div>
+        <div class="weather-data">
+          <h3>Daylight</h3>
+          <div class="daylight-details">
+            <div class="daylight-row">
+              <span>Sunrise: {{weather.daylight.sunrise}}</span>
+            </div>
+            <div class="daylight-row">
+              <span>Sunset: {{weather.daylight.sunset}}</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
-{{!-- Sunrise/Sunset Section --}}
-<div class="weather-row">
-  <div class="weather-icon">
-    <i class="fas fa-sun"></i>
-  </div>
-  <div class="weather-data">
-    <h3>Daylight</h3>
-    <div class="daylight-details">
-      <div class="daylight-row">
-        <span class="daylight-label">Sunrise:</span>
-        <span>{{weather.daylight.sunrise}}</span>
-      </div>
-      <div class="daylight-row">
-        <span class="daylight-label">Sunset:</span>
-        <span>{{weather.daylight.sunset}}</span>
-      </div>
-    </div>
-  </div>
-</div>

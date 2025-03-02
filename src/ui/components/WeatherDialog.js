@@ -242,6 +242,11 @@ export class WeatherDialog extends Application {
                 ...this.state.currentWeather,
                 history: this.weatherHistory // Add the history data
             };
+            
+            // Debug logging to ensure history is being passed
+            console.log("DND-Weather | Refreshing display with history:", 
+                this.weatherHistory.length, "entries");
+                
             await this.displayWindow.update(weatherDataWithHistory);
         }
     }
