@@ -109,46 +109,69 @@ export class WeatherDisplay extends Application {
         
         // Ensure we have weather data
         if (!this.weatherData?.baseConditions) {
-            console.warn("Weather Display: No base conditions in weather data");
-            return {
-                weather: {},
-                effects: {},
-                isGM: game.user.isGM,
-                loading: false
-            };
+          console.warn("Weather Display: No base conditions in weather data");
+          return {
+            weather: {},
+            effects: {},
+            isGM: game.user.isGM,
+            loading: false
+          };
         }
-
+      
         const baseConditions = this.weatherData.baseConditions;
+        
+        // Get settings for location data
+        const selectedMonth = game.settings.get('dnd-weather', 'selectedMonth');
+        const selectedDay = game.settings.get('dnd-weather', 'selectedDay');
+        const latitude = game.settings.get('dnd-weather', 'latitude');
+        const terrain = game.settings.get('dnd-weather', 'terrain');
+        const locationName = game.settings.get('dnd-weather', 'lastLocationName') || terrain;
+        
+        // Get current date from calendar integration if available
+        let currentDate = null;
+        if (globalThis.dndWeather?.weatherSystem?.calendarIntegration?.initialized) {
+          try {
+            currentDate = globalThis.dndWeather.weatherSystem.calendarIntegration.formatCurrentDate();
+          } catch (error) {
+            console.error("DND-Weather | Error formatting current date:", error);
+          }
+        }
         
         // Structure the data to match the template and include weatherDuration
         return {
-            weather: {
-                conditions: baseConditions.sky,
-                temperature: baseConditions.temperature.high,
-                temperatureLow: baseConditions.temperature.low,
-                windChill: baseConditions.temperature.windChill,
-                wind: baseConditions.wind.speed,
-                windDirection: baseConditions.wind.direction,
-                precipitation: {
-                    ...baseConditions.precipitation,
-                    // Make sure these specific properties are explicitly extracted and set
-                    continues: baseConditions.precipitation.continues || false,
-                    previousType: baseConditions.precipitation.previousType || null,
-                    changed: baseConditions.precipitation.changed || false,
-                    duration: baseConditions.precipitation.duration || 0
-                },
-                // Include weatherDuration if available:
-                weatherDuration: this.weatherData.weatherDuration || baseConditions.precipitation.duration,
-                moonPhase: baseConditions.moonPhase,
-                daylight: baseConditions.daylight
+          weather: {
+            conditions: baseConditions.sky,
+            temperature: baseConditions.temperature.high,
+            temperatureLow: baseConditions.temperature.low,
+            windChill: baseConditions.temperature.windChill,
+            wind: baseConditions.wind.speed,
+            windDirection: baseConditions.wind.direction,
+            precipitation: {
+              ...baseConditions.precipitation,
+              continues: baseConditions.precipitation.continues || false,
+              previousType: baseConditions.precipitation.previousType || null,
+              changed: baseConditions.precipitation.changed || false,
+              duration: baseConditions.precipitation.duration || 0
             },
-            weatherTiming: this.weatherData.timing || null,
-            weatherHistory: this.weatherData.history || [], // Add this line to receive history data
-            effects: this.weatherData.effects || {},
-            isGM: game.user.isGM,
-            loading: false
+            weatherDuration: this.weatherData.weatherDuration || baseConditions.precipitation.duration,
+            moonPhase: baseConditions.moonPhase,
+            daylight: baseConditions.daylight
+          },
+          weatherTiming: this.weatherData.timing || null,
+          weatherHistory: this.weatherData.history || [],
+          effects: this.weatherData.effects || {},
+          isGM: game.user.isGM,
+          loading: false,
+          
+          // Add location data
+          locationName: locationName,
+          currentDate: currentDate,
+          selectedMonth: selectedMonth,
+          selectedDay: selectedDay,
+          latitude: latitude,
+          terrain: terrain
         };
-    }
+      }
 
     // Also update the update method to accept history
     async update(weatherData) {

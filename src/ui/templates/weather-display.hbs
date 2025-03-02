@@ -4,8 +4,8 @@
     <div class="report-header">
       <h2>📜 Greyhawk Weather Report</h2>
       <div class="location-info">
-        <span>📍 <strong>Location</strong>: {{terrain}}</span>
-        <span>📅 <strong>Date</strong>: {{#if weatherTiming.start}}{{weatherTiming.start}}{{else}}{{selectedMonth}} {{selectedDay}}{{/if}}</span>
+        <span>📍 <strong>Location</strong>: {{#if locationName}}{{locationName}}{{else}}{{terrain}}{{/if}}</span>
+        <span>📅 <strong>Date</strong>: {{#if currentDate}}{{currentDate}}{{else}}{{selectedMonth}} {{selectedDay}}{{/if}}</span>
         <span>🌍 <strong>Latitude</strong>: {{latitude}}° North</span>
         <span>🏔 <strong>Terrain</strong>: {{terrain}}</span>
       </div>
