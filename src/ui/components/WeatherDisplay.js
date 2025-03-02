@@ -36,18 +36,40 @@ Handlebars.registerHelper('getMoonIcon', function(phaseName) {
     // Normalize phase name to lowercase and trim
     const phase = phaseName.toLowerCase().trim();
     
-    // Map phase names to Font Awesome classes
-    if (phase.includes('new')) return 'fa-moon-new';
-    if (phase.includes('full')) return 'fa-moon-full';
-    if (phase.includes('waxing') && phase.includes('crescent')) return 'fa-moon-waxing-crescent';
-    if (phase.includes('first quarter')) return 'fa-moon-first-quarter';
-    if (phase.includes('waxing') && phase.includes('gibbous')) return 'fa-moon-waxing-gibbous';
-    if (phase.includes('waning') && phase.includes('gibbous')) return 'fa-moon-waning-gibbous';
-    if (phase.includes('last quarter')) return 'fa-moon-last-quarter';
-    if (phase.includes('waning') && phase.includes('crescent')) return 'fa-moon-waning-crescent';
+    // Use standard Font Awesome icons with descriptive title attributes
+    if (phase.includes('new')) return 'fa-circle';  // Black circle for new moon
+    if (phase.includes('full')) return 'fa-circle'; // White circle for full moon (will style with CSS)
+    if (phase.includes('first quarter') || phase.includes('1/4')) return 'fa-adjust fa-rotate-270'; // Half moon
+    if (phase.includes('last quarter') || phase.includes('3/4')) return 'fa-adjust fa-rotate-90'; // Half moon (opposite)
+    if (phase.includes('waxing') && phase.includes('crescent')) return 'fa-moon'; 
+    if (phase.includes('waning') && phase.includes('crescent')) return 'fa-moon fa-flip-horizontal';
+    if (phase.includes('waxing') && phase.includes('gibbous')) return 'fa-adjust fa-rotate-180';
+    if (phase.includes('waning') && phase.includes('gibbous')) return 'fa-adjust';
     
     // Default to full moon if no match
-    return 'fa-moon';
+    return 'fa-circle';
+});
+
+Handlebars.registerHelper('shortTimestamp', function(timestamp) {
+    if (!timestamp) return '';
+    
+    // Extract just the time portion or last part of the timestamp
+    const parts = timestamp.split(',');
+    if (parts.length > 1) {
+        return parts[parts.length - 1].trim(); // Return just the time
+    }
+    return timestamp;
+});
+
+Handlebars.registerHelper('shortDate', function(timestamp) {
+    if (!timestamp) return '';
+    
+    // Extract just the time portion and possibly the date
+    const parts = timestamp.split(',');
+    if (parts.length > 1) {
+      return parts[parts.length - 1].trim(); // Return just the time portion
+    }
+    return timestamp;
   });
 
 // Add the formatDuration helper for continuing weather

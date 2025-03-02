@@ -1,245 +1,154 @@
 {{!-- Compact Weather Display Template --}}
 <div class="weather-current {{#if loading}}loading{{/if}}">
-  {{!-- Temperature & Sky Conditions Combined Section --}}
-  <div class="weather-row compact">
-    <div class="weather-icon">
-      <i class="fas 
-        {{~#if (eq weather.conditions 'Clear')}} fa-sun{{/if}}
-        {{~#if (eq weather.conditions 'Partly Cloudy')}} fa-cloud-sun{{/if}}
-        {{~#if (eq weather.conditions 'Cloudy')}} fa-cloud{{/if~}}
-      "></i>
+  <div class="weather-report">
+    <div class="report-header">
+      <h2>📜 Greyhawk Weather Report</h2>
+      <div class="location-info">
+        <span>📍 <strong>Location</strong>: {{terrain}}</span>
+        <span>📅 <strong>Date</strong>: {{#if weatherTiming.start}}{{weatherTiming.start}}{{else}}{{selectedMonth}} {{selectedDay}}{{/if}}</span>
+        <span>🌍 <strong>Latitude</strong>: {{latitude}}° North</span>
+        <span>🏔 <strong>Terrain</strong>: {{terrain}}</span>
+      </div>
     </div>
-    <div class="weather-data">
-      <h3>Current Weather</h3>
-      <div class="weather-summary">
-        <span class="conditions">{{weather.conditions}}</span> · 
-        <span class="temperature">{{weather.temperature}}°F</span>
+
+    <div class="report-section">
+      <h3>🌡 Temperature</h3>
+      <ul class="info-list">
+        <li><strong>Daily High</strong>: {{weather.temperature}}°F</li>
+        <li><strong>Daily Low</strong>: {{weather.temperatureLow}}°F</li>
         {{#if weather.windChill}}
-          <span class="wind-chill">(Feels like {{weather.windChill}}°F)</span>
+          <li><strong>Wind Chill Factor</strong>: Feels like {{weather.windChill}}°F</li>
         {{/if}}
-      </div>
+      </ul>
     </div>
-  </div>
 
-  {{!-- Weather Duration & Wind Combined --}}
-  <div class="weather-row compact">
-    <div class="weather-icon">
-      <i class="fas fa-wind"></i>
+    <div class="report-section">
+      <h3>💨 Wind</h3>
+      <ul class="info-list">
+        <li><strong>Speed</strong>: {{weather.wind}} mph</li>
+        <li><strong>Direction</strong>: {{weather.windDirection}}</li>
+        <li><strong>Effects</strong>: {{#if (gt weather.wind 30)}}Impairs movement and ranged attacks{{else}}No major impact on movement{{/if}}</li>
+      </ul>
     </div>
-    <div class="weather-data">
-      <div class="weather-dual-info">
-        <div class="info-column">
-          <h4>Wind</h4>
-          <p>{{weather.wind}} mph {{weather.windDirection}}</p>
-        </div>
-        {{#if weather.weatherDuration}}
-        <div class="info-column">
-          <h4>Duration</h4>
-          <p>{{weather.weatherDuration}}</p>
-        </div>
-        {{/if}}
-      </div>
-    </div>
-  </div>
 
-  {{!-- Weather Timing (if available) --}}
-  {{#if weatherTiming}}
-  <div class="weather-row compact">
-    <div class="weather-icon">
-      <i class="fas fa-clock"></i>
+    <div class="report-section">
+      <h3>☁ Sky Conditions</h3>
+      <ul class="info-list">
+        <li><strong>{{weather.conditions}}</strong></li>
+      </ul>
     </div>
-    <div class="weather-data">
-      <h4>Timing</h4>
-      <div class="timing-grid">
-        {{#if weatherTiming.start}}
-        <span class="timing-label">Started:</span>
-        <span class="timing-value">{{weatherTiming.start}}</span>
-        {{/if}}
-        
-        {{#if weatherTiming.end}}
-        <span class="timing-label">Ends:</span>
-        <span class="timing-value">{{weatherTiming.end}}</span>
-        {{/if}}
-        
-        {{#if weatherTiming.remaining}}
-        <span class="timing-label">Left:</span>
-        <span class="timing-value">{{weatherTiming.remaining}}</span>
-        {{/if}}
-      </div>
-    </div>
-  </div>
-  {{/if}}
 
-  {{!-- Precipitation Section --}}
-  <div class="weather-row compact">
-    <div class="weather-icon">
-      <i class="fas fa-cloud-rain"></i>
-    </div>
-    <div class="weather-data">
-      <h4>Precipitation</h4>
+    <div class="report-section">
+      <h3>🌧 Precipitation</h3>
       {{#if (eq weather.precipitation.type 'none')}}
-        <p class="none-text">None</p>
+        <ul class="info-list">
+          <li><strong>None</strong></li>
+        </ul>
       {{else}}
-        <div class="precip-details compact">
-          <div class="precip-header">
-            <span class="precip-type">{{weather.precipitation.type}}</span>
-            
-            {{#if weather.precipitation.amount}}
-            <span class="precip-amount">
-              {{#if (eq weather.precipitation.type "hailstorm")}}
-                {{weather.precipitation.amount}} in. diameter
-              {{else}}
-                {{weather.precipitation.amount}}{{#if weather.precipitation.amountSuffix}}{{weather.precipitation.amountSuffix}}{{else}} {{#if (gt weather.precipitation.amount 1)}}in.{{else}}in.{{/if}}{{/if}}
-              {{/if}}
-            </span>
-            {{/if}}
-          </div>
-          
-          {{!-- Compact Effects --}}
-          <div class="effects-grid">
-            <span class="effect-label">Move:</span>
-            <span class="effect-value">
-              {{#if (isObject weather.precipitation.movement)}}
-                {{#if weather.precipitation.movement.foot}}Foot: {{weather.precipitation.movement.foot}}{{/if}}
-                {{#if weather.precipitation.movement.horse}} · Horse: {{weather.precipitation.movement.horse}}{{/if}}
-                {{#if weather.precipitation.movement.cart}} · Cart: {{weather.precipitation.movement.cart}}{{/if}}
-              {{else}}
-                {{weather.precipitation.movement}}
-              {{/if}}
-            </span>
-            
-            <span class="effect-label">Vision:</span>
-            <span class="effect-value">{{weather.precipitation.vision}}</span>
-            
-            {{#if weather.precipitation.infraUltra}}
-              <span class="effect-label">Infra/Ultra:</span>
-              <span class="effect-value">{{weather.precipitation.infraUltra}}</span>
-            {{/if}}
-            
-            {{#if weather.precipitation.tracking}}
-              <span class="effect-label">Tracking:</span>
-              <span class="effect-value">{{weather.precipitation.tracking}}</span>
-            {{/if}}
-            
-            {{#if weather.precipitation.chanceLost}}
-              <span class="effect-label">Getting Lost:</span>
-              <span class="effect-value">{{weather.precipitation.chanceLost}}</span>
-            {{/if}}
-          </div>
-
-          {{!-- Weather Continuation (if applies) --}}
+        <ul class="info-list">
+          <li>
+            <strong>{{weather.precipitation.type}}</strong>
+            {{#if weather.precipitation.amount}} ({{weather.precipitation.amount}} in.){{/if}}
+            lasting <strong>{{formatDuration weather.precipitation.duration}}</strong>
+          </li>
+          <li><strong>Chance of Continuation</strong>: {{weather.precipitation.chanceContinuing}}%</li>
           {{#if weather.precipitation.continues}}
-          <div class="continuing-weather compact {{#if weather.precipitation.changed}}transition{{/if}}">
-            <div class="continuation-header">
-              <h5>
-                <i class="fas fa-sync-alt"></i> 
-                {{#if weather.precipitation.changed}}
+            <li><strong>Weather Change</strong>: 
+              {{#if weather.precipitation.changed}}
                 {{weather.precipitation.previousType}} → {{weather.precipitation.type}}
-                {{else}}
-                Continues: 
-                {{/if}}
-                <span class="duration-value">{{formatDuration weather.precipitation.duration}}</span>
-              </h5>
-            </div>
-          </div>
+              {{/if}}
+            </li>
           {{/if}}
-
-          {{#if weather.precipitation.notes}}
-            <div class="precip-notes compact">
-              {{weather.precipitation.notes}}
-            </div>
-          {{/if}}
-        </div>
+        </ul>
       {{/if}}
     </div>
-  </div>
 
-  {{!-- Moon & Daylight Section (Combined) --}}
-  <div class="weather-row compact">
-    <div class="weather-icon">
-      <i class="fas fa-moon"></i>
+    <div class="report-section">
+      <h3>🌙 Moon Phases</h3>
+      <ul class="info-list">
+        <li>
+          <strong>Luna</strong>: {{weather.moonPhase.luna}}
+          <i class="fas {{getMoonIcon weather.moonPhase.luna}} moon-icon"></i>
+        </li>
+        <li>
+          <strong>Celene</strong>: {{weather.moonPhase.celene}}
+          <i class="fas {{getMoonIcon weather.moonPhase.celene}} moon-icon celene"></i>
+        </li>
+      </ul>
     </div>
-    <div class="weather-data">
-      <div class="astro-grid">
-        <div class="moon-column">
-          <h4>Moons</h4>
-          <div class="moon-phases">
-            <div class="moon-item">
-              <span class="moon-label">Luna:</span>
-              <span class="moon-phase">
-                <i class="moon-icon fas {{getMoonIcon weather.moonPhase.luna}}"></i>
-                <span class="moon-name">{{weather.moonPhase.luna}}</span>
-              </span>
-            </div>
-            <div class="moon-item">
-              <span class="moon-label">Celene:</span>
-              <span class="moon-phase">
-                <i class="moon-icon fas {{getMoonIcon weather.moonPhase.celene}}"></i>
-                <span class="moon-name">{{weather.moonPhase.celene}}</span>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div class="sun-column">
-          <h4>Daylight</h4>
-          <div class="daylight-times">
-            <div class="time-item">
-              <i class="fas fa-sunrise"></i>
-              <span>{{weather.daylight.sunrise}}</span>
-            </div>
-            <div class="time-item">
-              <i class="fas fa-sunset"></i>
-              <span>{{weather.daylight.sunset}}</span>
-            </div>
-          </div>
-        </div>
+
+    <div class="report-section">
+      <h3>🌄 Sunrise & Sunset</h3>
+      <ul class="info-list">
+        <li><strong>Sunrise</strong>: {{weather.daylight.sunrise}}</li>
+        <li><strong>Sunset</strong>: {{weather.daylight.sunset}}</li>
+      </ul>
+    </div>
+
+    {{#if (neq weather.precipitation.type 'none')}}
+      <div class="report-section">
+        <h3>🚶 Travel Effects</h3>
+        <ul class="info-list">
+          <li><strong>Visibility</strong>: {{weather.precipitation.vision}}</li>
+          <li>
+            <strong>Movement Reduction</strong>: 
+            {{#if (isObject weather.precipitation.movement)}}
+              Foot: {{weather.precipitation.movement.foot}} · 
+              Horse: {{weather.precipitation.movement.horse}} · 
+              Cart: {{weather.precipitation.movement.cart}}
+            {{else}}
+              {{weather.precipitation.movement}}
+            {{/if}}
+          </li>
+          {{#if weather.precipitation.tracking}}
+            <li><strong>Tracking Penalty</strong>: {{weather.precipitation.tracking}}</li>
+          {{/if}}
+          {{#if weather.precipitation.chanceLost}}
+            <li><strong>Chance of Getting Lost</strong>: {{weather.precipitation.chanceLost}}</li>
+          {{/if}}
+        </ul>
       </div>
-    </div>
+    {{/if}}
+
+    {{#if effects.special.length}}
+      <div class="report-section">
+        <h3>🌈 Special Events</h3>
+        <ul class="info-list">
+          {{#each effects.special}}
+            <li>{{this}}</li>
+          {{/each}}
+        </ul>
+      </div>
+    {{/if}}
   </div>
 
   {{!-- Weather History Section --}}
-  <div class="weather-row compact">
-    <div class="weather-icon">
-      <i class="fas fa-history"></i>
-    </div>
-    <div class="weather-data">
-      <h4>History</h4>
-      {{#if weatherHistory.length}}
-        <div class="weather-history-list compact">
-          {{#each weatherHistory as |history index|}}
-            {{#if (lt index 5)}}
-            <div class="history-item">
-              <div class="history-time">{{history.timestamp}}</div>
-              <div class="history-details">{{history.baseConditions.sky}}{{#unless (eq history.baseConditions.precipitation.type "none")}} · {{history.baseConditions.precipitation.type}}{{/unless}}</div>
-              {{#if ../isGM}}
-                <button type="button" class="restore-weather" data-index="{{index}}">
-                  <i class="fas fa-undo"></i>
-                </button>
-              {{/if}}
-            </div>
+  <div class="history-section">
+    <h3>📝 Weather History</h3>
+    {{#if weatherHistory.length}}
+      <div class="history-list">
+        {{#each weatherHistory as |history index|}}
+          {{#if (lt index 5)}}
+          <div class="history-item">
+            <span class="history-time">{{history.timestamp}}</span>
+            <span class="history-details">
+              <i class="fas {{weatherIcon history.baseConditions.sky history.baseConditions.precipitation.type}}"></i>
+              {{history.baseConditions.sky}}
+              {{#unless (eq history.baseConditions.precipitation.type "none")}}
+                · {{history.baseConditions.precipitation.type}}
+              {{/unless}}
+            </span>
+            {{#if ../isGM}}
+              <button type="button" class="restore-weather" data-index="{{index}}" title="Restore this weather">
+                <i class="fas fa-undo"></i>
+              </button>
             {{/if}}
-          {{/each}}
-        </div>
-      {{else}}
-        <div class="empty-history">No history recorded yet.</div>
-      {{/if}}
-    </div>
-  </div>
-
-  {{!-- Special Effects Section (if any) --}}
-  {{#if effects.special.length}}
-  <div class="weather-row compact">
-    <div class="weather-icon">
-      <i class="fas fa-bolt"></i>
-    </div>
-    <div class="weather-data">
-      <h4>Special Effects</h4>
-      <div class="special-effects-list">
-        {{#each effects.special}}
-          <div class="special-effect">{{this}}</div>
+          </div>
+          {{/if}}
         {{/each}}
       </div>
-    </div>
+    {{else}}
+      <div class="empty-history">No previous weather records available.</div>
+    {{/if}}
   </div>
-  {{/if}}
 </div>

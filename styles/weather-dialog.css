@@ -1,931 +1,567 @@
-/* Base Dialog Styles */
-.weather-dialog {
+/* =========================
+   COMMON BASE STYLES
+   ========================= */
+   input, select, button {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+  }
+  
+  /* =========================
+     WEATHER DIALOG STYLES
+     ========================= */
+  .weather-dialog {
     min-width: 300px;
     max-width: 400px;
-}
-
-.dialog-content {
+  }
+  
+  .dialog-content {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-/* Form Controls Section */
-.weather-dialog .weather-controls {
+  }
+  
+  /* Form Controls Section */
+  .weather-dialog .weather-controls {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     margin-bottom: 15px;
-}
-
-.weather-dialog .form-group {
+  }
+  
+  .weather-dialog .form-group {
     display: flex;
     flex-direction: column;
     margin-bottom: 10px;
-}
-
-.weather-dialog .form-group label {
+  }
+  
+  .weather-dialog .form-group label {
     margin-bottom: 5px;
     font-weight: bold;
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.weather-dialog select,
-.weather-dialog input {
+  }
+  
+  .weather-dialog select,
+  .weather-dialog input {
     width: 150px;
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-}
-
-.weather-dialog input[type="number"] {
+  }
+  
+  .weather-dialog input[type="number"] {
     text-align: right;
-}
-
-/* Weather Sections */
-.weather-dialog .weather-section {
+  }
+  
+  /* Weather Sections */
+  .weather-dialog .weather-section {
     margin: 0.5em 0;
     padding: 0.5em;
     border-top: 1px solid #ddd;
-}
-
-.weather-dialog .weather-header {
+  }
+  
+  .weather-dialog .weather-header {
     font-size: 1.1em;
     font-weight: bold;
     margin-bottom: 5px;
     color: #444;
-}
-
-.weather-dialog .weather-value {
+  }
+  
+  .weather-dialog .weather-value {
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.weather-dialog .weather-value i {
+  }
+  
+  .weather-dialog .weather-value i {
     color: #666;
-}
-
-.weather-dialog .weather-value label {
+  }
+  
+  .weather-dialog .weather-value label {
     font-weight: bold;
     margin-right: 0.5em;
-}
-
-.weather-dialog .wind-chill {
-    font-size: 0.9em;
-    color: #666;
-    font-style: italic;
-}
-
-/* Precipitation Details */
-.weather-dialog .precip-details {
+  }
+  
+  /* Precipitation Details */
+  .weather-dialog .precip-details {
     margin-top: 10px;
-}
-
-.weather-dialog .precip-details h4 {
+  }
+  
+  .weather-dialog .precip-details h4 {
     color: #4a5568;
     font-size: 1.1em;
     margin-bottom: 8px;
-}
-
-.weather-dialog .precip-grid {
+  }
+  
+  .weather-dialog .precip-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     margin-bottom: 12px;
-}
-
-.weather-dialog .detail-item {
+  }
+  
+  .weather-dialog .detail-item {
     display: flex;
     flex-direction: column;
-}
-
-.weather-dialog .detail-item .label {
+  }
+  
+  .weather-dialog .detail-item .label {
     font-weight: bold;
     color: #4a5568;
     font-size: 0.9em;
-}
-
-/* Effects Section */
-.weather-dialog .effects-section {
-    border-top: 1px solid #e2e8f0;
-    padding-top: 12px;
-    margin-top: 12px;
-}
-
-.weather-dialog .effect-group {
-    margin-bottom: 8px;
-    display: flex;
-    gap: 8px;
-}
-
-.weather-dialog .effect-label {
-    font-weight: bold;
-    color: #4a5568;
-    min-width: 120px;
-}
-
-/* weather continuing */
-.weather-dialog .continuing-weather {
-    margin-top: 12px;
-    padding: 8px;
-    background: rgba(0, 0, 0, 0.05);
-    border-left: 3px solid #4a5568;
-    border-radius: 4px;
-}
-
-.weather-dialog .continuing-weather h4 {
-    margin: 0 0 8px 0;
-    color: #4a5568;
-}
-
-.weather-dialog .continuation-details p {
-    margin: 4px 0;
-}
-
-/* Moon Phase Styles */
-.weather-dialog .moon-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.weather-dialog .moon-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.weather-dialog .moon-label {
-    min-width: 60px;
-    font-weight: bold;
-}
-
-.weather-dialog .moon-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.weather-dialog .moon-icon {
-    display: inline-block;
-    vertical-align: middle;
-}
-
-/* Daylight Section Styles */
-.weather-dialog .daylight-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.weather-dialog .daylight-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.weather-dialog .daylight-label {
-    min-width: 60px;
-    font-weight: bold;
-}
-
-/* Button Styles */
-.weather-dialog .dialog-buttons {
+  }
+  
+  /* Button Styles */
+  .weather-dialog .dialog-buttons {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding: 10px;
-}
-
-.weather-dialog .dialog-buttons button {
+  }
+  
+  .weather-dialog .dialog-buttons button {
     width: 100%;
     padding: 8px;
     text-align: center;
     background: #f0f0f0;
     border: 1px solid #ddd;
     border-radius: 4px;
-}
-
-/* Notes & Special Effects */
-.weather-dialog .precip-notes {
+  }
+  
+  /* Weather Continuation */
+  .weather-dialog .continuing-weather {
     margin-top: 12px;
+    padding: 10px;
+    background: linear-gradient(to right, rgba(66, 153, 225, 0.1), rgba(66, 153, 225, 0.2));
+    border-left: 3px solid #4299e1;
+    border-radius: 4px;
+  }
+  
+  .weather-dialog .continuing-weather.transition {
+    border-left-color: #ed8936;
+    background: linear-gradient(to right, rgba(237, 137, 54, 0.1), rgba(237, 137, 54, 0.2));
+  }
+  
+  /* Weather History */
+  .weather-dialog .weather-history-section {
+    margin-top: 15px;
+  }
+  
+  .weather-dialog .collapse-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 8px;
-    background: rgba(0, 0, 0, 0.05);
+    background: #f7fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 4px;
-}
-
-.weather-dialog .precip-notes p {
+  }
+  
+  .weather-dialog .weather-history-content.collapsed {
+    display: none;
+  }
+  
+  /* =========================
+     WEATHER DISPLAY STYLES
+     ========================= */
+  
+  /* Main Container */
+  .weather-display {
+    max-width: 400px;
+    font-size: 0.95em;
+  }
+  
+  .weather-current {
+    font-family: var(--font-primary);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 0;
     margin: 0;
-    font-style: italic;
+    color: #333;
+  }
+
+  .weather-report {
+    background: rgba(245, 245, 240, 0.95);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+  }
+
+  .weather-grid {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 8px 12px;
+    margin-bottom: 15px;
+  }
+  
+  .weather-label {
+    font-weight: bold;
+    text-align: right;
+    padding-right: 8px;
+    color: #555;
+    align-self: start;
+  }
+  
+  .weather-value {
+    text-align: left;
+    padding-left: 0;
+    align-self: start;
+  }
+
+  /* Ensure proper icon alignment */
+.weather-value i.fas {
+  margin-right: 6px;
+  width: 16px;
+  text-align: center;
 }
 
-.weather-dialog .continuing-weather {
-    margin-top: 0.5em;
-    padding: 0.5em;
-    background: rgba(0, 0, 0, 0.05);
-    border-left: 3px solid #4a4a4a;
+  .weather-inline-icon {
+    margin-right: 5px;
+  }
+  
+  /* Older Row-based Layout - For sections not yet converted to grid */
+  .weather-display .weather-row.compact {
+    margin-bottom: 4px;
+    padding: 2px 4px;
+    border-bottom: 1px solid rgba(120, 120, 120, 0.15);
+  }
+  
+  .weather-display .weather-row.compact:last-child {
+    border-bottom: none;
+  }
+  
+  .weather-display .weather-icon {
+    width: 20px;
+    display: inline-block;
+    vertical-align: top;
+    padding-top: 3px;
+  }
+  
+  .weather-display .weather-data {
+    display: inline-block;
+    width: calc(100% - 24px);
+    vertical-align: top;
+  }
+  
+  /* Headers */
+  .weather-display .weather-data h3 {
+    font-size: 0.95em;
+    margin: 0 0 2px 0;
+    padding-bottom: 1px;
+    border-bottom: 1px solid rgba(120, 120, 120, 0.2);
+  }
+  
+  .weather-display .weather-data h4 {
+    font-size: 0.9em;
+    margin: 0 0 2px 0;
+    color: #444;
+  }
+
+  /* Header Styling */
+.report-header {
+  text-align: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
 }
 
-.weather-dialog .rainbow-info {
-    margin-top: 0.5em;
-    padding: 0.5em;
-    background: linear-gradient(
-        to right,
-        rgba(255, 0, 0, 0.1),
-        rgba(255, 165, 0, 0.1),
-        rgba(255, 255, 0, 0.1),
-        rgba(0, 128, 0, 0.1),
-        rgba(0, 0, 255, 0.1),
-        rgba(75, 0, 130, 0.1),
-        rgba(238, 130, 238, 0.1)
-    );
-    border-radius: 4px;
+.report-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.3em;
+  color: #3a3a3a;
 }
 
-/* Add to weather-dialog.css */
-.continuing-weather {
-  margin-top: 12px;
-  padding: 10px;
-  background: linear-gradient(to right, rgba(66, 153, 225, 0.1), rgba(66, 153, 225, 0.2));
-  border-left: 3px solid #4299e1;
-  border-radius: 4px;
-}
-
-.continuing-weather.transition {
-  border-left-color: #ed8936;
-  background: linear-gradient(to right, rgba(237, 137, 54, 0.1), rgba(237, 137, 54, 0.2));
-}
-
-.continuation-header {
+.location-info {
   display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.continuation-header h4 {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.changed-indicator {
-  font-size: 0.9em;
-  color: #ed8936;
-}
-
-.weather-transition {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.previous-weather, .current-weather {
-  display: flex;
-  flex-direction: column;
-}
-
-.transition-label {
-  font-size: 0.9em;
-  color: #718096;
-}
-
-.weather-type {
-  font-weight: bold;
-}
-
-.transition-arrow {
-  color: #718096;
-}
-
-.duration-display {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.duration-label {
-  font-size: 0.9em;
-  color: #718096;
-}
-
-.duration-value {
-  font-weight: bold;
-}
-
-/* Weather Timeline */
-.weather-timeline {
-  display: flex;
-  align-items: center;
-  margin: 15px 0;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
-}
-
-.timeline-point {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.timeline-connector {
-  flex: 1;
-  display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  color: #718096;
-}
-
-.timeline-connector.changed {
-  color: #ed8936;
-}
-
-.time-label {
-  font-size: 0.8em;
-  color: #718096;
-}
-
-.timeline-duration {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-left: 10px;
-  padding-left: 10px;
-  border-left: 1px solid #e2e8f0;
-}
-
-/* Weather History */
-.weather-history-section {
-  margin-top: 15px;
-}
-
-.collapse-toggle {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px;
-  background: #f7fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-}
-
-.weather-history-content.collapsed {
-  display: none;
-}
-
-.weather-history-list {
-  list-style: none;
-  padding: 0;
-  margin: 10px 0 0 0;
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-}
-
-.weather-history-item {
-  display: flex;
-  align-items: center;
   gap: 10px;
-  padding: 8px;
-  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.85em;
+}
+ 
+/* Section Styling */
+.report-section {
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
 }
 
-.weather-history-item:last-child {
+.report-section:last-child {
   border-bottom: none;
+  margin-bottom: 0;
 }
 
-.history-time {
-  font-size: 0.8em;
-  color: #718096;
-  min-width: 100px;
+.report-section h3 {
+  margin: 0 0 5px 0;
+  font-size: 1.1em;
+  color: #444;
 }
 
-.restore-weather {
-  margin-left: auto;
-  padding: 4px 8px;
-  background: #f7fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
+.info-list {
+  list-style: none;
+  padding: 0 0 0 20px;
+  margin: 0;
 }
 
-/* Weather Display specific styles */
-.weather-display {
-  max-width: 400px;
-}
-
-.weather-display .weather-row {
-  margin-bottom: 8px;
-  padding: 4px;
-}
-
-.weather-display .weather-icon {
-  width: 24px;
-  display: inline-block;
-  vertical-align: top;
-}
-
-.weather-display .weather-data {
-  display: inline-block;
-  width: calc(100% - 30px);
-  vertical-align: top;
-}
-
-.weather-display .weather-data h3 {
-  font-size: 1em;
-  margin: 0 0 4px 0;
-  border-bottom: 1px solid rgba(120, 120, 120, 0.3);
-  padding-bottom: 2px;
-}
-
-/* Weather History styling for the display */
-.weather-display .weather-history-list {
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid rgba(120, 120, 120, 0.3);
-  border-radius: 4px;
-  margin-top: 5px;
-}
-
-.weather-display .history-item {
-  display: flex;
-  align-items: center;
-  padding: 4px 6px;
-  border-bottom: 1px solid rgba(120, 120, 120, 0.2);
-  font-size: 0.9em;
-}
-
-.weather-display .history-item:last-child {
-  border-bottom: none;
-}
-
-.weather-display .history-time {
-  width: 140px;
-  font-size: 0.8em;
-  color: #666;
-}
-
-.weather-display .history-details {
-  flex-grow: 1;
-}
-
-.weather-display .restore-weather {
-  width: 24px;
-  height: 24px;
-  padding: 2px;
-  margin-left: 5px;
-  background: rgba(60, 60, 70, 0.1);
-  border: 1px solid rgba(120, 120, 120, 0.3);
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.weather-display .restore-weather:hover {
-  background: rgba(60, 60, 70, 0.2);
-}
-
-.weather-display .empty-history {
-  font-style: italic;
-  color: #888;
-  padding: 5px;
-}
-
-/* Specific sections styling */
-.weather-display .effects-section h4,
-.weather-display .precip-details h4 {
-  font-size: 0.95em;
-  margin: 6px 0 3px 0;
-  color: #555;
-}
-
-.weather-display .effect-group {
+.info-list li {
   margin-bottom: 3px;
-  font-size: 0.9em;
+  position: relative;
+  padding-left: 5px;
 }
 
-.weather-display .effect-label {
-  font-weight: bold;
-  margin-right: 4px;
+.info-list li:before {
+  content: "•";
+  position: absolute;
+  left: -12px;
+  color: #777;
 }
 
-/* Make the history items more compact */
-.weather-history-list {
+  /* Weather Summary */
+  .weather-display .weather-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    align-items: center;
+  }
+  
+  .wind-chill {
+    font-size: 0.85em;
+    color: #666;
+    font-style: italic;
+  }
+  
+  /* Dual Column Layout */
+  .weather-display .weather-dual-info {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .weather-display .info-column {
+    width: 48%;
+  }
+  
+  .weather-display .info-column p {
+    margin: 0;
+    font-size: 0.9em;
+  }
+  
+  /* Precipitation Details */
+  .weather-display .precip-details.compact {
+    font-size: 0.9em;
+  }
+  
+  .weather-display .precip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+  }
+  
+  .weather-display .precip-type {
+    font-weight: bold;
+  }
+  
+  .weather-display .none-text {
+    font-style: italic;
+    margin: 0;
+  }
+  
+  /* Effects Grid */
+  .weather-display .effects-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1px 8px;
+    font-size: 0.85em;
+    margin: 3px 0;
+  }
+  
+  .weather-display .effect-label {
+    font-weight: bold;
+    color: #555;
+  }
+  
+  /* Continuing Weather */
+  .weather-display .continuing-weather.compact {
+    margin-top: 3px;
+    padding: 3px 5px;
+    background: rgba(60, 60, 70, 0.1);
+    border-left: 2px solid #4299e1;
+    border-radius: 3px;
+    font-size: 0.85em;
+  }
+  
+  .weather-display .continuing-weather.compact.transition {
+    border-left-color: #ed8936;
+  }
+  
+  .weather-display .continuing-weather.compact h5 {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0;
+  }
+  
+  .weather-display .continuing-weather.compact .duration-value {
+    margin-left: auto;
+    font-style: italic;
+  }
+  
+  /* Moon and Sun Layout */
+  .weather-display .astro-grid {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .weather-display .moon-column,
+  .weather-display .sun-column {
+    width: 48%;
+  }
+  
+  /* Moon Phases */
+  .weather-display .moon-phases,
+  .weather-display .daylight-times {
+    font-size: 0.85em;
+  }
+  
+  .weather-display .moon-item,
+  .weather-display .time-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 2px;
+  }
+  
+  .weather-display .moon-label {
+    min-width: 45px;
+    font-weight: bold;
+  }
+  
+  .weather-display .moon-phase {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  
+  /* Moon Icons */
+  .moon-icon {
+    font-size: 1.4em;
+    margin: 0 0.2em;
+    vertical-align: middle;
+  }
+  
+  .moon-icon.celene {
+    color: #88CCFF;
+  }
+
+  /* Luna (white) */
+  .moon-item:first-child .moon-icon {
+    color: #FFFFFF;
+    text-shadow: 0 0 2px #000;
+  }
+  
+  /* Celene (blue) */
+  .moon-item:last-child .moon-icon {
+    color: #88CCFF;
+    text-shadow: 0 0 2px #000;
+  }
+  
+  /* Full moon (white circle) */
+  .fa-circle {
+    color: white;
+    text-shadow: 0 0 2px #000;
+  }
+  
+  /* History Section */
+.history-section {
+  margin-top: 10px;
+  background: rgba(240, 240, 240, 0.9);
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.history-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 1em;
+  color: #444;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  padding-bottom: 5px;
+}
+
+.history-list {
   max-height: 150px;
   overflow-y: auto;
 }
 
 .history-item {
   display: flex;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
   font-size: 0.9em;
-  padding: 3px;
-  border-bottom: 1px solid rgba(120, 120, 120, 0.3);
 }
 
 .history-time {
-  font-size: 0.8em;
+  font-size: 0.9em;
+  color: #666;
   width: 120px;
+  white-space: nowrap;
 }
 
 .history-details {
-  flex-grow: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.history-details i {
+  color: #555;
 }
 
 .restore-weather {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  margin: 0;
-}
-
-/* Create a two-column layout for some data */
-.compact-columns {
-  display: flex;
-  flex-wrap: wrap;
-}
-
-.compact-column {
-  width: 50%;
-}
-
-/* Make continuation display more compact */
-.continuing-weather {
-  margin-top: 5px;
-  padding: 5px;
-  background: rgba(60, 60, 70, 0.2);
-  border-radius: 3px;
-}
-
-.continuation-header h4 {
-  font-size: 0.9em;
-  margin: 0 0 3px 0;
-}
-
-/* Make the movement effects display more compact */
-.effect-group {
-  margin-bottom: 4px;
-  font-size: 0.9em;
-}
-
-.effect-group .effect-label {
-  font-weight: bold;
-  margin-right: 5px;
-}
-
-/* Make timeline more compact */
-.weather-timeline {
-  display: flex;
-  align-items: center;
-  font-size: 0.9em;
-  margin-top: 3px;
-  padding: 4px;
-  background: rgba(0,0,0,0.1);
-  border-radius: 3px;
-}
-
-/* Weather History in Weather Display */
-.weather-display .weather-history-list {
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid rgba(120, 120, 120, 0.3);
-  border-radius: 4px;
-  margin-top: 5px;
-}
-
-.weather-display .history-item {
-  display: flex;
-  align-items: center;
-  padding: 4px 6px;
-  border-bottom: 1px solid rgba(120, 120, 120, 0.2);
-  font-size: 0.9em;
-}
-
-.weather-display .history-item:last-child {
-  border-bottom: none;
-}
-
-.weather-display .history-time {
-  width: 110px;
-  font-size: 0.8em;
-  color: #666;
-}
-
-.weather-display .history-details {
-  flex-grow: 1;
-}
-
-.weather-display .restore-weather {
-  width: 24px;
-  height: 24px;
-  padding: 2px;
-  margin-left: 5px;
-  background: rgba(60, 60, 70, 0.1);
-  border: 1px solid rgba(120, 120, 120, 0.3);
-  border-radius: 3px;
+  background: none;
+  border: none;
+  color: #777;
   cursor: pointer;
+  padding: 3px 6px;
+  margin-left: 5px;
+  border-radius: 3px;
 }
 
-.weather-display .restore-weather:hover {
-  background: rgba(60, 60, 70, 0.2);
+.restore-weather:hover {
+  color: #222;
+  background: rgba(0,0,0,0.05);
 }
 
-.weather-display .empty-history {
+.empty-history {
   font-style: italic;
-  color: #888;
+  color: #777;
   padding: 5px;
-}
-
-/* Compact Weather Display Styles */
-
-/* Base styles for compact weather display */
-.weather-display {
-  max-width: 400px;
-  font-size: 0.95em;
-}
-
-/* Compact rows with reduced spacing */
-.weather-display .weather-row.compact {
-  margin-bottom: 4px;
-  padding: 2px 4px;
-  border-bottom: 1px solid rgba(120, 120, 120, 0.15);
-}
-
-.weather-display .weather-row.compact:last-child {
-  border-bottom: none;
-}
-
-/* Icon column */
-.weather-display .weather-icon {
-  width: 20px;
-  display: inline-block;
-  vertical-align: top;
-  padding-top: 3px;
-}
-
-/* Data column */
-.weather-display .weather-data {
-  display: inline-block;
-  width: calc(100% - 24px);
-  vertical-align: top;
-}
-
-/* Headers - reduced size and spacing */
-.weather-display .weather-data h3 {
-  font-size: 0.95em;
-  margin: 0 0 2px 0;
-  padding-bottom: 1px;
-  border-bottom: 1px solid rgba(120, 120, 120, 0.2);
-}
-
-.weather-display .weather-data h4 {
-  font-size: 0.9em;
-  margin: 0 0 2px 0;
-  color: #444;
-}
-
-.weather-display .weather-data h5 {
-  font-size: 0.85em;
-  margin: 0;
-  color: #555;
-}
-
-/* Weather summary */
-.weather-display .weather-summary {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  align-items: center;
-}
-
-.weather-display .weather-summary .wind-chill {
-  font-size: 0.85em;
-  color: #666;
-  font-style: italic;
-}
-
-/* Dual info columns */
-.weather-display .weather-dual-info {
-  display: flex;
-  justify-content: space-between;
-}
-
-.weather-display .info-column {
-  width: 48%;
-}
-
-.weather-display .info-column p {
-  margin: 0;
-  font-size: 0.9em;
-}
-
-/* Timing grid */
-.weather-display .timing-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 2px 8px;
-  font-size: 0.85em;
-}
-
-.weather-display .timing-label {
-  font-weight: bold;
-}
-
-/* Precipitation section */
-.weather-display .precip-details.compact {
-  font-size: 0.9em;
-}
-
-.weather-display .precip-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2px;
-}
-
-.weather-display .precip-type {
-  font-weight: bold;
-}
-
-.weather-display .none-text {
-  font-style: italic;
-  margin: 0;
-}
-
-/* Effects grid */
-.weather-display .effects-grid {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 1px 8px;
-  font-size: 0.85em;
-  margin: 3px 0;
-}
-
-.weather-display .effect-label {
-  font-weight: bold;
-  color: #555;
-}
-
-/* Continuing weather section */
-.weather-display .continuing-weather.compact {
-  margin-top: 3px;
-  padding: 3px 5px;
-  background: rgba(60, 60, 70, 0.1);
-  border-left: 2px solid #4299e1;
-  border-radius: 3px;
-  font-size: 0.85em;
-}
-
-.weather-display .continuing-weather.compact.transition {
-  border-left-color: #ed8936;
-}
-
-.weather-display .continuing-weather.compact h5 {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0;
-}
-
-.weather-display .continuing-weather.compact .duration-value {
-  margin-left: auto;
-  font-style: italic;
-}
-
-/* Precipitation notes */
-.weather-display .precip-notes.compact {
-  font-size: 0.85em;
-  font-style: italic;
-  color: #666;
-  margin-top: 3px;
-  padding: 2px 4px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 3px;
-}
-
-/* Moon and sun grid */
-.weather-display .astro-grid {
-  display: flex;
-  justify-content: space-between;
-}
-
-.weather-display .moon-column,
-.weather-display .sun-column {
-  width: 48%;
-}
-
-/* Moon phase styling */
-.weather-display .moon-phases,
-.weather-display .daylight-times {
-  font-size: 0.85em;
-}
-
-.weather-display .moon-item,
-.weather-display .time-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-bottom: 2px;
-}
-
-.weather-display .moon-label {
-  min-width: 45px;
-  font-weight: bold;
-}
-
-.weather-display .moon-phase {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Moon icons */
-.weather-display .moon-icon {
-  width: 16px;
-  height: 16px;
-  display: inline-block;
   text-align: center;
 }
 
-/* Weather history section */
-.weather-display .weather-history-list.compact {
-  max-height: 70px;
-  overflow-y: auto;
-  border: 1px solid rgba(120, 120, 120, 0.2);
-  border-radius: 3px;
-  margin-top: 2px;
-}
-
-.weather-display .history-item {
-  display: flex;
-  align-items: center;
-  padding: 2px 5px;
-  border-bottom: 1px solid rgba(120, 120, 120, 0.1);
-  font-size: 0.85em;
-}
-
-.weather-display .history-item:last-child {
-  border-bottom: none;
-}
-
-.weather-display .history-time {
-  width: 90px;
-  font-size: 0.85em;
-  color: #666;
-}
-
-.weather-display .history-details {
-  flex-grow: 1;
-}
-
-.weather-display .restore-weather {
-  width: 18px;
-  height: 18px;
-  padding: 1px;
-  margin-left: 5px;
-  background: rgba(60, 60, 70, 0.1);
-  border: 1px solid rgba(120, 120, 120, 0.2);
-  border-radius: 2px;
-  cursor: pointer;
-}
-
-.weather-display .restore-weather:hover {
-  background: rgba(60, 60, 70, 0.2);
-}
-
-.weather-display .empty-history {
-  font-style: italic;
-  color: #888;
-  padding: 3px;
-  font-size: 0.85em;
-}
-
-/* Special effects section */
-.weather-display .special-effects-list {
-  font-size: 0.85em;
-}
-
-.weather-display .special-effect {
-  margin-bottom: 2px;
-}
-
-/* Moon icon helper classes */
-.fa-moon-new, .fa-moon-full, .fa-moon-waxing-crescent,
-.fa-moon-waxing-gibbous, .fa-moon-waning-gibbous,
-.fa-moon-waning-crescent, .fa-moon-first-quarter,
-.fa-moon-last-quarter {
-  font-family: 'Font Awesome 5 Free';
-  font-weight: 900;
-}
-
-.fa-moon-new:before { content: "\f186"; opacity: 0.2; }
-.fa-moon-full:before { content: "\f186"; }
-.fa-moon-waxing-crescent:before { content: "\f6dc"; }
-.fa-moon-first-quarter:before { content: "\f6de"; }
-.fa-moon-waxing-gibbous:before { content: "\f6dd"; }
-.fa-moon-waning-gibbous:before { content: "\f6df"; }
-.fa-moon-last-quarter:before { content: "\f6e0"; }
-.fa-moon-waning-crescent:before { content: "\f6e1"; }
+  /* Weather History Section */
+  .weather-history-section {
+    margin-top: 15px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+    padding-top: 10px;
+  }
+  
+  .weather-history-section h4 {
+    margin-bottom: 5px;
+    font-size: 1em;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+      
+  /* Effects List */
+  .effects-list {
+    margin: 0;
+    padding-left: 15px;
+  }
+  
+  .effects-list li {
+    margin-bottom: 3px;
+  }

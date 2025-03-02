@@ -1,0 +1,22 @@
+.chat-message .table {
+    width: 100%;  /* Ensure table spans the chat window */
+    border-collapse: collapse; /* Merge table borders */
+}
+
+.chat-message .table th, 
+.chat-message .table td {
+    padding: 4px; /* Add some padding */
+    border: 1px solid #ccc; /* Add borders for clarity */
+    text-align: center; /* Center-align text */
+}
+
+.chat-message .table th {
+    background-color: #333;
+    color: #fff;
+}
+
+.chat-message h1, 
+.chat-message h2, 
+.chat-message h3 {
+    margin-bottom: 5px;
+}
