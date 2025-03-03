@@ -1,0 +1,136 @@
+
+C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather>(if not exist "lang\*" (echo Skipping lang )  else dir /s "lang" ) 
+ Volume in drive C is Windows
+ Volume Serial Number is 94F9-1583
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\lang
+
+02/10/2025  12:41 AM    <DIR>          .
+03/02/2025  03:04 PM    <DIR>          ..
+02/12/2025  03:27 PM             5,075 en.json
+02/10/2025  12:41 AM                22 README.md
+               2 File(s)          5,097 bytes
+
+     Total Files Listed:
+               2 File(s)          5,097 bytes
+               2 Dir(s)  284,478,283,776 bytes free
+
+C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather>(if not exist "src\*" (echo Skipping src )  else dir /s "src" ) 
+ Volume in drive C is Windows
+ Volume Serial Number is 94F9-1583
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src
+
+03/02/2025  05:42 PM    <DIR>          .
+03/02/2025  03:04 PM    <DIR>          ..
+02/28/2025  10:26 PM             5,864 CalendarIntegration.js
+02/14/2025  02:35 PM    <DIR>          constants
+03/02/2025  11:03 AM             5,902 settings.js
+02/28/2025  09:04 AM    <DIR>          subsystems
+02/10/2025  12:41 AM    <DIR>          ui
+02/28/2025  12:01 AM    <DIR>          utils
+03/02/2025  06:38 PM            71,144 weather-system.js
+               3 File(s)         82,910 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\constants
+
+02/14/2025  02:35 PM    <DIR>          .
+03/02/2025  05:42 PM    <DIR>          ..
+02/12/2025  07:53 AM             7,140 baseline-data.js
+02/10/2025  12:52 AM             2,777 index.js
+02/13/2025  07:09 PM             3,493 moon-phases.js
+02/28/2025  12:26 AM            15,714 precipitation-table.js
+02/12/2025  08:19 AM             7,314 special-weather-events.js
+02/12/2025  07:57 AM             6,050 terrain-effects.js
+02/10/2025  12:48 AM             4,817 wind-effects.js
+               7 File(s)         47,305 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\subsystems
+
+02/28/2025  09:04 AM    <DIR>          .
+03/02/2025  05:42 PM    <DIR>          ..
+02/10/2025  01:11 AM             9,038 MoonPhaseTracker.js
+02/10/2025  01:01 AM             7,358 PrecipitationHandler.js
+02/10/2025  01:20 AM            11,468 ReportGenerator.js
+02/10/2025  01:16 AM            10,998 SpecialWeatherEvents.js
+02/10/2025  12:55 AM             7,479 TemperatureCalculator.js
+02/10/2025  01:08 AM             7,023 WindSystem.js
+               6 File(s)         53,364 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\ui
+
+02/10/2025  12:41 AM    <DIR>          .
+03/02/2025  05:42 PM    <DIR>          ..
+03/02/2025  05:42 PM    <DIR>          components
+03/02/2025  05:42 PM    <DIR>          templates
+               0 File(s)              0 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\ui\components
+
+03/02/2025  05:42 PM    <DIR>          .
+02/10/2025  12:41 AM    <DIR>          ..
+02/10/2025  06:30 AM             8,547 SettingsPanel.js
+03/02/2025  05:42 PM            88,602 WeatherDialog.js
+03/02/2025  06:34 PM             9,083 WeatherDisplay.js
+               3 File(s)        106,232 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\ui\templates
+
+03/02/2025  05:42 PM    <DIR>          .
+02/10/2025  12:41 AM    <DIR>          ..
+02/10/2025  06:39 AM             3,892 settings-panel.hbs
+03/02/2025  01:03 PM             6,519 weather-dialog.hbs
+03/02/2025  06:41 PM             6,798 weather-display.hbs
+               3 File(s)         17,209 bytes
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\src\utils
+
+02/28/2025  12:01 AM    <DIR>          .
+03/02/2025  05:42 PM    <DIR>          ..
+02/13/2025  07:30 PM             3,886 dice.js
+02/13/2025  08:23 PM               593 latitude.js
+02/28/2025  12:55 AM             4,144 temperature.js
+02/12/2025  09:44 AM             1,541 time.js
+02/12/2025  09:43 AM             1,242 validation.js
+02/12/2025  09:40 AM             3,396 weather-calculations.js
+               6 File(s)         14,802 bytes
+
+     Total Files Listed:
+              28 File(s)        321,822 bytes
+              20 Dir(s)  284,478,271,488 bytes free
+
+C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather>(if not exist "styles\*" (echo Skipping styles )  else dir /s "styles" ) 
+ Volume in drive C is Windows
+ Volume Serial Number is 94F9-1583
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\styles
+
+03/02/2025  05:42 PM    <DIR>          .
+03/02/2025  03:04 PM    <DIR>          ..
+03/02/2025  02:49 PM               523 styles.css
+03/02/2025  06:34 PM            11,239 weather-dialog.css
+02/10/2025  12:41 AM                30 weather-system.css
+               3 File(s)         11,792 bytes
+
+     Total Files Listed:
+               3 File(s)         11,792 bytes
+               2 Dir(s)  284,478,271,488 bytes free
+
+C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather>(if not exist "test\*" (echo Skipping test )  else dir /s "test" ) 
+ Volume in drive C is Windows
+ Volume Serial Number is 94F9-1583
+
+ Directory of C:\Users\grayc\OneDrive\Desktop\Foundry12.330\data\Data\modules\dnd-weather\test
+
+02/10/2025  01:14 AM    <DIR>          .
+03/02/2025  03:04 PM    <DIR>          ..
+02/10/2025  06:31 AM             9,454 integration.test.js
+02/10/2025  01:14 AM             7,883 moonphases.test.js
+02/10/2025  01:06 AM             7,893 precipitation.test.js
+02/10/2025  06:34 AM             6,818 temperature.test.js
+02/10/2025  06:35 AM             6,808 wind.test.js
+               5 File(s)         38,856 bytes
+
+     Total Files Listed:
+               5 File(s)         38,856 bytes
+               2 Dir(s)  284,478,271,488 bytes free

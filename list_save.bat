@@ -1,1 +1,3 @@
-(for /d %%i in (*) do @attrib "%%i" | find /i "H" >nul || dir /s "%%i") > list.txt
+(for /d %%i in (*) do (
+    if not exist "%%i\*" (echo Skipping %%i) else dir /s "%%i"
+)) > list.txt

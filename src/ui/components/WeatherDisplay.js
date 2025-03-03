@@ -32,6 +32,26 @@ Handlebars.registerHelper('mod', function(a, b) {
     return a % b;
 });
 
+Handlebars.registerHelper('and', function() {
+    return Array.prototype.slice.call(arguments, 0, -1).every(Boolean);
+  });
+  
+  Handlebars.registerHelper('or', function() {
+    return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
+  });
+  
+  Handlebars.registerHelper('not', function(value) {
+    return !value;
+  });
+  
+  Handlebars.registerHelper('neq', function(a, b) {
+    return a !== b;
+  });
+  
+  Handlebars.registerHelper('gt', function(a, b) {
+    return a > b;
+  });
+
 Handlebars.registerHelper('getMoonIcon', function(phaseName) {
     // Normalize phase name to lowercase and trim
     const phase = phaseName.toLowerCase().trim();

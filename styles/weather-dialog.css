@@ -565,3 +565,13 @@
   .effects-list li {
     margin-bottom: 3px;
   }
+
+  /* Add to your CSS file */
+.rainbow-event {
+  font-weight: bold;
+}
+
+.rainbow-icon {
+  color: #ff4081;
+  margin-right: 5px;
+}

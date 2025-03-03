@@ -41,15 +41,6 @@ export class GreyhawkWeatherSystem {
         this.currentWeather = null;
     }
 
-    /**
-     * Initialize calendar integration
-     * Should be called after Foundry is ready
-     */
-    /**
- * Initialize calendar integration
- * Should be called after Foundry is ready
- */
-    // Update the initializeCalendar method
 // Update the initializeCalendar method
 async initializeCalendar() {
     try {
@@ -436,7 +427,7 @@ _updateDurationDisplay() {
                     console.error("DND-Weather | Error setting weather timing:", error);
                 }
             }
-    
+                
             return {
                 baseConditions: {
                     temperature: {
@@ -485,6 +476,8 @@ _updateDurationDisplay() {
                 timestamp: new Date().toLocaleString(),
                 timing: Object.keys(timing).length > 0 ? timing : undefined
             };
+
+            await this._checkForRainbow(weatherData);
     
         } catch (error) {
             console.error("DND-Weather | Failed to generate weather:", error);
@@ -1336,7 +1329,8 @@ async updateWeather(options = {}) {
                     console.error("DND-Weather | Error updating weather timing:", error);
                 }
             }
-            
+            await this._checkForRainbow(updatedWeather);
+
             // Create updated weather object with timing information
             const updatedWeather = {
                 ...this.currentWeather,
@@ -1559,6 +1553,77 @@ _calculateMovementModifiers(precipitation, specialEvent) {
     
     return Math.max(0.25, modifier); // Minimum 1/4 movement rate
 }
+
+/**
+ * Check for rainbow based on precipitation type and conditions
+ * @param {Object} weatherData - The weather data object to check and potentially modify
+ * @returns {boolean} - Whether a rainbow occurred
+ */
+async _checkForRainbow(weatherData) {
+    // Safety check
+    if (!weatherData?.baseConditions?.precipitation) {
+        console.log("DND-Weather | Cannot check for rainbow: invalid weather data");
+        return false;
+    }
+
+    const precipitation = weatherData.baseConditions.precipitation;
+    
+    // Only certain types of precipitation can have rainbows
+    if (precipitation.type === 'none' || !precipitation.chanceRainbow || precipitation.chanceRainbow <= 0) {
+        console.log("DND-Weather | No rainbow possible: precipitation type or chance");
+        return false;
+    }
+    
+    // Check sky conditions (need some sunlight)
+    const allowsRainbow = ['Clear', 'Partly Cloudy'].some(sky => 
+        weatherData.baseConditions.sky.includes(sky));
+    
+    if (!allowsRainbow) {
+        console.log("DND-Weather | No rainbow possible: sky conditions not suitable");
+        return false;
+    }
+    
+    // Roll for rainbow
+    const rainbowRoll = await rollDice(1, 100)[0];
+    console.log(`DND-Weather | Rainbow check: rolled ${rainbowRoll}, needed <= ${precipitation.chanceRainbow}`);
+    
+    if (rainbowRoll <= precipitation.chanceRainbow) {
+        // A rainbow has occurred! Now roll for type
+        const typeRoll = await rollDice(1, 100)[0];
+        console.log(`DND-Weather | Rainbow type roll: ${typeRoll}`);
+        
+        let rainbowEvent = "";
+        
+        if (typeRoll <= 89) {
+            rainbowEvent = "A single rainbow arcs across the sky";
+        } else if (typeRoll <= 95) {
+            rainbowEvent = "A double rainbow appears (possibly an omen)";
+        } else if (typeRoll <= 98) {
+            rainbowEvent = "A triple rainbow forms (almost certainly an omen)";
+        } else if (typeRoll === 99) {
+            rainbowEvent = "The Bifrost bridge appears, or clouds form the shape of a rain deity";
+        } else {
+            rainbowEvent = "A rain deity or servant appears in the sky";
+        }
+        
+        console.log(`DND-Weather | Rainbow event: ${rainbowEvent}`);
+        
+        // Add to special effects
+        if (!weatherData.effects) weatherData.effects = {};
+        if (!weatherData.effects.special) weatherData.effects.special = [];
+        
+        weatherData.effects.special.push(rainbowEvent);
+        
+        // Also mark in precipitation data that a rainbow occurred
+        precipitation.rainbowOccurred = true;
+        precipitation.rainbowType = rainbowEvent;
+        
+        return true;
+    }
+    
+    return false;
+}
+
 }
 
     // Corrected 'init' hook

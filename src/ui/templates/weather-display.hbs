@@ -110,18 +110,35 @@
       </div>
     {{/if}}
 
-    {{#if effects.special.length}}
-      <div class="report-section">
-        <h3>🌈 Special Events</h3>
-        <ul class="info-list">
-          {{#each effects.special}}
-            <li>{{this}}</li>
-          {{/each}}
-        </ul>
-      </div>
-    {{/if}}
+  {{!-- Look for the "Special Events" section in your template --}}
+  <div class="report-section">
+    <h3>🌈 Special Events</h3>
+    <ul class="info-list">
+      {{#if weather.precipitation.rainbowOccurred}}
+        <li class="rainbow-event">
+          <i class="fas fa-rainbow rainbow-icon"></i>
+          <strong>Rainbow Event:</strong> {{weather.precipitation.rainbowType}}
+        </li>
+      {{else if (neq weather.precipitation.type 'none')}}
+        {{#if (gt weather.precipitation.chanceRainbow 0)}}
+          <li>
+            <strong>Rainbow Chance:</strong> {{weather.precipitation.chanceRainbow}}%
+          </li>
+        {{/if}}
+      {{/if}}
+      {{#if effects.special.length}}
+        {{#each effects.special}}
+          <li>{{this}}</li>
+        {{/each}}
+      {{/if}}
+      {{#if (and (not weather.precipitation.rainbowOccurred) 
+                (or (eq weather.precipitation.type 'none') (eq weather.precipitation.chanceRainbow 0)) 
+                (eq effects.special.length 0))}}
+        <li><em>No special weather events occurring</em></li>
+      {{/if}}
+    </ul>
   </div>
-
+    
   {{!-- Weather History Section --}}
   <div class="history-section">
     <h3>📝 Weather History</h3>
