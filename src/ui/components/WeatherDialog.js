@@ -1089,7 +1089,7 @@ async _createOverrideWeather(precipType, duration, isContinuation, previousType)
                 </div>
                 <div class="form-group">
                     <label>Number of Days:</label>
-                    <input type="number" name="days" value="7" min="1" max="14">
+                    <input type="number" name="days" value="7" min="1" max="28">
                 </div>
                 <div class="form-group">
                     <label>Starting Month:</label>
