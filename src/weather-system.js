@@ -1513,22 +1513,49 @@ _calculateVisibility(precipitation, specialEvent) {
  * @param {number} temperature - Current temperature in °F
  * @returns {string} - Potentially converted precipitation type
  */
+/**
+ * Converts precipitation types based on temperature
+ * @param {string} precipType - Type of precipitation
+ * @param {number} temperature - Current temperature in °F
+ * @returns {string} - Potentially converted precipitation type
+ */
 _convertPrecipitationByTemperature(precipType, temperature) {
-    // Skip if no precipitation, or if temperature is above freezing threshold
-    if (!precipType || precipType === 'none' || temperature > 37) {
+    // Skip if no precipitation
+    if (!precipType || precipType === 'none') {
       return precipType;
     }
     
-    // Map of rain precipitation types to their snow equivalents
-    const conversions = {
-      'rainstorm-light': 'snowstorm-light',
-      'rainstorm-heavy': 'snowstorm-heavy',
-      'drizzle': 'snowstorm-light',
-      'thunderstorm': 'snowstorm-heavy'
-    };
+    // Handle freezing fog when temperature is at or below freezing
+    if ((precipType === 'fog-light' || precipType === 'fog-heavy') && temperature <= 32) {
+      const baseType = precipType.includes('heavy') ? 'heavy' : 'light';
+      return `freezing-fog-${baseType}`;
+    }
     
-    // Return the converted type if available, otherwise return the original
-    return conversions[precipType] || precipType;
+    // Convert rain to snow/ice at near-freezing temperatures
+    if (temperature <= 37) {
+      // Map of rain precipitation types to their snow/ice equivalents
+      const conversions = {
+        'rainstorm-light': 'snowstorm-light',
+        'rainstorm-heavy': 'snowstorm-heavy',
+        'drizzle': 'snowstorm-light',
+        'thunderstorm': 'snowstorm-heavy',
+        'tropical-storm': 'blizzard',
+        'monsoon': 'blizzard',
+        'gale': 'blizzard',
+        'hurricane': 'blizzard-heavy'
+      };
+      
+      // Special case for sleet which forms between 33-37°F
+      if (temperature > 32 && temperature <= 37 && 
+          (precipType === 'rainstorm-light' || precipType === 'drizzle')) {
+        return 'sleet';
+      }
+      
+      // Return the converted type if available, otherwise return the original
+      return conversions[precipType] || precipType;
+    }
+    
+    return precipType;
   }
 
 _calculateMovementModifiers(precipitation, specialEvent) {

@@ -69,7 +69,7 @@ export const weatherPhenomena = {
         },
         chanceContinuing: 20,
         chanceRainbow: 0,
-        restrictedTerrain: [],
+        restrictedTerrain: ["desert"],
         precipitation: {
             amount: "2d8+2",
             duration: "4d6 hours",
@@ -91,7 +91,7 @@ export const weatherPhenomena = {
         },
         chanceContinuing: 25,
         chanceRainbow: 1,
-        restrictedTerrain: [],
+        restrictedTerrain: ["desert"],
         precipitation: {
             amount: "d8",
             duration: "2d6 hours",
@@ -158,8 +158,8 @@ export const weatherPhenomena = {
         diceRange: [28, 30],
         type: "Fog, heavy",
         temperature: {
-            min: 20,
-            max: 60
+            min: 0,
+            max: 90
         },
         chanceContinuing: 25,
         chanceRainbow: 1,
@@ -179,8 +179,8 @@ export const weatherPhenomena = {
         diceRange: [31, 38],
         type: "Fog, light",
         temperature: {
-            min: 30,
-            max: 70
+            min: 0,
+            max: 90
         },
         chanceContinuing: 30,
         chanceRainbow: 3,
@@ -200,7 +200,7 @@ export const weatherPhenomena = {
         diceRange: [39, 40],
         type: "Mist",
         temperature: {
-            min: 30,
+            min: 37,
             max: null
         },
         chanceContinuing: 15,
@@ -221,7 +221,7 @@ export const weatherPhenomena = {
         diceRange: [41, 45],
         type: "Drizzle",
         temperature: {
-            min: 25,
+            min: 37,
             max: null
         },
         chanceContinuing: 20,
@@ -242,7 +242,7 @@ export const weatherPhenomena = {
         diceRange: [46, 60],
         type: "Rainstorm, light",
         temperature: {
-            min: 25,
+            min: 37,
             max: null
         },
         chanceContinuing: 45,
@@ -263,7 +263,7 @@ export const weatherPhenomena = {
         diceRange: [61, 70],
         type: "Rainstorm, heavy",
         temperature: {
-            min: 25,
+            min: 37,
             max: null
         },
         chanceContinuing: 30,
@@ -288,7 +288,7 @@ export const weatherPhenomena = {
         diceRange: [71, 84],
         type: "Thunderstorm",
         temperature: {
-            min: 30,
+            min: 40,
             max: null
         },
         chanceContinuing: 15,
@@ -310,7 +310,7 @@ export const weatherPhenomena = {
         diceRange: [85, 89],
         type: "Tropical storm",
         temperature: {
-            min: 40,
+            min: 70,
             max: null
         },
         chanceContinuing: 20,
@@ -336,7 +336,7 @@ export const weatherPhenomena = {
         diceRange: [90, 94],
         type: "Monsoon",
         temperature: {
-            min: 55,
+            min: 65,
             max: null
         },
         chanceContinuing: 30,
@@ -386,12 +386,12 @@ export const weatherPhenomena = {
         diceRange: [98, 99],
         type: "Hurricane or typhoon",
         temperature: {
-            min: 55,
+            min: 70,
             max: null
         },
         chanceContinuing: 20,
         chanceRainbow: 5,
-        restrictedTerrain: ["Desert", "dust", "mountains"],
+        restrictedTerrain: ["Desert", "dust", "mountains", "plains"],
         precipitation: {
             amount: "d10/day",
             duration: "1/2d8 days",
