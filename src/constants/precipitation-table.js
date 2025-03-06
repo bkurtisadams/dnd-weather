@@ -238,6 +238,126 @@ export const weatherPhenomena = {
             windSpeed: "d20"
         }
     },
+        // Add these to your weatherPhenomena object in precipitation-table.js
+
+    "freezing-fog-light": {
+        diceRange: [0, 0], // Not rolled directly, created by conversion
+        type: "Freezing Fog, light",
+        temperature: {
+            min: null,
+            max: 32
+        },
+        chanceContinuing: 30, // Same as fog-light
+        chanceRainbow: 0,
+        restrictedTerrain: ["Desert"],
+        precipitation: {
+            amount: null,
+            duration: "2d4 hours",
+            movement: "1/4 (all)", // Worse than regular fog due to ice
+            vision: "x 1/4",
+            infraUltra: "x 3/4",
+            tracking: "-40%",
+            chanceLost: "+40%",
+            windSpeed: "d10"
+        },
+        notes: "Surfaces become covered with rime ice, requiring dexterity checks for fast movement. -1 to all dexterity-based checks."
+    },
+
+    "freezing-fog-heavy": {
+        diceRange: [0, 0], // Not rolled directly, created by conversion
+        type: "Freezing Fog, heavy",
+        temperature: {
+            min: null,
+            max: 32
+        },
+        chanceContinuing: 25, // Same as fog-heavy
+        chanceRainbow: 0,
+        restrictedTerrain: ["Desert", "dust"],
+        precipitation: {
+            amount: null,
+            duration: "d12 hours",
+            movement: "1/8 (all)", // Worse than regular heavy fog
+            vision: "2' radius",
+            infraUltra: "x 1/4",
+            tracking: "-70%",
+            chanceLost: "+60%",
+            windSpeed: "d20"
+        },
+        notes: "Severe rime ice forms on all surfaces. -2 to all dexterity-based checks. Terrain becomes difficult for movement."
+    },
+
+    "freezing-mist": {
+        diceRange: [0, 0], // Not rolled directly, created by conversion
+        type: "Freezing Mist",
+        temperature: {
+            min: null,
+            max: 32
+        },
+        chanceContinuing: 15, // Same as mist
+        chanceRainbow: 0,
+        restrictedTerrain: [],
+        precipitation: {
+            amount: null,
+            duration: "2d6 hours",
+            movement: "3/4 (all)",
+            vision: "x 3/4",
+            infraUltra: "Normal",
+            tracking: "-15%",
+            chanceLost: "+10%",
+            windSpeed: "d10"
+        },
+        notes: "A light coating of ice forms on exposed surfaces. Cold metal objects may stick to bare skin."
+    },
+
+    "freezing-drizzle": {
+        diceRange: [0, 0], // Not rolled directly, created by conversion
+        type: "Freezing Drizzle",
+        temperature: {
+            min: null,
+            max: 32
+        },
+        chanceContinuing: 20, // Same as drizzle
+        chanceRainbow: 0,
+        restrictedTerrain: [],
+        precipitation: {
+            amount: "1/4d4",
+            duration: "d10 hours",
+            movement: "1/2 (all)",
+            vision: "Normal",
+            infraUltra: "Normal",
+            tracking: "-5%/turn (cum.)",
+            chanceLost: "+10%",
+            windSpeed: "d20"
+        },
+        notes: "Creates a thin layer of black ice on surfaces. Dexterity checks at -2 required for normal movement speed."
+    },
+
+    "ice-storm": {
+        diceRange: [0, 0], // Not rolled directly, created by conversion
+        type: "Ice Storm",
+        temperature: {
+            min: null,
+            max: 32
+        },
+        chanceContinuing: 15,
+        chanceRainbow: 0,
+        restrictedTerrain: ["Desert"],
+        precipitation: {
+            amount: "d4+2",
+            duration: "d6 hours",
+            movement: {
+                foot: "1/4",
+                horse: "1/4",
+                cart: "no"
+            },
+            vision: "x 1/4",
+            infraUltra: "x 1/4",
+            tracking: "-30%",
+            chanceLost: "+20%",
+            windSpeed: "4d8"
+        },
+        notes: "Ice chunks cause 1d4 damage per turn to unprotected creatures. Movement on ice-covered ground requires dexterity check at -3 to avoid falling."
+    },
     "rainstorm-light": {
         diceRange: [46, 60],
         type: "Rainstorm, light",

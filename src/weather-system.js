@@ -370,7 +370,8 @@ _updateDurationDisplay() {
             if (precipRoll <= adjustedPrecipChance) {
                 // Roll for precipitation type
                 const typeRoll = await rollDice(1, 100)[0];
-                precipitation = await this._determinePrecipitation(typeRoll, highTemp);
+                //precipitation = await this._determinePrecipitation(typeRoll, highTemp);
+                precipitation = await this._determinePrecipitation(typeRoll, highTemp, lowTemp);
                 console.log("DND-Weather | Checking precipitation continuation data:", {
                     type: precipitation.type,
                     chanceContinuing: precipitation.chanceContinuing,
@@ -507,8 +508,9 @@ _updateDurationDisplay() {
         return 'Cloudy';
     }
 
-    async _determinePrecipitation(roll, temperature) {
-        console.log("DND-Weather | Determining precipitation for roll:", roll, "temp:", temperature);
+    // Find the _determinePrecipitation method (around line 510) and update it:
+    async _determinePrecipitation(roll, highTemperature, lowTemperature) {
+        console.log("DND-Weather | Determining precipitation for roll:", roll, "high temp:", highTemperature, "low temp:", lowTemperature);
         
         // Find matching precipitation type from table
         for (const [type, data] of Object.entries(weatherPhenomena)) {
@@ -516,31 +518,65 @@ _updateDurationDisplay() {
                 // Check terrain restrictions first
                 if (data.restrictedTerrain?.includes(this.settings.terrain)) {
                     console.log(`DND-Weather | Weather type ${type} is restricted in ${this.settings.terrain}, rerolling...`);
-                    return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
+                    return this._determinePrecipitation(await rollDice(1, 100)[0], highTemperature, lowTemperature);
                 }
                 
                 // Check temperature requirements
-                if (data.temperature.max !== null && temperature > data.temperature.max) {
-                    console.log(`DND-Weather | Temperature ${temperature}°F too high for ${type}, rerolling...`);
-                    return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
+                if (data.temperature.max !== null && highTemperature > data.temperature.max) {
+                    console.log(`DND-Weather | Temperature ${highTemperature}°F too high for ${type}, rerolling...`);
+                    return this._determinePrecipitation(await rollDice(1, 100)[0], highTemperature, lowTemperature);
                 }
-                if (data.temperature.min !== null && temperature < data.temperature.min) {
-                    console.log(`DND-Weather | Temperature ${temperature}°F too low for ${type}, rerolling...`);
-                    return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
+                if (data.temperature.min !== null && highTemperature < data.temperature.min) {
+                    console.log(`DND-Weather | Temperature ${highTemperature}°F too low for ${type}, rerolling...`);
+                    return this._determinePrecipitation(await rollDice(1, 100)[0], highTemperature, lowTemperature);
                 }
                 
-                let finalType = this._convertPrecipitationByTemperature(type, temperature);
-                if (finalType !== type) {
-                    console.log(`DND-Weather | Converting ${type} to ${finalType} due to freezing temperature (${temperature}°F)`);
+                // Use original type for initial selection
+                let finalType = type;
+                
+                // Check if the low temperature is cold enough for freezing precipitation
+                if (lowTemperature <= 32) {
+                    // Map precipitation types to their freezing variants
+                    const freezingMap = {
+                        'fog-light': 'freezing-fog-light',
+                        'fog-heavy': 'freezing-fog-heavy',
+                        'mist': 'freezing-mist',
+                        'drizzle': 'freezing-drizzle',
+                        'rainstorm-light': 'ice-storm',
+                        'rainstorm-heavy': 'ice-storm',
+                        'thunderstorm': 'ice-storm'
+                    };
+                    
+                    if (freezingMap[type]) {
+                        finalType = freezingMap[type];
+                        console.log(`DND-Weather | Converting ${type} to ${finalType} due to freezing overnight temperature (${lowTemperature}°F)`);
+                    }
+                } else if (lowTemperature <= 37) {
+                    // Near freezing - convert rain to snow/sleet
+                    const coldMap = {
+                        'rainstorm-light': 'snowstorm-light',
+                        'rainstorm-heavy': 'snowstorm-heavy',
+                        'drizzle': 'sleet',
+                        'thunderstorm': 'snowstorm-heavy',
+                        'tropical-storm': 'blizzard',
+                        'monsoon': 'blizzard',
+                        'gale': 'blizzard',
+                        'hurricane': 'blizzard-heavy'
+                    };
+                    
+                    if (coldMap[type]) {
+                        finalType = coldMap[type];
+                        console.log(`DND-Weather | Converting ${type} to ${finalType} due to near-freezing overnight temperature (${lowTemperature}°F)`);
+                    }
                 }
                 
                 // If we converted the type, get the new data
                 const finalData = finalType !== type ? weatherPhenomena[finalType] : data;
                 if (!finalData) {
                     console.error(`DND-Weather | Converted type ${finalType} not found in weather phenomena table`);
-                    return this._determinePrecipitation(await rollDice(1, 100)[0], temperature);
+                    return this._determinePrecipitation(await rollDice(1, 100)[0], highTemperature, lowTemperature);
                 }
-    
+        
                 // Calculate duration
                 const duration = await this._calculatePrecipitationDuration(finalData);
                 
@@ -549,7 +585,7 @@ _updateDurationDisplay() {
                 if (finalData.precipitation.amount) {
                     amount = await evalDice(finalData.precipitation.amount);
                 }
-    
+        
                 return {
                     type: finalType,
                     amount,
@@ -571,6 +607,7 @@ _updateDurationDisplay() {
             }
         }
         
+        // Default return for no precipitation
         return { 
             type: 'none', 
             amount: null, 
@@ -1519,44 +1556,62 @@ _calculateVisibility(precipitation, specialEvent) {
  * @param {number} temperature - Current temperature in °F
  * @returns {string} - Potentially converted precipitation type
  */
+// Replace the existing _convertPrecipitationByTemperature function with this improved version:
 _convertPrecipitationByTemperature(precipType, temperature) {
+    console.log(`DND-Weather | Checking precipitation conversion for: ${precipType} at ${temperature}°F`);
+    
     // Skip if no precipitation
     if (!precipType || precipType === 'none') {
-      return precipType;
+        return precipType;
     }
     
-    // Handle freezing fog when temperature is at or below freezing
-    if ((precipType === 'fog-light' || precipType === 'fog-heavy') && temperature <= 32) {
-      const baseType = precipType.includes('heavy') ? 'heavy' : 'light';
-      return `freezing-fog-${baseType}`;
+    // Create a complete map of all precipitation conversions based on temperature
+    const conversionMap = {
+        // Freezing conversions (32°F and below)
+        freezing: {
+            'fog-light': 'freezing-fog-light',
+            'fog-heavy': 'freezing-fog-heavy',
+            'mist': 'freezing-mist',
+            'drizzle': 'freezing-drizzle',
+            'rainstorm-light': 'ice-storm',
+            'rainstorm-heavy': 'ice-storm',
+            'thunderstorm': 'ice-storm'
+        },
+        
+        // Near-freezing conversions (33-37°F)
+        nearFreezing: {
+            'rainstorm-light': 'snowstorm-light',  // This is the key conversion that was missing
+            'rainstorm-heavy': 'snowstorm-heavy',
+            'drizzle': 'sleet',
+            'thunderstorm': 'snowstorm-heavy',
+            'tropical-storm': 'blizzard',
+            'monsoon': 'blizzard',
+            'gale': 'blizzard',
+            'hurricane': 'blizzard-heavy'
+        }
+    };
+    
+    // Apply freezing conversions (32°F and below)
+    if (temperature <= 32) {
+        if (conversionMap.freezing[precipType]) {
+            const convertedType = conversionMap.freezing[precipType];
+            console.log(`DND-Weather | Converting ${precipType} to ${convertedType} due to freezing temperature (${temperature}°F)`);
+            return convertedType;
+        }
     }
     
-    // Convert rain to snow/ice at near-freezing temperatures
-    if (temperature <= 37) {
-      // Map of rain precipitation types to their snow/ice equivalents
-      const conversions = {
-        'rainstorm-light': 'snowstorm-light',
-        'rainstorm-heavy': 'snowstorm-heavy',
-        'drizzle': 'snowstorm-light',
-        'thunderstorm': 'snowstorm-heavy',
-        'tropical-storm': 'blizzard',
-        'monsoon': 'blizzard',
-        'gale': 'blizzard',
-        'hurricane': 'blizzard-heavy'
-      };
-      
-      // Special case for sleet which forms between 33-37°F
-      if (temperature > 32 && temperature <= 37 && 
-          (precipType === 'rainstorm-light' || precipType === 'drizzle')) {
-        return 'sleet';
-      }
-      
-      // Return the converted type if available, otherwise return the original
-      return conversions[precipType] || precipType;
+    // Apply near-freezing conversions (33-37°F) - the key range for rainstorm-light → snowstorm-light
+    if (temperature > 32 && temperature <= 37) {
+        if (conversionMap.nearFreezing[precipType]) {
+            const convertedType = conversionMap.nearFreezing[precipType];
+            console.log(`DND-Weather | Converting ${precipType} to ${convertedType} due to near-freezing temperature (${temperature}°F)`);
+            return convertedType;
+        }
     }
     
+    // No conversion needed
     return precipType;
-  }
+}
 
 _calculateMovementModifiers(precipitation, specialEvent) {
     let modifier = 1.0;
